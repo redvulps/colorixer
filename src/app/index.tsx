@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, Text } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import 'react-scan';
 import chroma from 'chroma-js';
+import { StatusBar } from 'expo-status-bar';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, SafeAreaView, Text } from 'react-native';
+
+import { ColorDisplay } from '../components/ColorDisplay';
 import { ColorPicker } from '../components/ColorPicker';
 import { HarmonySelector } from '../components/HarmonySelector';
-import { ColorDisplay } from '../components/ColorDisplay';
 import { ColorHarmonyType } from '../utils/colorUtils';
 import { getHarmonyColors } from '../utils/harmonies';
 
@@ -31,14 +33,14 @@ export default function App() {
   }, [baseColor, harmonyType]);
 
   // Handler for when user selects a new color
-  const handleColorChange = (color: string) => {
+  const handleColorChange = useCallback((color: string) => {
     setBaseColor(color);
-  };
+  }, []);
 
   // Handler for when user changes harmony type
-  const handleHarmonyChange = (harmony: ColorHarmonyType) => {
+  const handleHarmonyChange = useCallback((harmony: ColorHarmonyType) => {
     setHarmonyType(harmony);
-  };
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,6 +55,7 @@ export default function App() {
 
         <View style={styles.pickerContainer}>
           <ColorPicker
+          size={800}
             onColorChange={handleColorChange}
             harmonyColors={harmonyColors} // Pass harmony colors to the color picker
           />
