@@ -1,6 +1,6 @@
+import chroma from 'chroma-js';
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, PanResponder } from 'react-native';
-import chroma from 'chroma-js';
 
 interface ColorPickerProps {
   size?: number;
@@ -105,24 +105,25 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
     // Draw hue circle
     for (let angle = 0; angle < 360; angle++) {
-      const startAngle = (angle - 0.5) * Math.PI / 180;
-      const endAngle = (angle + 0.5) * Math.PI / 180;
+      // Use slightly larger angle coverage to prevent gaps
+      const startAngle = angle * Math.PI / 180;
+      const endAngle = (angle + 1.2) * Math.PI / 180;
 
-      // Draw each hue as a line from center to edge
-      for (let j = 0; j < radius; j++) {
-        // Calculate saturation based on distance from center
-        const saturation = j / radius;
+      // Create a radial gradient for this sector
+      const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
 
-        // Use Chroma.js to generate the color
-        const color = chroma.hsv(angle, saturation, 1).hex();
+      // White at center (0% saturation)
+      gradient.addColorStop(0, '#FFFFFF');
+      // Fully saturated color at the edge
+      gradient.addColorStop(1, chroma.hsv(angle, 1, 1).hex());
 
-        // Draw the segment with the generated color
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1;
-        ctx.arc(center, center, j, startAngle, endAngle);
-        ctx.stroke();
-      }
+      // Draw the sector with gradient fill
+      ctx.beginPath();
+      ctx.moveTo(center, center);
+      ctx.arc(center, center, radius, startAngle, endAngle);
+      ctx.lineTo(center, center);
+      ctx.fillStyle = gradient;
+      ctx.fill();
     }
   };
 
