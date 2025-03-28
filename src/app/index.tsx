@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import chroma from 'chroma-js';
 import { ColorPicker } from '../components/ColorPicker';
 import { HarmonySelector } from '../components/HarmonySelector';
 import { ColorDisplay } from '../components/ColorDisplay';
-import { hexToRgb, rgbToHsl, ColorHarmonyType } from '../utils/colorUtils';
+import { ColorHarmonyType } from '../utils/colorUtils';
 import { getHarmonyColors } from '../utils/harmonies';
 
 export default function App() {
@@ -18,9 +19,10 @@ export default function App() {
   // Generate harmony colors whenever base color or harmony type changes
   useEffect(() => {
     try {
-      const rgb = hexToRgb(baseColor);
-      const hsl = rgbToHsl(rgb);
-      const colors = getHarmonyColors(harmonyType, hsl);
+      // Use chroma.js directly to convert hex to HSL
+      const [h, s, l] = chroma(baseColor).hsl();
+      const hslColor = { h, s, l };
+      const colors = getHarmonyColors(harmonyType, hslColor);
       setHarmonyColors(colors);
     } catch (error) {
       console.error('Error generating harmony colors:', error);
@@ -51,8 +53,8 @@ export default function App() {
 
         <View style={styles.pickerContainer}>
           <ColorPicker
-            size={280}
             onColorChange={handleColorChange}
+            harmonyColors={harmonyColors} // Pass harmony colors to the color picker
           />
         </View>
 

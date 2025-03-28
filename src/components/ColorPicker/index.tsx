@@ -1,13 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, PanResponder } from 'react-native';
-import { hsvToRgb, rgbToHex, HSV } from '../../utils/colorUtils';
+import chroma from 'chroma-js';
 
 interface ColorPickerProps {
   size?: number;
   onColorChange: (color: string) => void;
+  harmonyColors?: string[]; // Add harmony colors prop
 }
 
-export const ColorPicker: React.FC<ColorPickerProps> = ({ size = 280, onColorChange }) => {
+export const ColorPicker: React.FC<ColorPickerProps> = ({
+  size = 480,
+  onColorChange,
+  harmonyColors = [] // Default to empty array if not provided
+}) => {
   const [selectedPosition, setSelectedPosition] = useState({ x: size / 2, y: size / 2 });
   const [selectedColor, setSelectedColor] = useState('#ff0000');
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,17 +29,35 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ size = 280, onColorCha
     const dy = y - center;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Calculate saturation (0 to 100) based on distance from center
-    const saturation = Math.min(distance / radius * 100, 100);
+    // Calculate saturation (0 to 1) based on distance from center
+    const saturation = Math.min(distance / radius, 1);
 
     // Calculate hue (0 to 360) based on angle
     const angle = Math.atan2(dy, dx);
-    const hue = ((angle / Math.PI * 180) + 360) % 360;
+    const hue = ((angle / Math.PI) * 180 + 360) % 360;
 
-    // Create color with full value/brightness
-    const hsv: HSV = { h: hue, s: saturation, v: 100 };
-    const rgb = hsvToRgb(hsv);
-    return rgbToHex(rgb);
+    // Use Chroma.js to create the color (full value/brightness)
+    return chroma.hsv(hue, saturation, 1).hex();
+  };
+
+  // Function to calculate position from color
+  const getPositionFromColor = (color: string) => {
+    try {
+      // Use Chroma.js to convert color to HSV
+      const [hue, saturation] = chroma(color).hsv();
+
+      // Calculate position based on hue and saturation
+      const hueRad = (hue * Math.PI) / 180; // Convert hue to radians
+      const saturationFactor = saturation;  // Chroma.js already returns saturation in 0-1 range
+
+      const x = center + Math.cos(hueRad) * saturationFactor * radius;
+      const y = center + Math.sin(hueRad) * saturationFactor * radius;
+
+      return { x, y };
+    } catch (error) {
+      console.error('Error calculating position from color:', error);
+      return { x: center, y: center };
+    }
   };
 
   // Handle user interaction with the color wheel
@@ -88,13 +111,12 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ size = 280, onColorCha
       // Draw each hue as a line from center to edge
       for (let j = 0; j < radius; j++) {
         // Calculate saturation based on distance from center
-        const saturation = j / radius * 100;
+        const saturation = j / radius;
 
-        // Create color for this segment
-        const hsv: HSV = { h: angle, s: saturation, v: 100 };
-        const rgb = hsvToRgb(hsv);
-        const color = rgbToHex(rgb);
+        // Use Chroma.js to generate the color
+        const color = chroma.hsv(angle, saturation, 1).hex();
 
+        // Draw the segment with the generated color
         ctx.beginPath();
         ctx.strokeStyle = color;
         ctx.lineWidth = 1;
@@ -123,10 +145,42 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ size = 280, onColorCha
     }
   }, []);
 
+  // Render harmony color indicators
+  const renderHarmonyIndicators = () => {
+    return harmonyColors?.map((color, index) => {
+      const harmonyKey = `harmony-${index}`;
+
+      if (color === selectedColor) {
+        return <React.Fragment key={harmonyKey} />; // Skip the base color
+      }
+
+      const position = getPositionFromColor(color);
+
+      return (
+        <View
+          key={harmonyKey}
+          style={[
+            styles.harmonyIndicator,
+            {
+              left: position.x - 10,
+              top: position.y - 10,
+              borderColor: '#FFFFFF',
+            }
+          ]}
+        />
+      );
+    });
+  };
+
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       <canvas ref={canvasRef} style={styles.canvas} />
       <View style={styles.touchLayer} {...panResponder.panHandlers} />
+
+      {/* Harmony color indicators */}
+      {renderHarmonyIndicators()}
+
+      {/* Main selector for the base color */}
       <View
         style={[
           styles.selector,
@@ -165,5 +219,15 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 3,
     backgroundColor: 'transparent',
+  },
+  harmonyIndicator: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    backgroundColor: 'transparent',
+    zIndex: 10,
   },
 });
