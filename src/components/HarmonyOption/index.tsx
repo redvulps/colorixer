@@ -1,6 +1,7 @@
-import type {ColorHarmonyType} from "@/src/utils/colorUtils";
 import React, {useCallback} from "react";
 import {StyleSheet, Text, TouchableOpacity} from "react-native";
+
+import type {ColorHarmonyType} from "@/src/utils/colorUtils";
 
 interface HarmonyOptionProps {
     harmony: { label: string; value: ColorHarmonyType };

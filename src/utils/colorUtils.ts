@@ -1,5 +1,3 @@
-import chroma from 'chroma-js';
-
 export type RGB = {
   r: number;
   g: number;
