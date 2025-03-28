@@ -1,6 +1,8 @@
 import chroma from 'chroma-js';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, StyleSheet, PanResponder } from 'react-native';
+
+import { HarmonyIndicators } from '../HarmonyIndicators';
 
 interface ColorPickerProps {
   size?: number;
@@ -23,7 +25,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   const radius = size / 2 - 10;
 
   // Function to calculate color at position
-  const getColorAtPosition = (x: number, y: number): string => {
+  const getColorAtPosition = useCallback((x: number, y: number): string => {
     // Calculate distance from center (for saturation)
     const dx = x - center;
     const dy = y - center;
@@ -38,7 +40,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
     // Use Chroma.js to create the color (full value/brightness)
     return chroma.hsv(hue, saturation, 1).hex();
-  };
+  }, [center, radius]);
 
   // Function to calculate position from color
   const getPositionFromColor = (color: string) => {
@@ -144,51 +146,25 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         drawColorWheel(ctx);
       }
     }
-  }, []);
-
-  // Render harmony color indicators
-  const renderHarmonyIndicators = () => {
-    return harmonyColors?.map((color, index) => {
-      const harmonyKey = `harmony-${index}`;
-
-      if (color === selectedColor) {
-        return <React.Fragment key={harmonyKey} />; // Skip the base color
-      }
-
-      const position = getPositionFromColor(color);
-
-      return (
-        <View
-          key={harmonyKey}
-          style={[
-            styles.harmonyIndicator,
-            {
-              left: position.x - 10,
-              top: position.y - 10,
-              borderColor: '#FFFFFF',
-            }
-          ]}
-        />
-      );
-    });
-  };
+  }, [size]);
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       <canvas ref={canvasRef} style={styles.canvas} />
       <View style={styles.touchLayer} {...panResponder.panHandlers} />
 
-      {/* Harmony color indicators */}
-      {renderHarmonyIndicators()}
+      <HarmonyIndicators
+        harmonyColors={harmonyColors}
+        selectedColor={selectedColor}
+        getPositionFromColor={getPositionFromColor}
+      />
 
-      {/* Main selector for the base color */}
       <View
         style={[
           styles.selector,
           {
             left: selectedPosition.x - 15,
             top: selectedPosition.y - 15,
-            borderColor: selectedColor === '#FFFFFF' ? '#000000' : '#FFFFFF'
           }
         ]}
       />
@@ -196,12 +172,15 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   );
 };
 
+ColorPicker.displayName = 'ColorPicker';
+
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
     borderRadius: 1000, // Make it circular
     overflow: 'hidden',
     alignSelf: 'center',
+    userSelect: 'none',
   },
   canvas: {
     width: '100%',
@@ -220,6 +199,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 3,
     backgroundColor: 'transparent',
+    borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   harmonyIndicator: {
     position: 'absolute',
