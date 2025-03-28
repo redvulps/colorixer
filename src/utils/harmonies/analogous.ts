@@ -1,33 +1,33 @@
+import chroma from 'chroma-js';
 import type { HSL } from '../colorUtils';
-import { hslToRgb, rgbToHex } from '../colorUtils';
 
 export function getAnalogousColors(baseColor: HSL, count: number = 5): string[] {
   const colors: string[] = [];
   const step = 30; // Degrees to step for analogous colors
 
   // Include base color
-  colors.push(rgbToHex(hslToRgb(baseColor)));
+  colors.push(chroma.hsl(baseColor.h, baseColor.s, baseColor.l).hex());
 
   // Calculate analogous colors
   for (let i = 1; i <= Math.floor((count - 1) / 2); i++) {
     // Colors clockwise
-    const color1: HSL = {
-      h: (baseColor.h + step * i) % 360,
-      s: baseColor.s,
-      l: baseColor.l
-    };
+    const color1 = chroma.hsl(
+      (baseColor.h + step * i) % 360,
+      baseColor.s,
+      baseColor.l
+    );
 
     // Colors counter-clockwise
-    const color2: HSL = {
-      h: (baseColor.h - step * i + 360) % 360,
-      s: baseColor.s,
-      l: baseColor.l
-    };
+    const color2 = chroma.hsl(
+      (baseColor.h - step * i + 360) % 360,
+      baseColor.s,
+      baseColor.l
+    );
 
-    colors.push(rgbToHex(hslToRgb(color1)));
+    colors.push(color1.hex());
 
     if (colors.length < count) {
-      colors.push(rgbToHex(hslToRgb(color2)));
+      colors.push(color2.hex());
     }
   }
 

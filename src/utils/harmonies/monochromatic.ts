@@ -1,23 +1,17 @@
+import chroma from 'chroma-js';
 import type { HSL } from '../colorUtils';
-import { hslToRgb, rgbToHex } from '../colorUtils';
 
-export function getMonochromaticColors(baseColor: HSL, count: number = 5): string[] {
-  const colors: string[] = [];
+export function getMonochromaticColors(baseColor: HSL, count: number = 4): string[] {
+  const baseColorChroma = chroma.hsl(baseColor.h, baseColor.s, baseColor.l);
 
-  // Create variations with different lightness levels
-  const step = 70 / (count - 1); // Range from 15% to 85% lightness
+  // Use chroma.js's scale functionality for better monochromatic variations
+  // This creates a scale from darker, more saturated to lighter, less saturated versions
+  const scale = chroma.scale([
+    baseColorChroma,
+    baseColorChroma.brighten(2),
+  ])
+  .mode('hsl')
+  .colors(count);
 
-  for (let i = 0; i < count; i++) {
-    const lightness = 15 + step * i;
-
-    const color: HSL = {
-      h: baseColor.h,
-      s: baseColor.s,
-      l: lightness
-    };
-
-    colors.push(rgbToHex(hslToRgb(color)));
-  }
-
-  return colors;
+  return scale;
 }
