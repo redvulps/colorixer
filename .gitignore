@@ -35,4 +35,7 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# yarn
+.yarn/install-state.gz
+
 app-example
