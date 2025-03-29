@@ -43,8 +43,12 @@ export const ColorDisplay: React.FC<ColorDisplayProps> = ({ colors }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Generated Colors</Text>
-      <View style={styles.colorsWrapper}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Generated Colors</Text>
+        <TouchableOpacity onPress={handleShowShareActions}>
+          <Text>Share</Text>
+        </TouchableOpacity>
+      </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -68,10 +72,6 @@ export const ColorDisplay: React.FC<ColorDisplayProps> = ({ colors }) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <TouchableOpacity onPress={handleShowShareActions}>
-          <Text>Share</Text>
-        </TouchableOpacity>
-      </View>
 
       <ColorDisplayCopyActions isVisible={isCopyActionsVisible} onClose={handleCopyActionsClose} selectedColor={selectedColor} />
       <ColorDisplayShareActions
@@ -85,14 +85,14 @@ export const ColorDisplay: React.FC<ColorDisplayProps> = ({ colors }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 20,
+    // marginVertical: 20,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 12,
   },
-  colorsWrapper: {
+  titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
