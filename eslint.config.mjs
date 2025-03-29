@@ -1,7 +1,7 @@
 import stylisticPlugin from '@stylistic/eslint-plugin';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
-import eslintConfigPrettier from 'eslint-config-prettier';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import importPlugin from 'eslint-plugin-import';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
@@ -17,7 +17,7 @@ export default [
     files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
       '@typescript-eslint': tsPlugin,
-      'import': importPlugin,
+      import: importPlugin,
       '@stylistic': stylisticPlugin,
     },
     languageOptions: {
@@ -32,21 +32,24 @@ export default [
       // TypeScript rules
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
 
       // Import rules
       'import/no-default-export': 'off',
-      'import/order': ['error', {
-        'groups': [
-          'builtin', 'external', 'internal',
-          'parent', 'sibling', 'index',
-        ],
-        'newlines-between': 'always',
-        'alphabetize': { order: 'asc', caseInsensitive: true },
-      }],
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
 
       // Stylistic rules
       '@stylistic/indent': ['error', 2],
@@ -56,7 +59,7 @@ export default [
       '@stylistic/object-curly-spacing': ['error', 'always'],
       '@stylistic/arrow-parens': ['error', 'always'],
       '@stylistic/brace-style': ['error', '1tbs'],
-      '@stylistic/max-len': ['error', { code: 100, ignoreUrls: true }],
+      // '@stylistic/max-len': ['error', { code: 100, ignoreUrls: true, ignoreStrings: true }],
     },
   },
 
@@ -64,7 +67,7 @@ export default [
   {
     files: ['**/*.{jsx,tsx}'],
     plugins: {
-      'react': reactPlugin,
+      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       '@stylistic': stylisticPlugin,
     },
@@ -89,14 +92,23 @@ export default [
       '@stylistic/jsx-quotes': ['error', 'prefer-double'],
       '@stylistic/jsx-indent': ['error', 2],
       '@stylistic/jsx-closing-bracket-location': 'error',
-      '@stylistic/jsx-wrap-multilines': ['error', {
-        declaration: 'parens-new-line',
-        assignment: 'parens-new-line',
-        return: 'parens-new-line',
-        arrow: 'parens-new-line',
-      }],
+      '@stylistic/jsx-wrap-multilines': [
+        'error',
+        {
+          declaration: 'parens-new-line',
+          assignment: 'parens-new-line',
+          return: 'parens-new-line',
+          arrow: 'parens-new-line',
+        },
+      ],
     },
   },
 
-  eslintConfigPrettier,
+  eslintPluginPrettierRecommended, // Integrate Prettier rules
+  {
+    rules: {
+      // Enable Prettier as a plugin and report issues as ESLint errors
+      'prettier/prettier': 'error',
+    },
+  },
 ];
