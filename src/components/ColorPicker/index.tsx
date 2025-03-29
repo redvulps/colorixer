@@ -1,7 +1,8 @@
 import chroma from 'chroma-js';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, StyleSheet, PanResponder } from 'react-native';
+import { View, StyleSheet, PanResponder, Platform } from 'react-native';
 
+import { CustomCanvas } from '../CustomCanvas';
 import { HarmonyIndicators } from '../HarmonyIndicators';
 
 interface ColorPickerProps {
@@ -43,7 +44,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   }, [center, radius]);
 
   // Function to calculate position from color
-  const getPositionFromColor = (color: string) => {
+  const getPositionFromColor = useCallback((color: string) => {
     try {
       // Use Chroma.js to convert color to HSV
       const [hue, saturation] = chroma(color).hsv();
@@ -60,7 +61,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
       console.error('Error calculating position from color:', error);
       return { x: center, y: center };
     }
-  };
+  }, [center, radius]);
 
   // Handle user interaction with the color wheel
   const panResponder = useRef(
@@ -131,7 +132,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
   // Set up canvas and draw color wheel when component mounts
   useEffect(() => {
-    if (canvasRef.current) {
+    if (Platform.OS === 'web' && canvasRef.current) {
       // Set canvas size
       canvasRef.current.width = size * 2; // 2x for high DPI displays
       canvasRef.current.height = size * 2;
@@ -148,10 +149,27 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     }
   }, [size]);
 
+  // Handle color change from CustomCanvas (mobile)
+  const handleMobileColorChange = useCallback((color: string) => {
+    setSelectedColor(color);
+    onColorChange(color);
+    // Update selected position based on the new color
+    setSelectedPosition(getPositionFromColor(color));
+  }, [onColorChange, getPositionFromColor]);
+
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      <canvas ref={canvasRef} style={styles.canvas} />
-      <View style={styles.touchLayer} {...panResponder.panHandlers} />
+      {Platform.OS === 'web' ? (
+        <>
+          <canvas ref={canvasRef} style={styles.canvas} />
+          <View style={styles.touchLayer} {...panResponder.panHandlers} />
+        </>
+      ) : (
+        <CustomCanvas
+          size={size}
+          onColorChange={handleMobileColorChange}
+        />
+      )}
 
       <HarmonyIndicators
         harmonyColors={harmonyColors}
@@ -204,15 +222,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-  },
-  harmonyIndicator: {
-    position: 'absolute',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    backgroundColor: 'transparent',
-    zIndex: 10,
+    zIndex: 100,
   },
 });
