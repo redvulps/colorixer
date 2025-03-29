@@ -1,7 +1,7 @@
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { exportProcreateSwatch } from "@/src/utils/exportProcreateSwatch";
-import { exportAdobeAse } from "@/src/utils/exportAdobeAse";
+import { exportAdobeAse } from '@/src/utils/exportAdobeAse';
+import { exportProcreateSwatch } from '@/src/utils/exportProcreateSwatch';
 
 export interface ColorDisplayShareActionsProps {
   colors: string[];
@@ -9,7 +9,11 @@ export interface ColorDisplayShareActionsProps {
   onClose: () => void;
 }
 
-export const ColorDisplayShareActions: React.FC<ColorDisplayShareActionsProps> = ({ isVisible, onClose, colors }) => {
+export const ColorDisplayShareActions: React.FC<ColorDisplayShareActionsProps> = ({
+  isVisible,
+  onClose,
+  colors,
+}) => {
   const handleExportAs = async (format: 'procreate' | 'adobe_ase') => {
     if (format === 'procreate') {
       await exportProcreateSwatch(colors);
@@ -21,11 +25,7 @@ export const ColorDisplayShareActions: React.FC<ColorDisplayShareActionsProps> =
   };
 
   return (
-    <Modal
-      transparent
-      visible={isVisible}
-      onRequestClose={onClose}
-    >
+    <Modal transparent visible={isVisible} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.modalOption} onPress={() => handleExportAs('procreate')}>
@@ -41,7 +41,7 @@ export const ColorDisplayShareActions: React.FC<ColorDisplayShareActionsProps> =
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   modalOverlay: {

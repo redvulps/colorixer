@@ -1,16 +1,17 @@
 import type { HSL, ColorHarmonyType } from '../colorUtils';
+
 import { getAnalogousColors } from './analogous';
-import { getTriadicColors } from './triadic';
-import { getTetratriadic } from './tetratriadic';
 import { getComplementaryColors } from './complementary';
 import { getMonochromaticColors } from './monochromatic';
+import { getTetratriadic } from './tetratriadic';
+import { getTriadicColors } from './triadic';
 
 export {
   getAnalogousColors,
   getTriadicColors,
   getTetratriadic,
   getComplementaryColors,
-  getMonochromaticColors
+  getMonochromaticColors,
 };
 
 export function getHarmonyColors(harmonyType: ColorHarmonyType, baseColor: HSL): string[] {

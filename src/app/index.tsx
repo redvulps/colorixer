@@ -50,10 +50,7 @@ export default function App() {
       <View style={styles.content}>
         {Platform.OS === 'web' && <Text style={styles.appTitle}>Colorixer</Text>}
 
-        <HarmonySelector
-          selectedHarmony={harmonyType}
-          onHarmonyChange={handleHarmonyChange}
-        />
+        <HarmonySelector selectedHarmony={harmonyType} onHarmonyChange={handleHarmonyChange} />
 
         <View style={styles.pickerContainer}>
           <ColorPicker
@@ -63,9 +60,7 @@ export default function App() {
           />
         </View>
 
-        <ColorDisplay
-          colors={harmonyColors}
-        />
+        <ColorDisplay colors={harmonyColors} />
       </View>
     </SafeAreaView>
   );
@@ -90,5 +85,5 @@ const styles = StyleSheet.create({
   pickerContainer: {
     marginVertical: 20,
     alignItems: 'center',
-  }
+  },
 });

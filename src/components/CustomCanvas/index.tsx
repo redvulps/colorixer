@@ -158,24 +158,27 @@ export const CustomCanvas: React.FC<CustomCanvasProps> = ({ size, onColorChange,
     </html>
   `;
 
-  const handleMessage = useCallback((event: any) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
+  const handleMessage = useCallback(
+    (event: any) => {
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
 
-      if (data.type === 'colorChange') {
-        // Convert HSV to hex using chroma-js
-        if (data.hsv) {
-          const { h, s, v } = data.hsv;
-          const color = chroma.hsv(h, s, v).hex();
-          onColorChange(color);
+        if (data.type === 'colorChange') {
+          // Convert HSV to hex using chroma-js
+          if (data.hsv) {
+            const { h, s, v } = data.hsv;
+            const color = chroma.hsv(h, s, v).hex();
+            onColorChange(color);
+          }
+        } else if (data.type === 'init' && data.success && onInit) {
+          onInit();
         }
-      } else if (data.type === 'init' && data.success && onInit) {
-        onInit();
+      } catch (error) {
+        console.error('Error parsing message from WebView:', error);
       }
-    } catch (error) {
-      console.error('Error parsing message from WebView:', error);
-    }
-  }, [onColorChange, onInit]);
+    },
+    [onColorChange, onInit],
+  );
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -203,5 +206,5 @@ const styles = StyleSheet.create({
   },
   webView: {
     backgroundColor: 'transparent',
-  }
+  },
 });

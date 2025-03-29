@@ -49,31 +49,35 @@ export const ColorDisplay: React.FC<ColorDisplayProps> = ({ colors }) => {
           <Text>Share</Text>
         </TouchableOpacity>
       </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.colorsContainer}
-        >
-          {colors.map((color, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.colorItem}
-              onPress={() => copyToClipboard(color)}
-              onLongPress={() => handleLongPress(color)}
-            >
-              <View
-                style={[
-                  styles.colorPreview,
-                  { backgroundColor: color },
-                  color === '#FFFFFF' && styles.whiteBorder
-                ]}
-              />
-              <Text style={styles.colorText}>{color}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.colorsContainer}
+      >
+        {colors.map((color, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.colorItem}
+            onPress={() => copyToClipboard(color)}
+            onLongPress={() => handleLongPress(color)}
+          >
+            <View
+              style={[
+                styles.colorPreview,
+                { backgroundColor: color },
+                color === '#FFFFFF' && styles.whiteBorder,
+              ]}
+            />
+            <Text style={styles.colorText}>{color}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-      <ColorDisplayCopyActions isVisible={isCopyActionsVisible} onClose={handleCopyActionsClose} selectedColor={selectedColor} />
+      <ColorDisplayCopyActions
+        isVisible={isCopyActionsVisible}
+        onClose={handleCopyActionsClose}
+        selectedColor={selectedColor}
+      />
       <ColorDisplayShareActions
         isVisible={isShareActionsVisible}
         onClose={handleShareActionsClose}

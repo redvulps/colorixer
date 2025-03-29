@@ -1,7 +1,7 @@
-import chroma from "chroma-js";
+import chroma from 'chroma-js';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
-import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export interface ColorDisplayActionsProps {
   selectedColor?: string | null;
@@ -9,11 +9,15 @@ export interface ColorDisplayActionsProps {
   onClose: () => void;
 }
 
-export const ColorDisplayCopyActions: React.FC<ColorDisplayActionsProps> = ({ isVisible, onClose, selectedColor }) => {
+export const ColorDisplayCopyActions: React.FC<ColorDisplayActionsProps> = ({
+  isVisible,
+  onClose,
+  selectedColor,
+}) => {
   const handleCopyAs = async (format: 'HEX' | 'HSL' | 'HSV') => {
     if (!selectedColor) {
-      return
-    };
+      return;
+    }
 
     let converted = selectedColor;
     if (format === 'HSL') {
@@ -35,11 +39,7 @@ export const ColorDisplayCopyActions: React.FC<ColorDisplayActionsProps> = ({ is
   };
 
   return (
-    <Modal
-      transparent
-      visible={isVisible}
-      onRequestClose={onClose}
-    >
+    <Modal transparent visible={isVisible} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.modalOption} onPress={() => handleCopyAs('HEX')}>
@@ -58,7 +58,7 @@ export const ColorDisplayCopyActions: React.FC<ColorDisplayActionsProps> = ({ is
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   modalOverlay: {

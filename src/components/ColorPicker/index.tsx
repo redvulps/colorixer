@@ -14,7 +14,7 @@ interface ColorPickerProps {
 export const ColorPicker: React.FC<ColorPickerProps> = ({
   size = 480,
   onColorChange,
-  harmonyColors = [] // Default to empty array if not provided
+  harmonyColors = [], // Default to empty array if not provided
 }) => {
   const [selectedPosition, setSelectedPosition] = useState({ x: size / 2, y: size / 2 });
   const [selectedColor, setSelectedColor] = useState('#ff0000');
@@ -26,42 +26,48 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   const radius = size / 2 - 10;
 
   // Function to calculate color at position
-  const getColorAtPosition = useCallback((x: number, y: number): string => {
-    // Calculate distance from center (for saturation)
-    const dx = x - center;
-    const dy = y - center;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+  const getColorAtPosition = useCallback(
+    (x: number, y: number): string => {
+      // Calculate distance from center (for saturation)
+      const dx = x - center;
+      const dy = y - center;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Calculate saturation (0 to 1) based on distance from center
-    const saturation = Math.min(distance / radius, 1);
+      // Calculate saturation (0 to 1) based on distance from center
+      const saturation = Math.min(distance / radius, 1);
 
-    // Calculate hue (0 to 360) based on angle
-    const angle = Math.atan2(dy, dx);
-    const hue = ((angle / Math.PI) * 180 + 360) % 360;
+      // Calculate hue (0 to 360) based on angle
+      const angle = Math.atan2(dy, dx);
+      const hue = ((angle / Math.PI) * 180 + 360) % 360;
 
-    // Use Chroma.js to create the color (full value/brightness)
-    return chroma.hsv(hue, saturation, 1).hex();
-  }, [center, radius]);
+      // Use Chroma.js to create the color (full value/brightness)
+      return chroma.hsv(hue, saturation, 1).hex();
+    },
+    [center, radius],
+  );
 
   // Function to calculate position from color
-  const getPositionFromColor = useCallback((color: string) => {
-    try {
-      // Use Chroma.js to convert color to HSV
-      const [hue, saturation] = chroma(color).hsv();
+  const getPositionFromColor = useCallback(
+    (color: string) => {
+      try {
+        // Use Chroma.js to convert color to HSV
+        const [hue, saturation] = chroma(color).hsv();
 
-      // Calculate position based on hue and saturation
-      const hueRad = (hue * Math.PI) / 180; // Convert hue to radians
-      const saturationFactor = saturation;  // Chroma.js already returns saturation in 0-1 range
+        // Calculate position based on hue and saturation
+        const hueRad = (hue * Math.PI) / 180; // Convert hue to radians
+        const saturationFactor = saturation; // Chroma.js already returns saturation in 0-1 range
 
-      const x = center + Math.cos(hueRad) * saturationFactor * radius;
-      const y = center + Math.sin(hueRad) * saturationFactor * radius;
+        const x = center + Math.cos(hueRad) * saturationFactor * radius;
+        const y = center + Math.sin(hueRad) * saturationFactor * radius;
 
-      return { x, y };
-    } catch (error) {
-      console.error('Error calculating position from color:', error);
-      return { x: center, y: center };
-    }
-  }, [center, radius]);
+        return { x, y };
+      } catch (error) {
+        console.error('Error calculating position from color:', error);
+        return { x: center, y: center };
+      }
+    },
+    [center, radius],
+  );
 
   // Handle user interaction with the color wheel
   const panResponder = useRef(
@@ -70,7 +76,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: handleTouch,
       onPanResponderMove: handleTouch,
-    })
+    }),
   ).current;
 
   function handleTouch(event: any) {
@@ -109,8 +115,8 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     // Draw hue circle
     for (let angle = 0; angle < 360; angle++) {
       // Use slightly larger angle coverage to prevent gaps
-      const startAngle = angle * Math.PI / 180;
-      const endAngle = (angle + 1.2) * Math.PI / 180;
+      const startAngle = (angle * Math.PI) / 180;
+      const endAngle = ((angle + 1.2) * Math.PI) / 180;
 
       // Create a radial gradient for this sector
       const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
@@ -150,12 +156,15 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   }, [size]);
 
   // Handle color change from CustomCanvas (mobile)
-  const handleMobileColorChange = useCallback((color: string) => {
-    setSelectedColor(color);
-    onColorChange(color);
-    // Update selected position based on the new color
-    setSelectedPosition(getPositionFromColor(color));
-  }, [onColorChange, getPositionFromColor]);
+  const handleMobileColorChange = useCallback(
+    (color: string) => {
+      setSelectedColor(color);
+      onColorChange(color);
+      // Update selected position based on the new color
+      setSelectedPosition(getPositionFromColor(color));
+    },
+    [onColorChange, getPositionFromColor],
+  );
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
@@ -165,10 +174,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
           <View style={styles.touchLayer} {...panResponder.panHandlers} />
         </>
       ) : (
-        <CustomCanvas
-          size={size}
-          onColorChange={handleMobileColorChange}
-        />
+        <CustomCanvas size={size} onColorChange={handleMobileColorChange} />
       )}
 
       <HarmonyIndicators
@@ -183,7 +189,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
           {
             left: selectedPosition.x - 15,
             top: selectedPosition.y - 15,
-          }
+          },
         ]}
       />
     </View>

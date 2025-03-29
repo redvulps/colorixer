@@ -1,14 +1,16 @@
 import React from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
-import type {ColorHarmonyType} from '../../utils/colorUtils';
-import {HarmonyOption} from "@/src/components/HarmonyOption";
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import type { ColorHarmonyType } from '../../utils/colorUtils';
+
+import { HarmonyOption } from '@/src/components/HarmonyOption';
 
 const harmonies: { label: string; value: ColorHarmonyType }[] = [
-    { label: 'Analogous', value: 'analogous' },
-    { label: 'Triadic', value: 'triadic' },
-    { label: 'Tetratriadic', value: 'tetratriadic' },
-    { label: 'Complementary', value: 'complementary' },
-    { label: 'Monochromatic', value: 'monochromatic' }
+  { label: 'Analogous', value: 'analogous' },
+  { label: 'Triadic', value: 'triadic' },
+  { label: 'Tetratriadic', value: 'tetratriadic' },
+  { label: 'Complementary', value: 'complementary' },
+  { label: 'Monochromatic', value: 'monochromatic' },
 ];
 
 interface HarmonySelectorProps {
@@ -18,7 +20,7 @@ interface HarmonySelectorProps {
 
 const HarmonySelectorComponent: React.FC<HarmonySelectorProps> = ({
   selectedHarmony,
-  onHarmonyChange
+  onHarmonyChange,
 }) => {
   return (
     <View style={styles.container}>

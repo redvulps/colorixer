@@ -1,4 +1,4 @@
-import { AdobeSwatch } from "./exportAdobeAse";
+import { AdobeSwatch } from './exportAdobeAse';
 
 /**
  * Original code from "ase-utils" package (https://www.npmjs.com/package/ase-utils)
@@ -12,16 +12,16 @@ const ASE_CONSTANTS = {
   FORMAT_VERSION: 1,
   COLOR_START: 0x0001,
   COLOR_TYPES: {
-    'global': 0,
-    'spot': 1,
-    'normal': 2
+    global: 0,
+    spot: 1,
+    normal: 2,
   },
   COLOR_SIZES: {
-    'RGB': 3,
-    'CMYK': 4,
-    'LAB': 3,
-    'GRAY': 1
-  }
+    RGB: 3,
+    CMYK: 4,
+    LAB: 3,
+    GRAY: 1,
+  },
 };
 
 /**
@@ -46,7 +46,7 @@ export function encodeAseData(aseData: AdobeSwatch): ArrayBuffer {
     // color model (4) + color values (4 * values) + color type (2)
     const localColorModel = color.model.toUpperCase() as keyof typeof ASE_CONSTANTS.COLOR_SIZES;
     const modelSize = ASE_CONSTANTS.COLOR_SIZES[localColorModel] || 3;
-    totalSize += 2 + 4 + 2 + ((color.name.length + 1) * 2) + 4 + (4 * modelSize) + 2;
+    totalSize += 2 + 4 + 2 + (color.name.length + 1) * 2 + 4 + 4 * modelSize + 2;
   }
 
   // Create our buffer
