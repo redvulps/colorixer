@@ -1,8 +1,8 @@
-import 'react-scan';
+// import 'react-scan';
 import chroma from 'chroma-js';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, SafeAreaView, Text } from 'react-native';
+import { View, StyleSheet, SafeAreaView, Text, Platform } from 'react-native';
 
 import { ColorDisplay } from '../components/ColorDisplay';
 import { ColorPicker } from '../components/ColorPicker';
@@ -17,6 +17,8 @@ export default function App() {
   const [harmonyType, setHarmonyType] = useState<ColorHarmonyType>('analogous');
   // Store generated harmony colors
   const [harmonyColors, setHarmonyColors] = useState<string[]>([]);
+
+  const pickerSize = 320;
 
   // Generate harmony colors whenever base color or harmony type changes
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="auto" />
       <View style={styles.content}>
-        <Text style={styles.appTitle}>Colorixer</Text>
+        {Platform.OS === 'web' && <Text style={styles.appTitle}>Colorixer</Text>}
 
         <HarmonySelector
           selectedHarmony={harmonyType}
@@ -55,7 +57,7 @@ export default function App() {
 
         <View style={styles.pickerContainer}>
           <ColorPicker
-          size={800}
+            size={pickerSize}
             onColorChange={handleColorChange}
             harmonyColors={harmonyColors} // Pass harmony colors to the color picker
           />
@@ -77,6 +79,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+    justifyContent: 'space-between',
   },
   appTitle: {
     fontSize: 24,
