@@ -1,50 +1,82 @@
-# Welcome to your Expo app 👋
+# Colorixer: Advanced Color Palette Creator
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Colorixer is a powerful color picker application that helps artists and designers create harmonious color palettes and export them to popular drawing applications.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Interactive Color Picker**: Select colors with precision using an intuitive color wheel interface
+- **Color Harmony Generation**: Create harmonious color schemes with various relationships including:
+  - Analogous
+  - Complementary
+  - Triadic
+  - And more
+- **Export to Drawing Applications**: Export color palettes in multiple formats:
+  - Adobe Swatch Exchange (ASE) for Photoshop and other Adobe applications
+  - Procreate Swatches for the popular iPad drawing app
+- **Cross-Platform**: Works on web, iOS, and Android platforms
 
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/)
+- [Yarn](https://yarnpkg.com/) (v4.7.0+)
+- [Expo CLI](https://docs.expo.dev/workflow/expo-cli/)
+
+### Installation
+
+1. Clone the repository
    ```bash
-   npm install
+   git clone https://github.com/redvulps/colorixer.git
+   cd colorixer
    ```
 
-2. Start the app
-
+2. Install dependencies
    ```bash
-    npx expo start
+   yarn install
    ```
 
-In the output, you'll find options to open the app in a
+3. Start the development server
+   ```bash
+   yarn start
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+4. Open the app
+   - Use the Expo Go app on your mobile device
+   - Run in an iOS or Android simulator
+   - Open in a web browser
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Usage
 
-## Get a fresh project
+1. **Select a Base Color**: Use the color wheel to pick your primary color
+2. **Choose a Harmony Type**: Select from different harmony types to generate related colors
+3. **View and Customize**: See your generated color palette
+4. **Export**: Share your palette with drawing applications in your preferred format
 
-When you're ready, run:
+## Supported Export Formats
 
-```bash
-npm run reset-project
-```
+### Adobe Swatch Exchange (ASE)
+Compatible with Adobe applications including:
+- Photoshop
+- Illustrator
+- InDesign
+- And other Creative Cloud apps
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Procreate Swatches
+Ready to import directly into the Procreate app on iPad.
 
-## Learn more
+## Development
 
-To learn more about developing your project with Expo, look at the following resources:
+Colorixer is built with:
+- [React Native](https://reactnative.dev/)
+- [Expo](https://expo.dev/)
+- [Chroma.js](https://gka.github.io/chroma.js/) for color manipulation
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## License
 
-## Join the community
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0) - see the LICENSE file for details.
 
-Join our community of developers creating universal apps.
+## Acknowledgments
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Chroma.js](https://gka.github.io/chroma.js/) for the excellent color manipulation library
+- The open-source community for invaluable resources and inspiration
