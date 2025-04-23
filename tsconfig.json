@@ -13,6 +13,7 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "prettier.config.mjs"
+    "prettier.config.mjs",
+    "nativewind-env.d.ts"
   ]
 }
