@@ -1,8 +1,8 @@
-// import 'react-scan';
+import './global.css';
 import chroma from 'chroma-js';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, SafeAreaView, Text, Platform } from 'react-native';
+import { View, SafeAreaView, Text, Platform, LayoutChangeEvent } from 'react-native';
 
 import { ColorDisplay } from '../components/ColorDisplay';
 import { ColorPicker } from '../components/ColorPicker';
@@ -17,8 +17,14 @@ export default function App() {
   const [harmonyType, setHarmonyType] = useState<ColorHarmonyType>('analogous');
   // Store generated harmony colors
   const [harmonyColors, setHarmonyColors] = useState<string[]>([]);
+  const [pickerSize, setPickerSize] = useState(
+    typeof window !== 'undefined' && window.innerWidth >= 768 ? 400 : 320,
+  );
 
-  const pickerSize = 320;
+  const handlePickerContainerLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setPickerSize(width > height ? height : width);
+  }, []);
 
   // Generate harmony colors whenever base color or harmony type changes
   useEffect(() => {
@@ -45,45 +51,40 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="container mx-auto flex-1 bg-white">
       <StatusBar style="auto" />
-      <View style={styles.content}>
-        {Platform.OS === 'web' && <Text style={styles.appTitle}>Colorixer</Text>}
-
-        <HarmonySelector selectedHarmony={harmonyType} onHarmonyChange={handleHarmonyChange} />
-
-        <View style={styles.pickerContainer}>
-          <ColorPicker
-            size={pickerSize}
-            onColorChange={handleColorChange}
-            harmonyColors={harmonyColors} // Pass harmony colors to the color picker
-          />
+      <View className="flex-1 px-4 py-6 md:px-12 md:py-10">
+        {Platform.OS === 'web' && (
+          <Text className="text-2xl font-bold mb-6 text-center">Colorixer</Text>
+        )}
+        {/* HarmonySelector on top for mobile only */}
+        <View className="block md:hidden mb-4">
+          <HarmonySelector selectedHarmony={harmonyType} onHarmonyChange={handleHarmonyChange} />
         </View>
-
-        <ColorDisplay colors={harmonyColors} />
+        {/* Responsive layout: column on mobile, row on md+ */}
+        <View className="flex-1 flex-col md:flex-row gap-8 md:gap-12 w-full h-full">
+          {/* Color Picker on left (full width on mobile, left column on md+) */}
+          <View
+            onLayout={handlePickerContainerLayout}
+            className="flex-1 items-center justify-center md:items-start md:justify-start"
+          >
+            <ColorPicker
+              size={pickerSize}
+              onColorChange={handleColorChange}
+              harmonyColors={harmonyColors}
+            />
+            {/* ColorDisplay below picker on mobile */}
+            <View className="block md:hidden w-full mt-6">
+              <ColorDisplay colors={harmonyColors} />
+            </View>
+          </View>
+          {/* Harmony selector and display on right (right column on md+) */}
+          <View className="hidden md:flex flex-1 flex-col items-start gap-6">
+            <HarmonySelector selectedHarmony={harmonyType} onHarmonyChange={handleHarmonyChange} />
+            <ColorDisplay colors={harmonyColors} />
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'space-between',
-  },
-  appTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  pickerContainer: {
-    marginVertical: 20,
-    alignItems: 'center',
-  },
-});

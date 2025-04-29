@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, StyleSheet, PanResponder, Platform } from 'react-native';
+import { View, StyleSheet, PanResponder, Platform, GestureResponderEvent } from 'react-native';
 
 import { CustomCanvas } from '../CustomCanvas';
 import { HarmonyIndicators } from '../HarmonyIndicators';
@@ -69,72 +69,82 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     [center, radius],
   );
 
-  // Handle user interaction with the color wheel
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: handleTouch,
-      onPanResponderMove: handleTouch,
-    }),
-  ).current;
+  const handleTouch = useCallback(
+    (event: GestureResponderEvent) => {
+      // Get touch position relative to the wheel
+      const { locationX, locationY } = event.nativeEvent;
 
-  function handleTouch(event: any) {
-    // Get touch position relative to the wheel
-    const { locationX, locationY } = event.nativeEvent;
+      // Calculate distance from center
+      const dx = locationX - center;
+      const dy = locationY - center;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Calculate distance from center
-    const dx = locationX - center;
-    const dy = locationY - center;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+      // Constrain position to within the wheel
+      let x = locationX;
+      let y = locationY;
 
-    // Constrain position to within the wheel
-    let x = locationX;
-    let y = locationY;
+      if (distance > radius) {
+        // If outside the wheel, clamp to the edge
+        const angle = Math.atan2(dy, dx);
+        x = Math.cos(angle) * radius + center;
+        y = Math.sin(angle) * radius + center;
+      }
 
-    if (distance > radius) {
-      // If outside the wheel, clamp to the edge
-      const angle = Math.atan2(dy, dx);
-      x = Math.cos(angle) * radius + center;
-      y = Math.sin(angle) * radius + center;
-    }
+      setSelectedPosition({ x, y });
 
-    setSelectedPosition({ x, y });
-
-    // Get the color at this position and notify parent
-    const color = getColorAtPosition(x, y);
-    setSelectedColor(color);
-    onColorChange(color);
-  }
+      // Get the color at this position and notify parent
+      const color = getColorAtPosition(x, y);
+      setSelectedColor(color);
+      onColorChange(color);
+    },
+    [center, getColorAtPosition, onColorChange, radius],
+  );
 
   // Draw color wheel on canvas
-  const drawColorWheel = (ctx: CanvasRenderingContext2D) => {
-    // Clear canvas
-    ctx.clearRect(0, 0, size, size);
+  const drawColorWheel = useCallback(
+    (ctx: CanvasRenderingContext2D) => {
+      // Clear canvas
+      ctx.clearRect(0, 0, size, size);
 
-    // Draw hue circle
-    for (let angle = 0; angle < 360; angle++) {
-      // Use slightly larger angle coverage to prevent gaps
-      const startAngle = (angle * Math.PI) / 180;
-      const endAngle = ((angle + 1.2) * Math.PI) / 180;
+      // Draw hue circle
+      for (let angle = 0; angle < 360; angle++) {
+        // Use slightly larger angle coverage to prevent gaps
+        const startAngle = (angle * Math.PI) / 180;
+        const endAngle = ((angle + 1.2) * Math.PI) / 180;
 
-      // Create a radial gradient for this sector
-      const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
+        // Create a radial gradient for this sector
+        const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
 
-      // White at center (0% saturation)
-      gradient.addColorStop(0, '#FFFFFF');
-      // Fully saturated color at the edge
-      gradient.addColorStop(1, chroma.hsv(angle, 1, 1).hex());
+        // White at center (0% saturation)
+        gradient.addColorStop(0, '#FFFFFF');
+        // Fully saturated color at the edge
+        gradient.addColorStop(1, chroma.hsv(angle, 1, 1).hex());
 
-      // Draw the sector with gradient fill
-      ctx.beginPath();
-      ctx.moveTo(center, center);
-      ctx.arc(center, center, radius, startAngle, endAngle);
-      ctx.lineTo(center, center);
-      ctx.fillStyle = gradient;
-      ctx.fill();
-    }
-  };
+        // Draw the sector with gradient fill
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, startAngle, endAngle);
+        ctx.lineTo(center, center);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    },
+    [center, radius, size],
+  );
+
+  const createPanResponder = useCallback(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: handleTouch,
+        onPanResponderMove: handleTouch,
+      }),
+    [handleTouch],
+  );
+
+  // Handle user interaction with the color wheel
+  const panResponder = useRef(createPanResponder());
 
   // Set up canvas and draw color wheel when component mounts
   useEffect(() => {
@@ -153,7 +163,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         drawColorWheel(ctx);
       }
     }
-  }, [size]);
+  }, [drawColorWheel, size]);
 
   // Handle color change from CustomCanvas (mobile)
   const handleMobileColorChange = useCallback(
@@ -166,12 +176,17 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     [onColorChange, getPositionFromColor],
   );
 
+  useEffect(() => {
+    setSelectedPosition({ x: size / 2, y: size / 2 });
+    panResponder.current = createPanResponder();
+  }, [createPanResponder, size]);
+
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       {Platform.OS === 'web' ? (
         <>
           <canvas ref={canvasRef} style={styles.canvas} />
-          <View style={styles.touchLayer} {...panResponder.panHandlers} />
+          <View style={styles.touchLayer} {...panResponder.current.panHandlers} />
         </>
       ) : (
         <CustomCanvas size={size} onColorChange={handleMobileColorChange} />

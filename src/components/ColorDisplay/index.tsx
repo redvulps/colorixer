@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 
 import { ColorDisplayCopyActions } from '../ColorDisplayCopyActions';
 import { ColorDisplayShareActions } from '../ColorDisplayShareActions';
@@ -42,91 +42,48 @@ export const ColorDisplay: React.FC<ColorDisplayProps> = ({ colors }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Generated Colors</Text>
-        <TouchableOpacity onPress={handleShowShareActions}>
-          <Text>Share</Text>
+    <View className="my-5 w-full">
+      <View className="flex-row items-center justify-between mb-2">
+        <Text className="text-lg font-bold">Generated Colors</Text>
+        <TouchableOpacity onPress={handleShowShareActions} className="p-2">
+          <Text className="text-blue-500">Share</Text>
         </TouchableOpacity>
       </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.colorsContainer}
+        className="p-1"
+        contentContainerClassName="flex-row gap-2 min-w-full"
       >
         {colors.map((color, index) => (
           <TouchableOpacity
             key={index}
-            style={styles.colorItem}
+            className="rounded-xl w-16 h-16 lg:w-auto lg:flex-1 border border-transparent justify-center items-center transition-transform duration-200 hover:scale-105 hover:drop-shadow-lg"
+            style={{ backgroundColor: color }}
             onPress={() => copyToClipboard(color)}
             onLongPress={() => handleLongPress(color)}
+            activeOpacity={0.8}
           >
-            <View
-              style={[
-                styles.colorPreview,
-                { backgroundColor: color },
-                color === '#FFFFFF' && styles.whiteBorder,
-              ]}
-            />
-            <Text style={styles.colorText}>{color}</Text>
+            <Text className="text-xs font-semibold text-white text-shadow-lg tracking-wide">
+              {color.toLocaleUpperCase()}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      <ColorDisplayCopyActions
-        isVisible={isCopyActionsVisible}
-        onClose={handleCopyActionsClose}
-        selectedColor={selectedColor}
-      />
-      <ColorDisplayShareActions
-        isVisible={isShareActionsVisible}
-        onClose={handleShareActionsClose}
-        colors={colors}
-      />
+      {isCopyActionsVisible && selectedColor && (
+        <ColorDisplayCopyActions
+          isVisible={isCopyActionsVisible}
+          selectedColor={selectedColor}
+          onClose={handleCopyActionsClose}
+        />
+      )}
+      {isShareActionsVisible && (
+        <ColorDisplayShareActions
+          isVisible={isShareActionsVisible}
+          colors={colors}
+          onClose={handleShareActionsClose}
+        />
+      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    // marginVertical: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  colorsContainer: {
-    flexDirection: 'row',
-    paddingVertical: 10,
-  },
-  colorItem: {
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  colorPreview: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-    elevation: 2,
-  },
-  whiteBorder: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  colorText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-});
