@@ -5,6 +5,7 @@ import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native
 
 import { ColorDisplayCopyActions } from '../ColorDisplayCopyActions';
 import { ColorDisplayShareActions } from '../ColorDisplayShareActions';
+import { ColorSwatch } from '../ColorSwatch';
 
 interface ColorDisplayProps {
   colors: string[];
@@ -56,18 +57,12 @@ export const ColorDisplay: React.FC<ColorDisplayProps> = ({ colors }) => {
         contentContainerClassName="flex-row gap-2 min-w-full"
       >
         {colors.map((color, index) => (
-          <TouchableOpacity
+          <ColorSwatch
             key={index}
-            className="rounded-xl w-16 h-16 lg:w-auto lg:flex-1 border border-transparent justify-center items-center transition-transform duration-200 hover:scale-105 hover:drop-shadow-lg"
-            style={{ backgroundColor: color }}
-            onPress={() => copyToClipboard(color)}
-            onLongPress={() => handleLongPress(color)}
-            activeOpacity={0.8}
-          >
-            <Text className="text-xs font-semibold text-white text-shadow-lg tracking-wide">
-              {color.toLocaleUpperCase()}
-            </Text>
-          </TouchableOpacity>
+            color={color}
+            onPress={copyToClipboard}
+            onLongPress={handleLongPress}
+          />
         ))}
       </ScrollView>
       {isCopyActionsVisible && selectedColor && (
