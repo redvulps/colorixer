@@ -5,35 +5,34 @@ tags:
 ---
 - launchApp:
     clearState: true
-- assertVisible: 'Harmony Type:'
-- assertVisible: 'Generated Colors'
+- assertVisible:
+    id: 'harmony-selector'
 
 # Analogous (default): base color plus ±30° / ±60° hue steps
 - assertVisible: '#ff0000'
 - assertVisible: '#ff8000'
 - assertVisible: '#ff0080'
 
-- tapOn: 'Triadic'
+- tapOn:
+    id: 'harmony-triadic'
 - assertVisible: '#00ff00'
 - assertVisible: '#0000ff'
 - assertNotVisible: '#ff8000'
 
-- tapOn: 'Complementary'
+- tapOn:
+    id: 'harmony-complementary'
 - assertVisible: '#ff0000'
 - assertVisible: '#00ffff'
 - assertNotVisible: '#00ff00'
 
-- tapOn: 'Tetratriadic'
+- tapOn:
+    id: 'harmony-tetratriadic'
 - assertVisible: '#80ff00'
 - assertVisible: '#00ffff'
 - assertVisible: '#7f00ff'
 
-# Monochromatic may be off-screen in the horizontal selector
-- swipe:
-    from:
-      id: 'harmony-selector'
-    direction: LEFT
-- tapOn: 'Monochromatic'
+- tapOn:
+    id: 'harmony-monochromatic'
 - assertVisible: '#ff0000'
 - assertVisible: '#ff3721'
 - assertNotVisible: '#80ff00'

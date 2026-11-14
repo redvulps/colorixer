@@ -1,0 +1,43 @@
+appId: com.redvulps.colorixer
+name: Saved palettes persist, reopen in the Color tab and can be deleted
+---
+- launchApp:
+    clearState: true
+
+# Save the tetratriadic palette
+- tapOn:
+    id: 'harmony-tetratriadic'
+- tapOn:
+    id: 'save-button'
+- assertVisible: 'Saved “Palette 1”'
+- assertVisible: '(?i)palette 1 · tetratriadic'
+
+# It survives an app restart
+- stopApp
+- launchApp
+- tapOn:
+    id: 'tab-palettes'
+- assertVisible: 'Palette 1'
+- assertVisible: 'Tetratriadic · 4 colors.*'
+
+# Opening it from the list brings back its colors in the Color tab
+- tapOn:
+    id: 'tab-color'
+- tapOn:
+    id: 'harmony-triadic'
+- assertNotVisible: '#80ff00'
+- tapOn:
+    id: 'tab-palettes'
+- tapOn:
+    id: 'palette-Palette 1'
+- assertVisible: '#80ff00'
+- assertVisible: '(?i)palette 1 · tetratriadic'
+
+# Delete it from the actions sheet
+- tapOn:
+    id: 'tab-palettes'
+- tapOn:
+    id: 'palette-more-Palette 1'
+- tapOn: 'Delete palette'
+- assertVisible: 'Deleted “Palette 1”'
+- assertVisible: 'No saved palettes'

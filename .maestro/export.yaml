@@ -1,34 +1,35 @@
 appId: com.redvulps.colorixer
-name: Share menu exports the palette as ASE and Procreate swatches
+name: Export sheet shares the palette as ASE and Procreate swatches
 ---
 - launchApp:
     clearState: true
 - tapOn:
     id: 'share-button'
-- assertVisible: 'Procreate Swatches'
-- assertVisible: 'Adobe Swatches.*'
+- assertVisible: 'Current palette'
+- assertVisible: 'Export to Procreate'
+- assertVisible: 'Export to Adobe'
 - tapOn: 'Cancel'
-- assertNotVisible: 'Procreate Swatches'
+- assertNotVisible: 'Export to Procreate'
 
-# Each export writes a file and opens the system share sheet
+# Each export writes a file named after the palette and opens the system share sheet
 - tapOn:
     id: 'share-button'
-- tapOn: 'Adobe Swatches.*'
+- tapOn: 'Export to Adobe'
 - runFlow:
     when:
       platform: Android
     file: subflows/android-assert-share-sheet.yaml
     env:
-      FILE_NAME: 'Exported Swatch\.ase'
-- assertNotVisible: 'Procreate Swatches'
+      FILE_NAME: 'Colorixer palette\.ase'
+- assertNotVisible: 'Export to Adobe'
 
 - tapOn:
     id: 'share-button'
-- tapOn: 'Procreate Swatches'
+- tapOn: 'Export to Procreate'
 - runFlow:
     when:
       platform: Android
     file: subflows/android-assert-share-sheet.yaml
     env:
-      FILE_NAME: 'Exported Swatch\.swatches'
-- assertNotVisible: 'Procreate Swatches'
+      FILE_NAME: 'Colorixer palette\.swatches'
+- assertNotVisible: 'Export to Procreate'

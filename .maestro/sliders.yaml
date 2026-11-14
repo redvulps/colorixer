@@ -1,0 +1,20 @@
+appId: com.redvulps.colorixer
+name: Typing H, S and V values sets the base color
+---
+- launchApp:
+    clearState: true
+- assertVisible: '#ff0000'
+
+- tapOn:
+    id: 'value-h'
+- eraseText
+- inputText: '120'
+- pressKey: Enter
+- assertVisible: '#00ff00'
+
+- tapOn:
+    id: 'value-v'
+- eraseText
+- inputText: '50'
+- pressKey: Enter
+- assertVisible: '#008000'

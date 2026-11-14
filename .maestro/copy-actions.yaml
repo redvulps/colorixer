@@ -5,7 +5,8 @@ name: Swatches copy their color, in HEX on tap and in other formats on long pres
     clearState: true
 
 # Long press opens the copy actions; Cancel closes them without copying
-- longPressOn: '#ff0000'
+- longPressOn:
+    id: 'swatch-#ff0000'
 - assertVisible: 'Copy as HEX'
 - assertVisible: 'Copy as HSL'
 - assertVisible: 'Copy as HSV'
@@ -13,7 +14,9 @@ name: Swatches copy their color, in HEX on tap and in other formats on long pres
 - assertNotVisible: 'Copy as HEX'
 
 # Tap copies the HEX value
-- tapOn: '#ff8000'
+- tapOn:
+    id: 'swatch-#ff8000'
+- assertVisible: 'Copied #ff8000'
 - runFlow:
     when:
       platform: Android
@@ -22,7 +25,8 @@ name: Swatches copy their color, in HEX on tap and in other formats on long pres
       CLIPBOARD_TEXT: '#ff8000'
 
 # Long press > Copy as HSL
-- longPressOn: '#ff0000'
+- longPressOn:
+    id: 'swatch-#ff0000'
 - tapOn: 'Copy as HSL'
 - assertNotVisible: 'Copy as HEX'
 - runFlow:
@@ -33,7 +37,8 @@ name: Swatches copy their color, in HEX on tap and in other formats on long pres
       CLIPBOARD_TEXT: 'hsl\(0deg 100% 50%\)'
 
 # Long press > Copy as HSV
-- longPressOn: '#ff0000'
+- longPressOn:
+    id: 'swatch-#ff0000'
 - tapOn: 'Copy as HSV'
 - assertNotVisible: 'Copy as HEX'
 - runFlow:
