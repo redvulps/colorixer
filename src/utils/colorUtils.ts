@@ -17,8 +17,4 @@ export type HSV = {
 };
 
 export type ColorHarmonyType =
-  | 'analogous'
-  | 'triadic'
-  | 'tetratriadic'
-  | 'complementary'
-  | 'monochromatic';
+  'analogous' | 'triadic' | 'tetratriadic' | 'complementary' | 'monochromatic';
