@@ -1,0 +1,16 @@
+appId: com.redvulps.colorixer
+name: Tapping the color wheel changes the base color
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- assertVisible: '#ff0000'
+- waitForAnimationToEnd
+# The wheel is a canvas inside a WebView. Tap below the center (hue ~90°):
+# the center is covered by the selector ring, and red (hue 0°) is to the right.
+- tapOn:
+    id: 'color-wheel'
+    point: '50%,85%'
+    retryTapIfNoChange: true
+- assertNotVisible: '#ff0000'

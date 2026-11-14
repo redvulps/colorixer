@@ -1,0 +1,7 @@
+appId: com.redvulps.colorixer
+---
+# The Android sharesheet ignores the dialog title but previews the shared file name.
+- assertVisible:
+    id: 'com.android.intentresolver:id/content_preview_filename'
+    text: ${FILE_NAME}
+- back

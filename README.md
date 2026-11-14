@@ -46,6 +46,27 @@ Colorixer is a powerful color picker application that helps artists and designer
    - Run in an iOS or Android simulator
    - Open in a web browser
 
+## End-to-end tests
+
+E2E flows live in `.maestro/` and run with [Maestro](https://maestro.dev) against a release build of the app.
+
+Prerequisites:
+- [Maestro CLI](https://docs.maestro.dev/getting-started/installing-maestro)
+- A full JDK 17+ for the Android build (`JAVA_HOME` must provide `javac`; Android Studio's bundled JBR works)
+- A running Android emulator on Android 13+ (some checks read the system clipboard overlay and share sheet)
+
+1. Build and install the release app
+   ```bash
+   yarn android --variant release --device <avd-name>
+   ```
+
+2. Run the flows (`adb devices` lists the serials)
+   ```bash
+   yarn test:e2e --udid <device-serial>
+   ```
+
+The flows are platform-agnostic. Android-only checks live in `.maestro/subflows/android-*` and run behind `when: platform: Android`. On macOS, run them against an iOS simulator with `yarn ios --configuration Release` and `yarn test:e2e --udid <simulator-udid>`.
+
 ## Usage
 
 1. **Select a Base Color**: Use the color wheel to pick your primary color

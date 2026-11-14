@@ -1,0 +1,44 @@
+appId: com.redvulps.colorixer
+name: Swatches copy their color, in HEX on tap and in other formats on long press
+---
+- launchApp:
+    clearState: true
+
+# Long press opens the copy actions; Cancel closes them without copying
+- longPressOn: '#ff0000'
+- assertVisible: 'Copy as HEX'
+- assertVisible: 'Copy as HSL'
+- assertVisible: 'Copy as HSV'
+- tapOn: 'Cancel'
+- assertNotVisible: 'Copy as HEX'
+
+# Tap copies the HEX value
+- tapOn: '#ff8000'
+- runFlow:
+    when:
+      platform: Android
+    file: subflows/android-assert-clipboard.yaml
+    env:
+      CLIPBOARD_TEXT: '#ff8000'
+
+# Long press > Copy as HSL
+- longPressOn: '#ff0000'
+- tapOn: 'Copy as HSL'
+- assertNotVisible: 'Copy as HEX'
+- runFlow:
+    when:
+      platform: Android
+    file: subflows/android-assert-clipboard.yaml
+    env:
+      CLIPBOARD_TEXT: 'hsl\(0deg 100% 50%\)'
+
+# Long press > Copy as HSV
+- longPressOn: '#ff0000'
+- tapOn: 'Copy as HSV'
+- assertNotVisible: 'Copy as HEX'
+- runFlow:
+    when:
+      platform: Android
+    file: subflows/android-assert-clipboard.yaml
+    env:
+      CLIPBOARD_TEXT: 'hsv\(0, 100%, 100%\)'

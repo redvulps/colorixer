@@ -45,11 +45,12 @@ export const ColorDisplay: React.FC<ColorDisplayProps> = ({ colors }) => {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Generated Colors</Text>
-        <TouchableOpacity onPress={handleShowShareActions}>
+        <TouchableOpacity testID="share-button" onPress={handleShowShareActions}>
           <Text>Share</Text>
         </TouchableOpacity>
       </View>
       <ScrollView
+        testID="generated-colors"
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.colorsContainer}

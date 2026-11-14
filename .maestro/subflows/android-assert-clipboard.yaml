@@ -1,0 +1,11 @@
+appId: com.redvulps.colorixer
+---
+# Android 13+ shows a clipboard preview overlay after a copy. Use it to check
+# what was copied, then wait for it to go away: it covers the first swatches.
+- assertVisible:
+    id: 'com.android.systemui:id/text_preview'
+    text: ${CLIPBOARD_TEXT}
+- extendedWaitUntil:
+    notVisible:
+      id: 'com.android.systemui:id/clipboard_ui'
+    timeout: 20000

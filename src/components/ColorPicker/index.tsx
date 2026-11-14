@@ -167,7 +167,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   );
 
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
+    <View testID="color-wheel" style={[styles.container, { width: size, height: size }]}>
       {Platform.OS === 'web' ? (
         <>
           <canvas ref={canvasRef} style={styles.canvas} />

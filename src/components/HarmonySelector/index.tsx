@@ -26,6 +26,7 @@ const HarmonySelectorComponent: React.FC<HarmonySelectorProps> = ({
     <View style={styles.container}>
       <Text style={styles.label}>Harmony Type:</Text>
       <ScrollView
+        testID="harmony-selector"
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.optionsContainer}
