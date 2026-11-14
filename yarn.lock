@@ -4630,13 +4630,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zip.js/zip.js@npm:2.8.36":
-  version: 2.8.36
-  resolution: "@zip.js/zip.js@npm:2.8.36"
-  checksum: 10c0/8d8647c925750843816b461fa76758b10612371c9d3fcdc5b21718b95910c2af2bef8e461270d052a38e78d27265313ab0c2cde469cd87285dfbe6d03b73c6a8
-  languageName: node
-  linkType: hard
-
 "abbrev@npm:^3.0.0":
   version: 3.0.0
   resolution: "abbrev@npm:3.0.0"
@@ -5850,7 +5843,6 @@ __metadata:
     "@types/react": "npm:~19.3.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.72.2"
     "@typescript-eslint/parser": "npm:^8.72.2"
-    "@zip.js/zip.js": "npm:2.8.36"
     babel-plugin-transform-import-meta: "npm:^2.3.3"
     chroma-js: "npm:^3.3.0"
     eslint: "npm:^9.39.5"
@@ -5874,6 +5866,7 @@ __metadata:
     expo-symbols: "npm:~58.0.5"
     expo-system-ui: "npm:~58.0.7"
     expo-web-browser: "npm:~58.0.8"
+    fflate: "npm:^0.8.3"
     jest: "npm:~30.5.2"
     jest-expo: "npm:~58.0.14"
     prettier: "npm:^3.10.1"
@@ -7591,6 +7584,13 @@ __metadata:
   version: 0.4.10
   resolution: "fetch-nodeshim@npm:0.4.10"
   checksum: 10c0/73b840b5d1252e82c416b350526ff24f5aebf554bfe911c713a19fbe4ad1218fb4c488f95055362a132f5dd733679c929fbe6a65ee23339592290c4d107ade92
+  languageName: node
+  linkType: hard
+
+"fflate@npm:^0.8.3":
+  version: 0.8.3
+  resolution: "fflate@npm:0.8.3"
+  checksum: 10c0/eab181ca37f5348ae76d4b6f840e0026e30220e33153289ac942222d8b9638237d486507dbcc09878d724095bd354993a2ee48bbee99c8f2c6440d4448719aa7
   languageName: node
   linkType: hard
 

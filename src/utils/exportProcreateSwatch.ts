@@ -1,25 +1,8 @@
-import { ZipWriter, TextReader, BlobWriter } from '@zip.js/zip.js';
 import chroma from 'chroma-js';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { strToU8, zipSync } from 'fflate';
 import { Platform } from 'react-native';
-
-// Helper to convert a Blob object to a Base64 string (needed for Expo FileSystem on mobile)
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject; // Handle potential read errors
-    reader.onloadend = () => {
-      // reader.result contains the Data URL: "data:mime/type;base64,BASE64_STRING"
-      const dataUrl = reader.result as string;
-      // Extract just the Base64 part after the comma
-      const base64 = dataUrl.split(',')[1];
-      resolve(base64);
-    };
-    // Start reading the Blob as a Data URL
-    reader.readAsDataURL(blob);
-  });
-}
 
 // Interface defining the structure of a single color within the Procreate swatches JSON
 interface ProcreateColor {
@@ -104,24 +87,19 @@ export async function exportProcreateSwatch(
   );
 
   // 4. Create the ZIP archive
+  // fflate is synchronous pure JS: it needs no Blob, Web Streams or workers, which Hermes lacks
   const jsonFileName = 'Swatches.json'; // Standard internal filename for Procreate
-  const blobWriter = new BlobWriter('application/zip'); // Specify ZIP MIME type
-  const zipWriter = new ZipWriter(blobWriter);
 
   // Add the JSON content as a file named "Swatches.json" inside the zip
-  await zipWriter.add(jsonFileName, new TextReader(jsonContent));
-
-  // Finalize the zip and get the Blob result
-  const zipBlob = await zipWriter.close();
+  const zipData = zipSync({ [jsonFileName]: strToU8(jsonContent) });
 
   // 5. Handle file saving/sharing based on platform
   if (Platform.OS !== 'web') {
     // Mobile (iOS/Android)
     try {
-      // Convert the zip Blob to base64 for Expo FileSystem
-      const base64Zip = await blobToBase64(zipBlob);
+      // Expo FileSystem writes the zip bytes directly (overwrites any previous export)
       const file = new File(Paths.document, exportFileName);
-      await file.write(base64Zip, { encoding: 'base64' });
+      await file.write(zipData);
       const fileUri = file.uri;
       console.log(`Procreate swatch file saved to: ${fileUri}`);
 
@@ -141,6 +119,7 @@ export async function exportProcreateSwatch(
   } else {
     // Web - Trigger download using a Blob URL
     try {
+      const zipBlob = new Blob([zipData], { type: 'application/zip' });
       const url = URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
       a.href = url;
