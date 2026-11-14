@@ -1,11 +1,39 @@
-import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
+  type LayoutChangeEvent,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { IconComponent } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
 import { colors, control, iconTone, radius, type } from '@/src/theme/tokens';
+
+const OPEN_MS = 280;
+const CLOSE_MS = 200;
+/** Off-screen offset used until the sheet has been measured */
+const UNMEASURED_OFFSET = 1000;
+
+/** Whether the system asks for reduced motion (prefers-reduced-motion on web) */
+function useReduceMotion(): boolean {
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then(setReduce)
+      .catch(() => {});
+    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduce);
+    return () => subscription.remove();
+  }, []);
+  return reduce;
+}
 
 interface BottomSheetProps {
   visible: boolean;
@@ -18,7 +46,10 @@ interface BottomSheetProps {
   testID?: string;
 }
 
-/** Modal sheet from the bottom with a scrim; tapping the scrim closes it */
+/**
+ * Modal sheet from the bottom: the scrim fades in while the sheet slides up, and both reverse
+ * before the modal goes away. With reduced motion the sheet only fades. Tapping the scrim closes it.
+ */
 export function BottomSheet({
   visible,
   onClose,
@@ -29,20 +60,76 @@ export function BottomSheet({
   testID,
 }: BottomSheetProps) {
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReduceMotion();
+  // 0 = hidden, 1 = open
+  const progress = useRef(new Animated.Value(0)).current;
+  const [mounted, setMounted] = useState(visible);
+  const mountedRef = useRef(visible);
+  mountedRef.current = mounted;
+  const [height, setHeight] = useState(0);
+  const measured = useRef(false);
+
+  const animateTo = useCallback(
+    (toValue: 0 | 1, onDone?: () => void) => {
+      progress.stopAnimation();
+      Animated.timing(progress, {
+        toValue,
+        duration: toValue ? OPEN_MS : CLOSE_MS,
+        easing: toValue ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) onDone?.();
+      });
+    },
+    [progress],
+  );
+
+  useEffect(() => {
+    if (visible) {
+      // Cancels a closing animation, so its callback won't unmount the reopened sheet
+      progress.stopAnimation();
+      setMounted(true);
+      // The first opening waits for the sheet's height (see onSheetLayout)
+      if (measured.current) animateTo(1);
+    } else if (mountedRef.current) {
+      animateTo(0, () => setMounted(false));
+    }
+  }, [visible, animateTo, progress]);
+
+  const onSheetLayout = (e: LayoutChangeEvent) => {
+    setHeight(e.nativeEvent.layout.height);
+    if (!measured.current) {
+      measured.current = true;
+      if (visible) animateTo(1);
+    }
+  };
+
+  const translateY = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [height || UNMEASURED_OFFSET, 0],
+  });
+
   return (
     <Modal
       transparent
-      visible={visible}
-      animationType="fade"
+      visible={mounted}
+      animationType="none"
       onRequestClose={onClose}
       statusBarTranslucent
       navigationBarTranslucent
     >
       <View style={styles.root}>
-        <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Close" />
-        <View
+        <Animated.View style={[styles.scrim, { opacity: progress }]}>
+          <Pressable style={styles.fill} onPress={onClose} accessibilityLabel="Close" />
+        </Animated.View>
+        <Animated.View
           testID={testID}
-          style={[styles.sheet, { paddingBottom: 20 + insets.bottom }]}
+          onLayout={onSheetLayout}
+          style={[
+            styles.sheet,
+            { paddingBottom: 20 + insets.bottom },
+            reduceMotion ? { opacity: progress } : { transform: [{ translateY }] },
+          ]}
           accessibilityViewIsModal
         >
           <View style={styles.grabber} />
@@ -56,7 +143,7 @@ export function BottomSheet({
             <PaletteStrip colors={palette} height={30} radius={radius.sm} style={styles.palette} />
           )}
           {children}
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -122,6 +209,9 @@ const styles = StyleSheet.create({
   scrim: {
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.scrim,
+  },
+  fill: {
+    flex: 1,
   },
   sheet: {
     backgroundColor: colors.surfaceRaised,
