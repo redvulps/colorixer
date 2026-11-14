@@ -20,7 +20,7 @@ Colorixer is a powerful color picker application that helps artists and designer
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v26+, see `.tool-versions`)
-- [Yarn](https://yarnpkg.com/) (v4.7.0+)
+- [Yarn](https://yarnpkg.com/) (v4.18.1+)
 - [Expo CLI](https://docs.expo.dev/workflow/expo-cli/)
 
 ### Installation
