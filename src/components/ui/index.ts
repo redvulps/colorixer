@@ -5,5 +5,6 @@ export { CopyField, ExportOption, HarmonyRow, Overline, PaletteValue, SavedRow }
 export { HarmonyStrip } from './HarmonyStrip';
 export { PaletteCard } from './PaletteCard';
 export { PaletteStrip } from './PaletteStrip';
+export { type MenuPoint, pointFromEvent, PopoverMenu } from './PopoverMenu';
 export { TabButton } from './TabButton';
 export { ToastProvider, useToast } from './Toast';

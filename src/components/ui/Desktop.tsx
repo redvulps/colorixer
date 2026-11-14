@@ -1,10 +1,10 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { type GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { IconComponent } from './Button';
+import { type IconComponent, IconButton } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
-import { CopyIcon, FileIcon, HarmonyIcon } from '@/src/components/icons';
+import { CopyIcon, FileIcon, HarmonyIcon, MoreIcon } from '@/src/components/icons';
 import { paletteColors, type SavedPalette } from '@/src/state/palettes';
 import { colors, control, iconTone, radius, type } from '@/src/theme/tokens';
 import { harmonyLabel } from '@/src/utils/color';
@@ -113,59 +113,87 @@ export function SavedRow({
   palette,
   selected,
   onPress,
+  onMore,
 }: {
   palette: SavedPalette;
   selected: boolean;
   onPress: () => void;
+  /** Opens the palette's actions (export, delete) */
+  onMore: (e: GestureResponderEvent) => void;
 }) {
   return (
-    <Pressable
-      testID={`palette-${palette.name}`}
-      accessibilityRole="button"
-      accessibilityLabel={`${palette.name}, ${harmonyLabel(palette.harmony)}`}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.row,
-        styles.savedRow,
-        selected && styles.rowSelected,
-        pressed && !selected && styles.rowPressed,
-      ]}
-    >
-      <PaletteStrip
-        colors={paletteColors(palette)}
-        height={22}
-        radius={radius.xs}
-        style={styles.savedStrip}
+    <View style={[styles.savedRow, selected && styles.rowSelected]}>
+      <Pressable
+        testID={`palette-${palette.name}`}
+        accessibilityRole="button"
+        accessibilityLabel={`${palette.name}, ${harmonyLabel(palette.harmony)}`}
+        onPress={onPress}
+        style={({ pressed }) => [styles.savedMain, pressed && !selected && styles.rowPressed]}
+      >
+        <PaletteStrip
+          colors={paletteColors(palette)}
+          height={22}
+          radius={radius.xs}
+          style={styles.savedStrip}
+        />
+        <View style={styles.savedText}>
+          <Text
+            style={[
+              styles.rowLabel,
+              { color: selected ? colors.textOnPrimary : colors.textSecondary },
+            ]}
+            numberOfLines={1}
+          >
+            {palette.name}
+          </Text>
+          <Text style={styles.savedHarmony}>{harmonyLabel(palette.harmony)}</Text>
+        </View>
+      </Pressable>
+      <IconButton
+        testID={`palette-more-${palette.name}`}
+        icon={MoreIcon}
+        tone="muted"
+        iconSize={18}
+        style={styles.moreButton}
+        accessibilityLabel={`More actions for ${palette.name}`}
+        onPress={onMore}
       />
-      <View style={styles.savedText}>
-        <Text
-          style={[
-            styles.rowLabel,
-            { color: selected ? colors.textOnPrimary : colors.textSecondary },
-          ]}
-          numberOfLines={1}
-        >
-          {palette.name}
-        </Text>
-        <Text style={styles.savedHarmony}>{harmonyLabel(palette.harmony)}</Text>
-      </View>
-    </Pressable>
+    </View>
   );
 }
 
-/** Swatch and hex of one palette color */
-export function PaletteValue({ color, onPress }: { color: string; onPress: () => void }) {
+/** Swatch and hex of one palette color: copies HEX, the ⋯ button offers other formats */
+export function PaletteValue({
+  color,
+  onPress,
+  onMore,
+}: {
+  color: string;
+  onPress: () => void;
+  onMore: (e: GestureResponderEvent) => void;
+}) {
   return (
-    <Pressable
-      testID={`swatch-${color}`}
-      accessibilityRole="button"
-      accessibilityLabel={`Copy ${color}`}
-      onPress={onPress}
-      style={styles.value}
-    >
-      <View style={[styles.valueSwatch, { backgroundColor: color }]} />
-      <Text style={styles.valueHex}>{color}</Text>
-    </Pressable>
+    <View style={styles.value}>
+      <Pressable
+        testID={`swatch-${color}`}
+        accessibilityRole="button"
+        accessibilityLabel={`Copy ${color}`}
+        onPress={onPress}
+        style={styles.valueMain}
+      >
+        <View style={[styles.valueSwatch, { backgroundColor: color }]} />
+        <Text style={styles.valueHex}>{color}</Text>
+      </Pressable>
+      <IconButton
+        testID={`swatch-more-${color}`}
+        icon={MoreIcon}
+        tone="muted"
+        iconSize={16}
+        style={styles.valueMore}
+        accessibilityLabel={`Copy ${color} in another format`}
+        onPress={onMore}
+      />
+    </View>
   );
 }
 
@@ -253,7 +281,25 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   savedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  savedMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     paddingVertical: 8,
+    paddingLeft: 10,
+    paddingRight: 4,
+    borderRadius: 10,
+  },
+  moreButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    marginRight: 4,
   },
   savedStrip: {
     width: 58,
@@ -271,7 +317,18 @@ const styles = StyleSheet.create({
     height: 28,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  valueMain: {
+    flex: 1,
+    height: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
+  },
+  valueMore: {
+    width: 28,
+    height: 28,
+    borderRadius: 7,
   },
   valueSwatch: {
     width: 18,

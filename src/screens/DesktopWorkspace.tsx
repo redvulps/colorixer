@@ -1,29 +1,33 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { ColorWheel } from '@/src/components/ColorWheel';
 import { HsvSlider } from '@/src/components/HsvSlider';
-import { CheckIcon, ExportIcon, FileIcon, SaveIcon } from '@/src/components/icons';
+import { CheckIcon, ExportIcon, FileIcon, SaveIcon, TrashIcon } from '@/src/components/icons';
 import {
   Button,
   CopyField,
   ExportOption,
   HarmonyRow,
   LogoMark,
+  type MenuPoint,
   Overline,
   PaletteValue,
+  pointFromEvent,
+  PopoverMenu,
   SavedRow,
   SheetAction,
   useToast,
 } from '@/src/components/ui';
 import {
   EXPORT_FORMATS,
+  type ExportFormat,
   exportPalette,
   UNSAVED_NAME,
   useCopy,
 } from '@/src/hooks/usePaletteActions';
-import { usePalette } from '@/src/state/palettes';
-import { colors as tokens, radius, shadows, type } from '@/src/theme/tokens';
+import { paletteColors, type SavedPalette, usePalette } from '@/src/state/palettes';
+import { colors as tokens, radius, type } from '@/src/theme/tokens';
 import {
   HARMONIES,
   harmonyColors,
@@ -37,14 +41,23 @@ const TOP_BAR = 60;
 const SIDEBAR = 252;
 const INSPECTOR = 320;
 
+/** Open menu: export of the current palette, actions of a saved palette, or copy formats of a color */
+type Menu =
+  | { kind: 'export'; at: MenuPoint }
+  | { kind: 'saved'; at: MenuPoint; palette: SavedPalette }
+  | { kind: 'color'; at: MenuPoint; color: string };
+
+const exportLabel = (format: ExportFormat) => (format === 'ase' ? 'Adobe ASE' : 'Procreate');
+
 /** Wide layout: harmonies and saved palettes | wheel and sliders | base color and export */
 export function DesktopWorkspace() {
-  const { hsv, harmony, base, colors, current, saved, setHsv, setHarmony, save, load } =
+  const { hsv, harmony, base, colors, current, saved, setHsv, setHarmony, save, load, remove } =
     usePalette();
   const copy = useCopy();
   const toast = useToast();
   const { width, height } = useWindowDimensions();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menu, setMenu] = useState<Menu | null>(null);
+  const closeMenu = () => setMenu(null);
 
   const canvasWidth = width - SIDEBAR - INSPECTOR;
   // Wheel, three 34 px sliders with 12 px gaps, 18 px between them, 48 px of margin
@@ -60,9 +73,24 @@ export function DesktopWorkspace() {
     toast(`Saved “${palette.name}”`);
   };
 
-  const onExport = (format: (typeof EXPORT_FORMATS)[number]['format']) => {
-    setMenuOpen(false);
-    exportPalette(format, colors, name);
+  const onExport = (format: ExportFormat, palette?: SavedPalette) => {
+    setMenu(null);
+    if (palette) {
+      exportPalette(format, paletteColors(palette), palette.name);
+    } else {
+      exportPalette(format, colors, name);
+    }
+  };
+
+  const onDelete = (palette: SavedPalette) => {
+    setMenu(null);
+    remove(palette.id);
+    toast(`Deleted “${palette.name}”`);
+  };
+
+  const onCopy = (text: string) => {
+    setMenu(null);
+    copy(text);
   };
 
   return (
@@ -88,8 +116,9 @@ export function DesktopWorkspace() {
           icon={ExportIcon}
           label="Export"
           chevron
-          accessibilityState={{ expanded: menuOpen }}
-          onPress={() => setMenuOpen((open) => !open)}
+          accessibilityState={{ expanded: menu?.kind === 'export' }}
+          // Right-aligned under the button
+          onPress={() => setMenu({ kind: 'export', at: { x: width - 28, y: TOP_BAR - 14 } })}
         />
       </View>
 
@@ -115,6 +144,7 @@ export function DesktopWorkspace() {
                 palette={palette}
                 selected={palette.id === current?.id}
                 onPress={() => load(palette.id)}
+                onMore={(e) => setMenu({ kind: 'saved', at: pointFromEvent(e), palette })}
               />
             ))
           ) : (
@@ -150,16 +180,21 @@ export function DesktopWorkspace() {
           <View testID="generated-colors" style={styles.paletteSection}>
             <Overline style={styles.paletteLabel}>{`Palette · ${harmonyLabel(harmony)}`}</Overline>
             {colors.map((color, i) => (
-              <PaletteValue key={`${color}-${i}`} color={color} onPress={() => copy(color)} />
+              <PaletteValue
+                key={`${color}-${i}`}
+                color={color}
+                onPress={() => copy(color)}
+                onMore={(e) => setMenu({ kind: 'color', at: pointFromEvent(e), color })}
+              />
             ))}
           </View>
 
           <View style={styles.exportSection}>
             <Overline>Export</Overline>
-            {EXPORT_FORMATS.map(({ format, app, ext }) => (
+            {EXPORT_FORMATS.map(({ format, ext }) => (
               <ExportOption
                 key={format}
-                label={format === 'ase' ? 'Adobe ASE' : app}
+                label={exportLabel(format)}
                 ext={ext}
                 onPress={() => onExport(format)}
               />
@@ -168,27 +203,84 @@ export function DesktopWorkspace() {
         </ScrollView>
       </View>
 
-      {menuOpen && (
-        <>
-          <Pressable
-            style={styles.menuDismiss}
-            onPress={() => setMenuOpen(false)}
-            accessibilityLabel="Close menu"
+      <PopoverMenu
+        testID="export-menu"
+        at={menu?.kind === 'export' ? menu.at : null}
+        items={EXPORT_FORMATS.length}
+        onClose={closeMenu}
+      >
+        {EXPORT_FORMATS.map(({ format, ext }) => (
+          <SheetAction
+            key={format}
+            compact
+            icon={FileIcon}
+            label={exportLabel(format)}
+            ext={ext}
+            onPress={() => onExport(format)}
           />
-          <View style={styles.menu} accessibilityRole="menu">
-            {EXPORT_FORMATS.map(({ format, app, ext }) => (
+        ))}
+      </PopoverMenu>
+
+      <PopoverMenu
+        testID="palette-menu"
+        at={menu?.kind === 'saved' ? menu.at : null}
+        items={EXPORT_FORMATS.length + 1}
+        width={300}
+        onClose={closeMenu}
+      >
+        {menu?.kind === 'saved' && (
+          <>
+            {EXPORT_FORMATS.map(({ format, ext }) => (
               <SheetAction
                 key={format}
                 compact
                 icon={FileIcon}
-                label={format === 'ase' ? 'Adobe ASE' : app}
+                label={`Export to ${exportLabel(format)}`}
                 ext={ext}
-                onPress={() => onExport(format)}
+                onPress={() => onExport(format, menu.palette)}
               />
             ))}
-          </View>
-        </>
-      )}
+            <SheetAction
+              compact
+              icon={TrashIcon}
+              tone="danger"
+              label="Delete palette"
+              onPress={() => onDelete(menu.palette)}
+            />
+          </>
+        )}
+      </PopoverMenu>
+
+      <PopoverMenu
+        testID="copy-menu"
+        at={menu?.kind === 'color' ? menu.at : null}
+        items={3}
+        width={320}
+        onClose={closeMenu}
+      >
+        {menu?.kind === 'color' && (
+          <>
+            <SheetAction
+              compact
+              label="Copy as HEX"
+              ext={menu.color}
+              onPress={() => onCopy(menu.color)}
+            />
+            <SheetAction
+              compact
+              label="Copy as HSL"
+              ext={hslString(menu.color)}
+              onPress={() => onCopy(hslString(menu.color))}
+            />
+            <SheetAction
+              compact
+              label="Copy as HSV"
+              ext={hsvString(menu.color)}
+              onPress={() => onCopy(hsvString(menu.color))}
+            />
+          </>
+        )}
+      </PopoverMenu>
     </View>
   );
 }
@@ -304,27 +396,5 @@ const styles = StyleSheet.create({
   },
   exportSection: {
     gap: 8,
-  },
-  menuDismiss: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 3,
-  },
-  menu: {
-    position: 'absolute',
-    top: TOP_BAR - 2,
-    right: 16,
-    width: 260,
-    padding: 6,
-    gap: 2,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: tokens.lineDefault,
-    backgroundColor: tokens.surfaceField,
-    zIndex: 4,
-    ...shadows.menu,
   },
 });
