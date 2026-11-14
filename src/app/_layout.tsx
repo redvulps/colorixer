@@ -13,6 +13,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { PaletteProvider } from '@/src/state/palettes';
 import { colors } from '@/src/theme/tokens';
 
 // Keep the splash screen up until the fonts are ready
@@ -39,11 +40,11 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <PaletteProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
       />
-    </>
+    </PaletteProvider>
   );
 }
