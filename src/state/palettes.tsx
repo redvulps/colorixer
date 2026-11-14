@@ -11,7 +11,7 @@ import React, {
 import { harmonyColors, hexToHsv, type Hsv, hsvToHex } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
 
-const STORAGE_KEY = 'colorixer:palettes:v1';
+export const STORAGE_KEY = 'colorixer:palettes:v1';
 
 export interface SavedPalette {
   id: string;

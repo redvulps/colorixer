@@ -44,6 +44,15 @@ Colorixer is a powerful color picker application that helps artists and designer
    - Run in an iOS or Android simulator
    - Open in a web browser
 
+## Unit and screen tests
+
+```bash
+yarn test:ci   # run once
+yarn test      # watch mode
+```
+
+Tests live next to the code in `__tests__` folders and run with Jest (`jest-expo`) and React Native Testing Library. They cover the color math, the palette store and the Color, Palettes and desktop screens. Native modules (storage, clipboard, haptics, safe area) are mocked in `jest.setup.ts`.
+
 ## End-to-end tests
 
 E2E flows live in `.maestro/` and run with [Maestro](https://maestro.dev) against a release build of the app.

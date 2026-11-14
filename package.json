@@ -9,11 +9,15 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
+    "test:ci": "jest --ci",
     "test:e2e": "maestro test .maestro",
     "lint": "expo lint"
   },
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.ts"
+    ]
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -53,6 +57,7 @@
     "@babel/core": "^7.29.7",
     "@react-native/jest-preset": "^0.88.1",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@testing-library/react-native": "^14.1.0",
     "@types/chroma-js": "^3.1.3",
     "@types/jest": "30.0.0",
     "@types/react": "~19.3.0",
@@ -68,6 +73,7 @@
     "jest": "~30.5.2",
     "jest-expo": "~58.0.14",
     "prettier": "^3.10.1",
+    "test-renderer": "^1.3.1",
     "typescript": "~6.0.3"
   },
   "private": true,
