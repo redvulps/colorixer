@@ -135,7 +135,6 @@ export function HsvSlider({ channel, hsv, onChange }: HsvSliderProps) {
         keyboardType="number-pad"
         returnKeyType="done"
         selectTextOnFocus
-        maxLength={3}
         accessibilityLabel={`${label} value`}
       />
     </View>

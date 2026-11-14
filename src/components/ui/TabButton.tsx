@@ -1,5 +1,12 @@
 import React, { forwardRef } from 'react';
-import { Pressable, type PressableProps, StyleSheet, Text } from 'react-native';
+import {
+  Pressable,
+  type PressableProps,
+  type StyleProp,
+  StyleSheet,
+  Text,
+  type ViewStyle,
+} from 'react-native';
 
 import type { IconComponent } from './Button';
 
@@ -10,18 +17,19 @@ interface TabButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   icon: IconComponent;
   /** Set by expo-router's TabTrigger */
   isFocused?: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
 /** Bottom tab: icon over label, filled when active */
 export const TabButton = forwardRef<React.ComponentRef<typeof Pressable>, TabButtonProps>(
-  function TabButton({ label, icon: Icon, isFocused, ...props }, ref) {
+  function TabButton({ label, icon: Icon, isFocused, style, ...props }, ref) {
     return (
       <Pressable
         ref={ref}
         accessibilityRole="tab"
         accessibilityState={{ selected: !!isFocused }}
-        style={[styles.tab, isFocused && styles.tabActive]}
         {...props}
+        style={[style, styles.tab, isFocused && styles.tabActive]}
       >
         <Icon size={22} color={isFocused ? iconTone.onPrimary : iconTone.muted} />
         <Text
@@ -37,6 +45,7 @@ export const TabButton = forwardRef<React.ComponentRef<typeof Pressable>, TabBut
 const styles = StyleSheet.create({
   tab: {
     flex: 1,
+    flexDirection: 'column',
     height: control.lg,
     borderRadius: radius.lg,
     alignItems: 'center',

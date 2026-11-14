@@ -7,6 +7,8 @@ import type { Hsv } from '@/src/utils/color';
 
 // Must match INSET in scripts/generate-color-wheel.js
 const INSET = 0.035;
+// Room around the wheel so markers on the edge are not clipped
+const PAD = 24;
 const WHEEL_IMAGE = require('@/assets/images/color-wheel.png');
 
 interface ColorWheelProps {
@@ -90,7 +92,13 @@ export function ColorWheel({
         pointerEvents="none"
         style={[styles.dim, { borderRadius: radius, opacity: 1 - hsv[2] }]}
       />
-      <Svg width={size} height={size} style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Svg
+        width={size + 2 * PAD}
+        height={size + 2 * PAD}
+        viewBox={`${-PAD} ${-PAD} ${size + 2 * PAD} ${size + 2 * PAD}`}
+        style={styles.overlay}
+        pointerEvents="none"
+      >
         {[base, ...others].map((p, i) => (
           <Line
             key={`line-${i}`}
@@ -140,6 +148,11 @@ export function ColorWheel({
 const styles = StyleSheet.create({
   wheel: {
     overflow: 'visible',
+  },
+  overlay: {
+    position: 'absolute',
+    top: -PAD,
+    left: -PAD,
   },
   dim: {
     position: 'absolute',
