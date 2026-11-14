@@ -1,5 +1,5 @@
 import chroma from 'chroma-js';
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 
@@ -59,12 +59,10 @@ export async function exportAdobeAse(
   if (Platform.OS !== 'web') {
     // Mobile (iOS/Android) using Expo FileSystem and Sharing
     try {
-      const fileUri = FileSystem.documentDirectory + exportFileName;
-      // Convert ArrayBuffer to base64 for Expo FileSystem's writeAsStringAsync
-      const base64Data = arrayBufferToBase64(aseData);
-      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const file = new File(Paths.document, exportFileName);
+      // Expo FileSystem writes the binary ArrayBuffer directly (overwrites any previous export)
+      await file.write(aseData);
+      const fileUri = file.uri;
       console.log(`ASE file saved to: ${fileUri}`);
 
       // Check if sharing is available and share the file
@@ -97,16 +95,4 @@ export async function exportAdobeAse(
       alert(`Error exporting swatch: ${error instanceof Error ? error.message : String(error)}`); // Show error to user
     }
   }
-}
-
-// Helper function to convert ArrayBuffer to a Base64 string
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  // btoa is a built-in browser function for base64 encoding
-  return btoa(binary);
 }

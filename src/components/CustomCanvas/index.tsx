@@ -10,7 +10,7 @@ interface CustomCanvasProps {
 }
 
 export const CustomCanvas: React.FC<CustomCanvasProps> = ({ size, onColorChange, onInit }) => {
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<WebView<object>>(null);
 
   // HTML content with canvas and color wheel logic
   const htmlContent = `
@@ -182,7 +182,8 @@ export const CustomCanvas: React.FC<CustomCanvasProps> = ({ size, onColorChange,
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      <WebView
+      {/* Explicit type argument: react-native-webview defaults P to `undefined`, which collapses props to `never` */}
+      <WebView<object>
         ref={webViewRef}
         originWhitelist={['*']}
         source={{ html: htmlContent }}

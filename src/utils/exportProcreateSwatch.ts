@@ -1,6 +1,6 @@
 import { ZipWriter, TextReader, BlobWriter } from '@zip.js/zip.js';
 import chroma from 'chroma-js';
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 
@@ -120,10 +120,9 @@ export async function exportProcreateSwatch(
     try {
       // Convert the zip Blob to base64 for Expo FileSystem
       const base64Zip = await blobToBase64(zipBlob);
-      const fileUri = FileSystem.documentDirectory + exportFileName;
-      await FileSystem.writeAsStringAsync(fileUri, base64Zip, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const file = new File(Paths.document, exportFileName);
+      await file.write(base64Zip, { encoding: 'base64' });
+      const fileUri = file.uri;
       console.log(`Procreate swatch file saved to: ${fileUri}`);
 
       // Use Expo Sharing to open the share sheet

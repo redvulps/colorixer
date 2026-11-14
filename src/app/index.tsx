@@ -2,7 +2,8 @@
 import chroma from 'chroma-js';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, SafeAreaView, Text, Platform } from 'react-native';
+import { View, StyleSheet, Text, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ColorDisplay } from '../components/ColorDisplay';
 import { ColorPicker } from '../components/ColorPicker';
