@@ -4,16 +4,14 @@ Colorixer is a powerful color picker application that helps artists and designer
 
 ## Features
 
-- **Interactive Color Picker**: Select colors with precision using an intuitive color wheel interface
-- **Color Harmony Generation**: Create harmonious color schemes with various relationships including:
-  - Analogous
-  - Complementary
-  - Triadic
-  - And more
+- **Color wheel and H/S/V controls**: Drag on the wheel to pick hue and saturation, or set hue, saturation and value with sliders and numeric fields
+- **Color Harmony Generation**: Analogous, triadic, tetratriadic, complementary and monochromatic palettes, drawn on the wheel
+- **Saved palettes**: Save a palette, reopen it later, export or delete it from the Palettes tab
+- **Copy in any format**: Tap a swatch to copy its HEX value, long press for HSL or HSV
 - **Export to Drawing Applications**: Export color palettes in multiple formats:
   - Adobe Swatch Exchange (ASE) for Photoshop and other Adobe applications
   - Procreate Swatches for the popular iPad drawing app
-- **Cross-Platform**: Works on web, iOS, and Android platforms
+- **Cross-Platform**: Works on web, iOS, and Android. Windows 1024 px wide or more get a three-column workspace
 
 ## Getting Started
 
@@ -69,9 +67,9 @@ The flows are platform-agnostic. Android-only checks live in `.maestro/subflows/
 
 ## Usage
 
-1. **Select a Base Color**: Use the color wheel to pick your primary color
-2. **Choose a Harmony Type**: Select from different harmony types to generate related colors
-3. **View and Customize**: See your generated color palette
+1. **Select a Base Color**: Drag on the color wheel, or use the H, S and V sliders and fields
+2. **Choose a Harmony Type**: Tap one of the harmony diagrams to generate related colors
+3. **Save**: Keep the palette in the Palettes tab (the sidebar on wide screens)
 4. **Export**: Share your palette with drawing applications in your preferred format
 
 ## Supported Export Formats
