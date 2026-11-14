@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
-    "@zip.js/zip.js": "^2.25.0",
+    "@zip.js/zip.js": "2.8.36",
     "chroma-js": "^3.3.0",
     "expo": "~58.0.25",
     "expo-blur": "~58.0.6",

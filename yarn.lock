@@ -4630,10 +4630,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zip.js/zip.js@npm:^2.25.0":
-  version: 2.25.0
-  resolution: "@zip.js/zip.js@npm:2.25.0"
-  checksum: 10c0/4e93bcc20541b4b3badb9834c4f0d87b6e0ecc089a5183e61551e5bca8ae22dd4a53bf72d3aab5a2697d7362529418c2e479a5ef908f3468f32bd38bbfde030c
+"@zip.js/zip.js@npm:2.8.36":
+  version: 2.8.36
+  resolution: "@zip.js/zip.js@npm:2.8.36"
+  checksum: 10c0/8d8647c925750843816b461fa76758b10612371c9d3fcdc5b21718b95910c2af2bef8e461270d052a38e78d27265313ab0c2cde469cd87285dfbe6d03b73c6a8
   languageName: node
   linkType: hard
 
@@ -5850,7 +5850,7 @@ __metadata:
     "@types/react": "npm:~19.3.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.72.2"
     "@typescript-eslint/parser": "npm:^8.72.2"
-    "@zip.js/zip.js": "npm:^2.25.0"
+    "@zip.js/zip.js": "npm:2.8.36"
     babel-plugin-transform-import-meta: "npm:^2.3.3"
     chroma-js: "npm:^3.3.0"
     eslint: "npm:^9.39.5"
