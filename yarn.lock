@@ -1563,10 +1563,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo-google-fonts/inter@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@expo-google-fonts/inter@npm:0.4.2"
+  checksum: 10c0/a88e6d1321584055d2fa265861795d55ec04b64d9726ecb60fd11a970252d23a1fd8c1febab7b587eb8ec699071d35c38c591625e44a2826c1e0e18bb1aa1946
+  languageName: node
+  linkType: hard
+
 "@expo-google-fonts/material-symbols@npm:^0.4.1":
   version: 0.4.54
   resolution: "@expo-google-fonts/material-symbols@npm:0.4.54"
   checksum: 10c0/184435a5ab88615bf413d036c178861c9be7f0fca1c0726337f3e1b241f57978e908b62fd6c68d0809e5754a300ba4ff6211669185c4ca3ae9aafbcabda84111
+  languageName: node
+  linkType: hard
+
+"@expo-google-fonts/source-code-pro@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@expo-google-fonts/source-code-pro@npm:0.4.2"
+  checksum: 10c0/2c00646248e53e04e0566dfcfa08522abda31239f997f3363b5d88257eca24ee159b2cdc9e7fc642c0d876a1be8ca455d301dc5dda6da3ec2bf51c73ced64d1d
   languageName: node
   linkType: hard
 
@@ -5835,6 +5849,8 @@ __metadata:
   resolution: "colorixer@workspace:."
   dependencies:
     "@babel/core": "npm:^7.29.7"
+    "@expo-google-fonts/inter": "npm:^0.4.2"
+    "@expo-google-fonts/source-code-pro": "npm:^0.4.2"
     "@expo/vector-icons": "npm:^15.0.2"
     "@react-native/jest-preset": "npm:^0.88.1"
     "@stylistic/eslint-plugin": "npm:^5.10.0"
