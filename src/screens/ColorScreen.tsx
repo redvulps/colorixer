@@ -26,7 +26,7 @@ import {
 import { useHeldTopInset } from '@/src/hooks/useTopInset';
 import { usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
-import { harmonyLabel, hslString, hsvString } from '@/src/utils/color';
+import { harmonyLabel, hslString, hsvString, rgbString } from '@/src/utils/color';
 
 /** Largest wheel, for tablets and narrow browser windows */
 const MAX_WHEEL = 480;
@@ -179,6 +179,11 @@ export function ColorScreen() {
         {copyColor && (
           <>
             <SheetAction label="Copy as HEX" ext={copyColor} onPress={() => copyAs(copyColor)} />
+            <SheetAction
+              label="Copy as RGB"
+              ext={rgbString(copyColor)}
+              onPress={() => copyAs(rgbString(copyColor))}
+            />
             <SheetAction
               label="Copy as HSL"
               ext={hslString(copyColor)}

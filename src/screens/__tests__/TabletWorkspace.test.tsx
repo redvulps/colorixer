@@ -108,6 +108,8 @@ describe('Tablet workspace controls', () => {
     await renderWithProviders(<TabletWorkspace />);
     await fireEvent.press(screen.getByTestId('copy-hex'));
     expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff0000');
+    await fireEvent.press(screen.getByTestId('copy-rgb'));
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 0 0)');
     await fireEvent.press(screen.getByTestId('copy-hsl'));
     expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(0deg 100% 50%)');
     await fireEvent.press(screen.getByTestId('copy-hsv'));
@@ -127,6 +129,10 @@ describe('Tablet workspace controls', () => {
     await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
     await fireEvent.press(screen.getByText('Copy as HSL'));
     expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(30deg 100% 50%)');
+
+    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent.press(screen.getByText('Copy as RGB'));
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 128 0)');
 
     jest.mocked(Clipboard.setStringAsync).mockClear();
     await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');

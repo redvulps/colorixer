@@ -37,6 +37,7 @@ import {
   hslString,
   hsvString,
   inkOn,
+  rgbString,
 } from '@/src/utils/color';
 
 const TOP_BAR = 60;
@@ -210,6 +211,7 @@ export function DesktopWorkspace() {
               <Text style={[styles.baseHex, { color: inkOn(base) }]}>{base}</Text>
             </View>
             <CopyField label="HEX" value={base} onCopy={() => copy(base)} />
+            <CopyField label="RGB" value={rgbString(base)} onCopy={() => copy(rgbString(base))} />
             <CopyField label="HSL" value={hslString(base)} onCopy={() => copy(hslString(base))} />
             <CopyField label="HSV" value={hsvString(base)} onCopy={() => copy(hsvString(base))} />
           </View>
@@ -291,7 +293,7 @@ export function DesktopWorkspace() {
       <PopoverMenu
         testID="copy-menu"
         at={menu?.kind === 'color' ? menu.at : null}
-        items={3}
+        items={4}
         width={320}
         onClose={closeMenu}
       >
@@ -302,6 +304,12 @@ export function DesktopWorkspace() {
               label="Copy as HEX"
               ext={menu.color}
               onPress={() => onCopy(menu.color)}
+            />
+            <SheetAction
+              compact
+              label="Copy as RGB"
+              ext={rgbString(menu.color)}
+              onPress={() => onCopy(rgbString(menu.color))}
             />
             <SheetAction
               compact

@@ -8,6 +8,7 @@ name: Swatches copy their color, in HEX on tap and in other formats on long pres
 - longPressOn:
     id: 'swatch-#ff0000'
 - assertVisible: 'Copy as HEX'
+- assertVisible: 'Copy as RGB'
 - assertVisible: 'Copy as HSL'
 - assertVisible: 'Copy as HSV'
 - tapOn: 'Cancel'
@@ -23,6 +24,18 @@ name: Swatches copy their color, in HEX on tap and in other formats on long pres
     file: subflows/android-assert-clipboard.yaml
     env:
       CLIPBOARD_TEXT: '#ff8000'
+
+# Long press > Copy as RGB
+- longPressOn:
+    id: 'swatch-#ff0000'
+- tapOn: 'Copy as RGB'
+- assertNotVisible: 'Copy as HEX'
+- runFlow:
+    when:
+      platform: Android
+    file: subflows/android-assert-clipboard.yaml
+    env:
+      CLIPBOARD_TEXT: 'rgb\(255 0 0\)'
 
 # Long press > Copy as HSL
 - longPressOn:

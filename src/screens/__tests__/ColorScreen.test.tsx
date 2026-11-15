@@ -75,6 +75,10 @@ describe('Color tab', () => {
 
   it('copies other formats from the long-press sheet', async () => {
     await renderWithProviders(<ColorScreen />);
+    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent.press(screen.getByText('Copy as RGB'));
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith('rgb(255 128 0)');
+
     await fireEvent(screen.getByTestId('swatch-#ff0000'), 'longPress');
     await fireEvent.press(screen.getByText('Copy as HSL'));
     expect(Clipboard.setStringAsync).toHaveBeenCalledWith('hsl(0deg 100% 50%)');

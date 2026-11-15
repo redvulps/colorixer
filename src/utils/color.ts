@@ -34,6 +34,12 @@ export function harmonyColors(harmony: ColorHarmonyType, base: string): string[]
   return getHarmonyColors(harmony, { h: Number.isNaN(h) ? 0 : h, s, l });
 }
 
+/** e.g. rgb(255 128 0) */
+export function rgbString(hex: string): string {
+  const [r, g, b] = chroma(hex).rgb();
+  return `rgb(${r} ${g} ${b})`;
+}
+
 /** e.g. hsl(30deg 100% 50%), rounded to whole units */
 export function hslString(hex: string): string {
   const [h, s, l] = chroma(hex).hsl();

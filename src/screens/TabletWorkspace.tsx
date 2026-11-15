@@ -50,6 +50,7 @@ import {
   hslString,
   hsvString,
   inkOn,
+  rgbString,
 } from '@/src/utils/color';
 
 const TOP_BAR = 60;
@@ -225,6 +226,11 @@ export function TabletWorkspace() {
                 </View>
                 <CopyField label="HEX" value={base} onCopy={() => copy(base)} />
                 <CopyField
+                  label="RGB"
+                  value={rgbString(base)}
+                  onCopy={() => copy(rgbString(base))}
+                />
+                <CopyField
                   label="HSL"
                   value={hslString(base)}
                   onCopy={() => copy(hslString(base))}
@@ -379,6 +385,11 @@ export function TabletWorkspace() {
         {copyColor && (
           <>
             <SheetAction label="Copy as HEX" ext={copyColor} onPress={() => copyAs(copyColor)} />
+            <SheetAction
+              label="Copy as RGB"
+              ext={rgbString(copyColor)}
+              onPress={() => copyAs(rgbString(copyColor))}
+            />
             <SheetAction
               label="Copy as HSL"
               ext={hslString(copyColor)}

@@ -15,7 +15,7 @@ export function Overline({ children, style }: { children: string; style?: object
   return <Text style={[styles.overline, style]}>{children}</Text>;
 }
 
-/** Read-only value with a copy button (HEX, HSL, HSV) */
+/** Read-only value with a copy button (HEX, RGB, HSL, HSV) */
 export function CopyField({
   label,
   value,

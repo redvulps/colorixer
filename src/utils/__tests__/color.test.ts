@@ -1,4 +1,12 @@
-import { harmonyColors, hexToHsv, hslString, hsvString, hsvToHex, inkOn } from '../color';
+import {
+  harmonyColors,
+  hexToHsv,
+  hslString,
+  hsvString,
+  hsvToHex,
+  inkOn,
+  rgbString,
+} from '../color';
 import type { ColorHarmonyType } from '../colorUtils';
 
 describe('harmonyColors', () => {
@@ -27,6 +35,12 @@ describe('harmonyColors', () => {
 });
 
 describe('color formats', () => {
+  it('formats RGB', () => {
+    expect(rgbString('#ff8000')).toBe('rgb(255 128 0)');
+    expect(rgbString('#008000')).toBe('rgb(0 128 0)');
+    expect(rgbString('#ffffff')).toBe('rgb(255 255 255)');
+  });
+
   it('rounds HSL to whole units', () => {
     expect(hslString('#ff0000')).toBe('hsl(0deg 100% 50%)');
     expect(hslString('#ff8000')).toBe('hsl(30deg 100% 50%)');

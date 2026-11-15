@@ -84,12 +84,18 @@ describe('Desktop workspace', () => {
     await fireEvent.press(screen.getByTestId('swatch-more-#ff8000'), pressAt);
     await fireEvent.press(screen.getByText('Copy as HSV'));
     expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsv(30, 100%, 100%)');
+
+    await fireEvent.press(screen.getByTestId('swatch-more-#ff8000'), pressAt);
+    await fireEvent.press(screen.getByText('Copy as RGB'));
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 128 0)');
   });
 
   it('copies the base color from the inspector fields', async () => {
     await renderWithProviders(<DesktopWorkspace />);
     await fireEvent.press(screen.getByTestId('copy-hsl'));
     expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(0deg 100% 50%)');
+    await fireEvent.press(screen.getByTestId('copy-rgb'));
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 0 0)');
   });
 });
 
