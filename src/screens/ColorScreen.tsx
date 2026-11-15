@@ -90,40 +90,43 @@ export function ColorScreen() {
           />
         </View>
 
-        {/* Sticky: stays in view while the sliders scroll */}
+        {/* Sticky: stays in view while the sliders scroll. A sticky child's own style goes to
+            the ScrollView's wrapper, so the gap lives on an inner view. */}
         <View style={styles.paletteBlock}>
-          <View style={styles.paletteHeader}>
-            <Overline style={styles.paletteName}>
-              {current ? `${current.name} · ${harmonyLabel(harmony)}` : harmonyLabel(harmony)}
-            </Overline>
-            <View style={styles.paletteActions}>
-              <PillButton testID="save-button" saved={!!current} onPress={onSave} />
-              <PillIconButton
-                testID="share-button"
-                icon={ExportIcon}
-                accessibilityLabel="Export palette"
-                onPress={() => setExportOpen(true)}
-              />
+          <View style={styles.paletteInner}>
+            <View style={styles.paletteHeader}>
+              <Overline style={styles.paletteName}>
+                {current ? `${current.name} · ${harmonyLabel(harmony)}` : harmonyLabel(harmony)}
+              </Overline>
+              <View style={styles.paletteActions}>
+                <PillButton testID="save-button" saved={!!current} onPress={onSave} />
+                <PillIconButton
+                  testID="share-button"
+                  icon={ExportIcon}
+                  accessibilityLabel="Export palette"
+                  onPress={() => setExportOpen(true)}
+                />
+              </View>
             </View>
-          </View>
-          <View style={styles.palette}>
-            <View ref={stripRef} collapsable={false}>
-              <PaletteStrip
-                testID="generated-colors"
-                colors={colors}
-                height={52}
-                radius={14}
-                onPressColor={openFull}
-                onLongPressColor={setCopyColor}
-                swatchHint="Shows the palette in full screen. Long press to copy the color."
-              />
-            </View>
-            <View style={styles.hexRow}>
-              {colors.map((color, i) => (
-                <Text key={`${color}-${i}`} style={styles.hex}>
-                  {color}
-                </Text>
-              ))}
+            <View style={styles.palette}>
+              <View ref={stripRef} collapsable={false}>
+                <PaletteStrip
+                  testID="generated-colors"
+                  colors={colors}
+                  height={52}
+                  radius={14}
+                  onPressColor={openFull}
+                  onLongPressColor={setCopyColor}
+                  swatchHint="Shows the palette in full screen. Long press to copy the color."
+                />
+              </View>
+              <View style={styles.hexRow}>
+                {colors.map((color, i) => (
+                  <Text key={`${color}-${i}`} style={styles.hex}>
+                    {color}
+                  </Text>
+                ))}
+              </View>
             </View>
           </View>
         </View>
@@ -217,12 +220,14 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 8,
   },
+  // The space around the palette is its own, so it keeps it while stuck to the top
   paletteBlock: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 10,
-    gap: 10,
+    paddingVertical: 16,
     backgroundColor: tokens.bgApp,
+  },
+  paletteInner: {
+    gap: 10,
   },
   paletteHeader: {
     flexDirection: 'row',
