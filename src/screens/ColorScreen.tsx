@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,9 +9,11 @@ import {
   BottomSheet,
   HarmonyStrip,
   Overline,
+  PaletteFullscreen,
   PaletteStrip,
   PillButton,
   PillIconButton,
+  type Rect,
   SheetAction,
   useToast,
 } from '@/src/components/ui';
@@ -40,6 +42,9 @@ export function ColorScreen() {
   const { width } = useWindowDimensions();
   const [exportOpen, setExportOpen] = useState(false);
   const [copyColor, setCopyColor] = useState<string | null>(null);
+  const [fullOpen, setFullOpen] = useState(false);
+  const [fullOrigin, setFullOrigin] = useState<Rect | null>(null);
+  const stripRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const wheelSize = Math.min(MAX_WHEEL, width - 32);
   const name = current?.name ?? UNSAVED_NAME;
@@ -48,6 +53,13 @@ export function ColorScreen() {
     const palette = save();
     haptic();
     toast(`Saved “${palette.name}”`);
+  };
+
+  // The full-screen view grows out of the bar, so it needs the bar's place on screen
+  const openFull = () => {
+    setFullOrigin(null);
+    setFullOpen(true);
+    stripRef.current?.measureInWindow((x, y, w, h) => setFullOrigin({ x, y, width: w, height: h }));
   };
 
   const copyAs = (text: string) => {
@@ -87,14 +99,17 @@ export function ColorScreen() {
             </View>
           </View>
           <View style={styles.palette}>
-            <PaletteStrip
-              testID="generated-colors"
-              colors={colors}
-              height={52}
-              radius={14}
-              onPressColor={copy}
-              onLongPressColor={setCopyColor}
-            />
+            <View ref={stripRef} collapsable={false}>
+              <PaletteStrip
+                testID="generated-colors"
+                colors={colors}
+                height={52}
+                radius={14}
+                onPressColor={openFull}
+                onLongPressColor={setCopyColor}
+                swatchHint="Shows the palette in full screen. Long press to copy the color."
+              />
+            </View>
             <View style={styles.hexRow}>
               {colors.map((color, i) => (
                 <Text key={`${color}-${i}`} style={styles.hex}>
@@ -111,6 +126,15 @@ export function ColorScreen() {
           <HsvSlider channel="v" hsv={hsv} onChange={(v) => setHsv([hsv[0], hsv[1], v])} />
         </View>
       </ScrollView>
+
+      <PaletteFullscreen
+        testID="palette-fullscreen"
+        visible={fullOpen}
+        origin={fullOrigin}
+        colors={colors}
+        label={`${current ? `${current.name} · ` : ''}${harmonyLabel(harmony)} · ${colors.length} colors`}
+        onClose={() => setFullOpen(false)}
+      />
 
       <BottomSheet
         testID="export-sheet"

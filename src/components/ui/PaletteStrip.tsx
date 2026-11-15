@@ -7,6 +7,8 @@ interface PaletteStripProps {
   radius: number;
   onPressColor?: (color: string) => void;
   onLongPressColor?: (color: string) => void;
+  /** What a tap and a long press on a swatch do, for screen readers */
+  swatchHint?: string;
   style?: ViewStyle;
   testID?: string;
 }
@@ -18,6 +20,7 @@ export function PaletteStrip({
   radius,
   onPressColor,
   onLongPressColor,
+  swatchHint = 'Copies the color. Long press for other formats.',
   style,
   testID,
 }: PaletteStripProps) {
@@ -31,7 +34,7 @@ export function PaletteStrip({
             testID={`swatch-${color}`}
             accessibilityRole="button"
             accessibilityLabel={color}
-            accessibilityHint="Copies the color. Long press for other formats."
+            accessibilityHint={swatchHint}
             style={[styles.swatch, { backgroundColor: color }]}
             onPress={() => onPressColor?.(color)}
             onLongPress={() => onLongPressColor?.(color)}

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fireEvent, screen } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
 import React from 'react';
 
@@ -44,9 +44,24 @@ describe('Color tab', () => {
     expect(screen.queryByText('#ff0000')).toBeNull();
   });
 
-  it('copies HEX when a swatch is tapped', async () => {
+  it('shows the palette in full screen when a swatch is tapped, and closes on a tap', async () => {
     await renderWithProviders(<ColorScreen />);
     await fireEvent.press(screen.getByTestId('swatch-#ff8000'));
+    const full = screen.getByTestId('palette-fullscreen');
+    for (const hex of ANALOGOUS_RED) {
+      expect(within(full).getByText(hex)).toBeOnTheScreen();
+    }
+    expect(screen.getByText('Analogous · 5 colors')).toBeOnTheScreen();
+    expect(Clipboard.setStringAsync).not.toHaveBeenCalled();
+
+    await fireEvent.press(full);
+    await waitFor(() => expect(screen.queryByTestId('palette-fullscreen')).toBeNull());
+  });
+
+  it('copies HEX from the long-press sheet', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent.press(screen.getByText('Copy as HEX'));
     expect(Clipboard.setStringAsync).toHaveBeenCalledWith('#ff8000');
     expect(screen.getByText('Copied #ff8000')).toBeOnTheScreen();
   });

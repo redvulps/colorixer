@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  AccessibilityInfo,
   Animated,
   Easing,
   type LayoutChangeEvent,
@@ -15,25 +14,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { IconComponent } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
+import { useReduceMotion } from '@/src/hooks/useReduceMotion';
 import { colors, control, iconTone, radius, type } from '@/src/theme/tokens';
 
 const OPEN_MS = 280;
 const CLOSE_MS = 200;
 /** Off-screen offset used until the sheet has been measured */
 const UNMEASURED_OFFSET = 1000;
-
-/** Whether the system asks for reduced motion (prefers-reduced-motion on web) */
-function useReduceMotion(): boolean {
-  const [reduce, setReduce] = useState(false);
-  useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled()
-      .then(setReduce)
-      .catch(() => {});
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduce);
-    return () => subscription.remove();
-  }, []);
-  return reduce;
-}
 
 interface BottomSheetProps {
   visible: boolean;

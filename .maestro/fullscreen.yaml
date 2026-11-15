@@ -1,0 +1,19 @@
+appId: com.redvulps.colorixer
+name: Tapping the color bar shows the palette in full screen, and a tap closes it
+---
+- launchApp:
+    clearState: true
+
+- tapOn:
+    id: 'swatch-#ff8000'
+- assertVisible:
+    id: 'palette-fullscreen'
+- assertVisible: 'Analogous · 5 colors'
+- assertNotVisible: 'Copied #ff8000'
+
+- tapOn:
+    id: 'palette-fullscreen'
+- assertNotVisible:
+    id: 'palette-fullscreen'
+- assertVisible:
+    id: 'harmony-selector'

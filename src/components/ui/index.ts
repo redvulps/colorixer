@@ -4,6 +4,7 @@ export { Button, IconButton, PillButton, PillIconButton, type IconComponent } fr
 export { CopyField, ExportOption, HarmonyRow, Overline, PaletteValue, SavedRow } from './Desktop';
 export { HarmonyStrip } from './HarmonyStrip';
 export { PaletteCard } from './PaletteCard';
+export { PaletteFullscreen, type Rect } from './PaletteFullscreen';
 export { PaletteStrip } from './PaletteStrip';
 export { type MenuPoint, pointFromEvent, PopoverMenu } from './PopoverMenu';
 export { TabButton } from './TabButton';
