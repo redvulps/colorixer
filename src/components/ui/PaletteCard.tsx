@@ -44,22 +44,24 @@ export function PaletteCard({ palette, current, onPress, onMore }: PaletteCardPr
         </View>
         <PaletteStrip colors={swatches} height={30} radius={radius.sm} />
       </Pressable>
+      {/* Over the card's corner, so the strip runs the card's full width */}
       <IconButton
         icon={MoreIcon}
         tone="muted"
         accessibilityLabel={`More actions for ${palette.name}`}
         onPress={onMore}
         testID={`palette-more-${palette.name}`}
+        style={styles.more}
       />
     </View>
   );
 }
 
+/** Room the top row leaves for the ⋯ button */
+const MORE_SPACE = 40;
+
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 4,
     padding: 6,
     borderRadius: radius.lg,
     borderWidth: 1,
@@ -70,12 +72,9 @@ const styles = StyleSheet.create({
     borderColor: colors.lineCurrent,
   },
   main: {
-    flex: 1,
     gap: 10,
-    paddingTop: 8,
-    paddingBottom: 8,
-    paddingLeft: 10,
-    paddingRight: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderRadius: radius.md,
   },
   mainPressed: {
@@ -85,6 +84,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    paddingRight: MORE_SPACE,
+  },
+  more: {
+    position: 'absolute',
+    top: 10,
+    right: 6,
   },
   text: {
     flex: 1,
