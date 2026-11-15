@@ -4,7 +4,13 @@ import * as Clipboard from 'expo-clipboard';
 import React from 'react';
 
 import { exportPalette } from '../../hooks/usePaletteActions';
-import { pressAt, renderWithProviders } from '../../testing/renderWithProviders';
+import { type SavedPalette, STORAGE_KEY } from '../../state/palettes';
+import {
+  pressAt,
+  renderWithProviders,
+  setChannel,
+  touchWheel,
+} from '../../testing/renderWithProviders';
 import { DesktopWorkspace } from '../DesktopWorkspace';
 
 jest.mock('../../hooks/usePaletteActions', () => ({
@@ -84,5 +90,54 @@ describe('Desktop workspace', () => {
     await renderWithProviders(<DesktopWorkspace />);
     await fireEvent.press(screen.getByTestId('copy-hsl'));
     expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(0deg 100% 50%)');
+  });
+});
+
+const OCEANO: SavedPalette = {
+  id: 'p2',
+  name: 'Oceano',
+  harmony: 'complementary',
+  base: '#0077b6',
+  createdAt: '2026-11-09T10:00:00.000Z',
+};
+
+describe('Desktop workspace controls', () => {
+  it('switches the harmony from the sidebar', async () => {
+    await renderWithProviders(<DesktopWorkspace />);
+    await fireEvent.press(screen.getByTestId('harmony-triadic'));
+    expect(screen.getByText('Palette · Triadic')).toBeOnTheScreen();
+    expect(screen.getByTestId('swatch-#00ff00')).toBeOnTheScreen();
+  });
+
+  it('opens a saved palette from the sidebar', async () => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([OCEANO]));
+    await renderWithProviders(<DesktopWorkspace />);
+    await fireEvent.press(screen.getByTestId('palette-Oceano'));
+    expect(screen.getByText('Palette · Complementary')).toBeOnTheScreen();
+    expect(screen.getByTestId('swatch-#b63f00')).toBeOnTheScreen();
+    expect(screen.getByText('Saved')).toBeOnTheScreen();
+  });
+
+  it('picks the base color on the wheel and its sliders', async () => {
+    await renderWithProviders(<DesktopWorkspace />);
+    await touchWheel(screen.getByTestId('color-wheel'), 0, 0);
+    expect(screen.getByTestId('swatch-#0040ff')).toBeOnTheScreen();
+    await setChannel(screen.getByTestId('value-s'), '50');
+    await setChannel(screen.getByTestId('value-v'), '50');
+    expect(screen.getByText('hsv(225, 50%, 50%)')).toBeOnTheScreen();
+    expect(screen.getAllByText('#405080').length).toBeGreaterThan(0);
+  });
+
+  it('exports from the inspector', async () => {
+    await renderWithProviders(<DesktopWorkspace />);
+    await fireEvent.press(screen.getByText('Procreate'));
+    expect(exportPalette).toHaveBeenCalledWith('swatches', ANALOGOUS_RED, 'Colorixer palette');
+  });
+
+  it('copies a palette color as HEX from its menu', async () => {
+    await renderWithProviders(<DesktopWorkspace />);
+    await fireEvent.press(screen.getByTestId('swatch-more-#ff8000'), pressAt);
+    await fireEvent.press(screen.getByText('Copy as HEX'));
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff8000');
   });
 });

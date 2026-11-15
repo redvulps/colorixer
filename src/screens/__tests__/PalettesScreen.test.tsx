@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fireEvent, screen } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 
 import { exportPalette } from '../../hooks/usePaletteActions';
@@ -76,6 +76,15 @@ describe('Palettes tab', () => {
       expect(screen.getByText('Deleted “Oceano”')).toBeOnTheScreen();
       expect(screen.queryByTestId('palette-Oceano')).toBeNull();
       expect(screen.getByText('1 saved')).toBeOnTheScreen();
+    });
+
+    it('closes the sheet with Cancel and keeps the palette', async () => {
+      await renderWithProviders(<PalettesScreen />);
+      await fireEvent.press(screen.getByTestId('palette-more-Oceano'));
+      await fireEvent.press(screen.getByText('Cancel'));
+      await waitFor(() => expect(screen.queryByText('Delete palette')).toBeNull());
+      expect(screen.getByTestId('palette-Oceano')).toBeOnTheScreen();
+      expect(exportPalette).not.toHaveBeenCalled();
     });
   });
 });

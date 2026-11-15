@@ -4,7 +4,7 @@ import * as Clipboard from 'expo-clipboard';
 import React from 'react';
 
 import { exportPalette } from '../../hooks/usePaletteActions';
-import { renderWithProviders } from '../../testing/renderWithProviders';
+import { renderWithProviders, setChannel, touchWheel } from '../../testing/renderWithProviders';
 import { ColorScreen } from '../ColorScreen';
 
 jest.mock('../../hooks/usePaletteActions', () => ({
@@ -98,5 +98,38 @@ describe('Color tab', () => {
     expect(screen.getByText('Current palette')).toBeOnTheScreen();
     await fireEvent.press(screen.getByText('Export to Adobe'));
     expect(exportPalette).toHaveBeenCalledWith('ase', ANALOGOUS_RED, 'Colorixer palette');
+  });
+});
+
+describe('Color tab controls', () => {
+  it('picks the base color on the wheel', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await touchWheel(screen.getByTestId('color-wheel'), 0, 0);
+    expect(screen.getByText('#0040ff')).toBeOnTheScreen();
+    expect(screen.queryByText('#ff0000')).toBeNull();
+  });
+
+  it('sets saturation and value from their fields', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await setChannel(screen.getByTestId('value-s'), '50');
+    expect(screen.getByText('#ff8080')).toBeOnTheScreen();
+    await setChannel(screen.getByTestId('value-v'), '50');
+    expect(screen.getByText('#804040')).toBeOnTheScreen();
+  });
+
+  it('closes the export sheet with Cancel, without exporting', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent.press(screen.getByTestId('share-button'));
+    await fireEvent.press(within(screen.getByTestId('export-sheet')).getByText('Cancel'));
+    await waitFor(() => expect(screen.queryByText('Export to Adobe')).toBeNull());
+    expect(exportPalette).not.toHaveBeenCalled();
+  });
+
+  it('closes the copy sheet with Cancel, without copying', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent(screen.getByTestId('swatch-#ff0000'), 'longPress');
+    await fireEvent.press(within(screen.getByTestId('copy-sheet')).getByText('Cancel'));
+    await waitFor(() => expect(screen.queryByText('Copy as HEX')).toBeNull());
+    expect(Clipboard.setStringAsync).not.toHaveBeenCalled();
   });
 });
