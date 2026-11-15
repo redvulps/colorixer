@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FileIcon, TrashIcon } from '@/src/components/icons';
 import { AppBar, BottomSheet, PaletteCard, SheetAction, useToast } from '@/src/components/ui';
 import { EXPORT_FORMATS, exportPalette } from '@/src/hooks/usePaletteActions';
+import { useTopInset } from '@/src/hooks/useTopInset';
 import { paletteColors, type SavedPalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
 import { harmonyLabel } from '@/src/utils/color';
@@ -15,6 +15,7 @@ export function PalettesScreen() {
   const { saved, current, load, remove } = usePalette();
   const router = useRouter();
   const toast = useToast();
+  const topInset = useTopInset();
   const [selected, setSelected] = useState<SavedPalette | null>(null);
   const selectedColors = selected ? paletteColors(selected) : [];
 
@@ -24,7 +25,7 @@ export function PalettesScreen() {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={styles.screen}>
+    <View style={[styles.screen, { paddingTop: topInset }]}>
       <AppBar title="Palettes" meta={`${saved.length} saved`} />
       <FlatList
         data={saved}
@@ -88,7 +89,7 @@ export function PalettesScreen() {
         )}
         <SheetAction label="Cancel" tone="cancel" onPress={() => setSelected(null)} />
       </BottomSheet>
-    </SafeAreaView>
+    </View>
   );
 }
 

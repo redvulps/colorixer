@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorWheel } from '@/src/components/ColorWheel';
 import { HsvSlider } from '@/src/components/HsvSlider';
@@ -26,6 +27,7 @@ import {
   UNSAVED_NAME,
   useCopy,
 } from '@/src/hooks/usePaletteActions';
+import { useTopInset } from '@/src/hooks/useTopInset';
 import { paletteColors, type SavedPalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, radius, type } from '@/src/theme/tokens';
 import {
@@ -56,14 +58,22 @@ export function DesktopWorkspace() {
   const copy = useCopy();
   const toast = useToast();
   const { width, height } = useWindowDimensions();
+  // Zero in a browser; on a tablet, the system bars the workspace has to stay clear of
+  const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState<Menu | null>(null);
   const closeMenu = () => setMenu(null);
 
-  const canvasWidth = width - SIDEBAR - INSPECTOR;
+  const topInset = useTopInset();
+  const topBarHeight = TOP_BAR + topInset;
+  const canvasWidth = width - SIDEBAR - INSPECTOR - insets.left - insets.right;
   // Wheel, three 34 px sliders with 12 px gaps, 18 px between them, 48 px of margin
   const wheelSize = Math.max(
     220,
-    Math.min(400, height - TOP_BAR - (3 * 34 + 2 * 12) - 18 - 48, canvasWidth - 48),
+    Math.min(
+      400,
+      height - topBarHeight - insets.bottom - (3 * 34 + 2 * 12) - 18 - 48,
+      canvasWidth - 48,
+    ),
   );
   const sliderWidth = Math.min(470, canvasWidth - 48);
   const name = current?.name ?? UNSAVED_NAME;
@@ -95,7 +105,17 @@ export function DesktopWorkspace() {
 
   return (
     <View style={styles.root}>
-      <View style={styles.topBar}>
+      <View
+        style={[
+          styles.topBar,
+          {
+            height: topBarHeight,
+            paddingTop: topInset,
+            paddingLeft: 22 + insets.left,
+            paddingRight: 16 + insets.right,
+          },
+        ]}
+      >
         <LogoMark />
         <Text style={styles.brand}>Colorixer</Text>
         <Text style={styles.crumb}>
@@ -118,12 +138,20 @@ export function DesktopWorkspace() {
           chevron
           accessibilityState={{ expanded: menu?.kind === 'export' }}
           // Right-aligned under the button
-          onPress={() => setMenu({ kind: 'export', at: { x: width - 28, y: TOP_BAR - 14 } })}
+          onPress={() =>
+            setMenu({ kind: 'export', at: { x: width - 28 - insets.right, y: topBarHeight - 14 } })
+          }
         />
       </View>
 
       <View style={styles.columns}>
-        <ScrollView style={styles.sidebar} contentContainerStyle={styles.sidebarContent}>
+        <ScrollView
+          style={[styles.sidebar, { width: SIDEBAR + insets.left }]}
+          contentContainerStyle={[
+            styles.sidebarContent,
+            { paddingLeft: 12 + insets.left, paddingBottom: 18 + insets.bottom },
+          ]}
+        >
           <Overline style={styles.sidebarLabel}>Harmony</Overline>
           <View testID="harmony-selector">
             {HARMONIES.map(({ key }) => (
@@ -152,7 +180,10 @@ export function DesktopWorkspace() {
           )}
         </ScrollView>
 
-        <ScrollView style={styles.canvas} contentContainerStyle={styles.canvasContent}>
+        <ScrollView
+          style={styles.canvas}
+          contentContainerStyle={[styles.canvasContent, { paddingBottom: 24 + insets.bottom }]}
+        >
           <ColorWheel
             size={wheelSize}
             hsv={hsv}
@@ -166,7 +197,13 @@ export function DesktopWorkspace() {
           </View>
         </ScrollView>
 
-        <ScrollView style={styles.inspector} contentContainerStyle={styles.inspectorContent}>
+        <ScrollView
+          style={[styles.inspector, { width: INSPECTOR + insets.right }]}
+          contentContainerStyle={[
+            styles.inspectorContent,
+            { paddingRight: 18 + insets.right, paddingBottom: 18 + insets.bottom },
+          ]}
+        >
           <View style={styles.section}>
             <Overline>Base color</Overline>
             <View style={[styles.baseSwatch, { backgroundColor: base }]}>
