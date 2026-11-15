@@ -5,23 +5,34 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorIcon, PalettesIcon } from '@/src/components/icons';
 import { TabButton, ToastProvider } from '@/src/components/ui';
-import { colors, control, WIDE_BREAKPOINT } from '@/src/theme/tokens';
+import { layoutFor } from '@/src/hooks/useLayout';
+import { tabletToastBottom } from '@/src/screens/TabletWorkspace';
+import { colors, control } from '@/src/theme/tokens';
 
 /**
- * Color and Palettes tabs. On wide windows the index route shows the three-column
- * workspace instead, so the tab bar is hidden.
+ * Color and Palettes tabs. On wide windows the index route shows the three-column workspace,
+ * and on an upright tablet the tablet layout, which switches Color and Palettes itself; both
+ * hide the tab bar.
  */
 export default function TabsLayout() {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const wide = width >= WIDE_BREAKPOINT;
+  const layout = layoutFor(width, height);
   const barBottom = Math.max(insets.bottom, 8) + 10;
+  const toastBottom =
+    layout === 'wide'
+      ? 24
+      : layout === 'tablet'
+        ? tabletToastBottom(insets.bottom)
+        : 8 + control.lg + barBottom + 16;
 
   return (
-    <ToastProvider bottom={wide ? 24 : 8 + control.lg + barBottom + 16}>
+    <ToastProvider bottom={toastBottom}>
       <Tabs style={styles.tabs}>
         <TabSlot />
-        <TabList style={[styles.bar, { paddingBottom: barBottom }, wide && styles.hidden]}>
+        <TabList
+          style={[styles.bar, { paddingBottom: barBottom }, layout !== 'phone' && styles.hidden]}
+        >
           <TabTrigger name="index" href="/" asChild>
             <TabButton testID="tab-color" label="Color" icon={ColorIcon} />
           </TabTrigger>

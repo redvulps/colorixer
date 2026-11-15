@@ -12,7 +12,7 @@ Colorixer is a powerful color picker application that helps artists and designer
 - **Export to Drawing Applications**: Export color palettes in multiple formats:
   - Adobe Swatch Exchange (ASE) for Photoshop and other Adobe applications
   - Procreate Swatches for the popular iPad drawing app
-- **Cross-Platform**: Works on web, iOS, and Android. Windows 1024 px wide or more get a three-column workspace
+- **Cross-Platform**: Works on web, iOS, and Android. Windows 1024 px wide or more get a three-column workspace, and upright tablets get Color and Palettes side by side in one screen. Phones stay in portrait; tablets turn
 
 ## Getting Started
 
@@ -52,7 +52,7 @@ yarn test:ci   # run once
 yarn test      # watch mode
 ```
 
-Tests live next to the code in `__tests__` folders and run with Jest (`jest-expo`) and React Native Testing Library. They cover the color math, the palette store and the Color, Palettes and desktop screens. Native modules (storage, clipboard, haptics, safe area) are mocked in `jest.setup.ts`.
+Tests live next to the code in `__tests__` folders and run with Jest (`jest-expo`) and React Native Testing Library. They cover the color math, the layout breakpoints, the palette store and the Color, Palettes, tablet and desktop screens. Native modules (storage, clipboard, haptics, safe area) are mocked in `jest.setup.ts`.
 
 ## End-to-end tests
 
@@ -79,7 +79,7 @@ The flows are platform-agnostic. Android-only checks live in `.maestro/subflows/
 
 1. **Select a Base Color**: Drag on the color wheel, or use the H, S and V sliders and fields
 2. **Choose a Harmony Type**: Tap one of the harmony diagrams to generate related colors
-3. **Save**: Keep the palette in the Palettes tab (the sidebar on wide screens)
+3. **Save**: Keep the palette in the Palettes tab (Palettes at the top on upright tablets, the sidebar on wide screens)
 4. **Export**: Share your palette with drawing applications in your preferred format
 
 ## Supported Export Formats

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { ColorWheel } from '@/src/components/ColorWheel';
@@ -23,7 +23,7 @@ import {
   UNSAVED_NAME,
   useCopy,
 } from '@/src/hooks/usePaletteActions';
-import { useTopInset } from '@/src/hooks/useTopInset';
+import { useHeldTopInset } from '@/src/hooks/useTopInset';
 import { usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
 import { harmonyLabel, hslString, hsvString } from '@/src/utils/color';
@@ -44,13 +44,7 @@ export function ColorScreen() {
   const [copyColor, setCopyColor] = useState<string | null>(null);
   const [fullOpen, setFullOpen] = useState(false);
   const [fullOrigin, setFullOrigin] = useState<Rect | null>(null);
-  // The full-screen view hides the status bar, which shrinks the top inset. The screen keeps
-  // the inset it had, so nothing behind the view moves, until the status bar is back.
-  const topInset = useTopInset();
-  const [frozenTop, setFrozenTop] = useState<number | null>(null);
-  useEffect(() => {
-    if (!fullOpen && frozenTop !== null && topInset >= frozenTop) setFrozenTop(null);
-  }, [fullOpen, frozenTop, topInset]);
+  const { top: topInset, hold: holdTopInset } = useHeldTopInset(fullOpen);
   const stripRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const wheelSize = Math.min(MAX_WHEEL, width - 32);
@@ -65,7 +59,7 @@ export function ColorScreen() {
   // The full-screen view grows out of the bar, so it needs the bar's place on screen
   const openFull = () => {
     setFullOrigin(null);
-    setFrozenTop(topInset);
+    holdTopInset();
     setFullOpen(true);
     stripRef.current?.measureInWindow((x, y, w, h) => setFullOrigin({ x, y, width: w, height: h }));
   };
@@ -76,7 +70,7 @@ export function ColorScreen() {
   };
 
   return (
-    <View style={[styles.screen, { paddingTop: frozenTop ?? topInset }]}>
+    <View style={[styles.screen, { paddingTop: topInset }]}>
       <View style={styles.header}>
         <HarmonyStrip value={harmony} onChange={setHarmony} />
       </View>

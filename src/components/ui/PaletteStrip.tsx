@@ -1,5 +1,8 @@
 import React from 'react';
-import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+
+import { fonts } from '@/src/theme/tokens';
+import { inkOn } from '@/src/utils/color';
 
 interface PaletteStripProps {
   colors: string[];
@@ -7,6 +10,8 @@ interface PaletteStripProps {
   radius: number;
   onPressColor?: (color: string) => void;
   onLongPressColor?: (color: string) => void;
+  /** Print each color's hex inside its swatch */
+  labels?: boolean;
   style?: ViewStyle;
   testID?: string;
 }
@@ -18,10 +23,17 @@ export function PaletteStrip({
   radius,
   onPressColor,
   onLongPressColor,
+  labels,
   style,
   testID,
 }: PaletteStripProps) {
   const interactive = !!(onPressColor || onLongPressColor);
+  const label = (color: string) =>
+    labels ? (
+      <Text style={[styles.label, { color: inkOn(color) }]} numberOfLines={1}>
+        {color}
+      </Text>
+    ) : null;
   return (
     <View testID={testID} style={[styles.strip, { height, borderRadius: radius }, style]}>
       {colors.map((color, i) =>
@@ -32,12 +44,19 @@ export function PaletteStrip({
             accessibilityRole="button"
             accessibilityLabel={color}
             accessibilityHint="Copies the color. Long press for other formats."
-            style={[styles.swatch, { backgroundColor: color }]}
+            style={[styles.swatch, labels && styles.labeled, { backgroundColor: color }]}
             onPress={() => onPressColor?.(color)}
             onLongPress={() => onLongPressColor?.(color)}
-          />
+          >
+            {label(color)}
+          </Pressable>
         ) : (
-          <View key={`${color}-${i}`} style={[styles.swatch, { backgroundColor: color }]} />
+          <View
+            key={`${color}-${i}`}
+            style={[styles.swatch, labels && styles.labeled, { backgroundColor: color }]}
+          >
+            {label(color)}
+          </View>
         ),
       )}
     </View>
@@ -51,5 +70,15 @@ const styles = StyleSheet.create({
   },
   swatch: {
     flex: 1,
+  },
+  labeled: {
+    justifyContent: 'flex-end',
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+  },
+  label: {
+    fontFamily: fonts.monoSemibold,
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

@@ -1,0 +1,564 @@
+import React, { useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { ColorWheel } from '@/src/components/ColorWheel';
+import { HsvSlider } from '@/src/components/HsvSlider';
+import {
+  CheckIcon,
+  ColorIcon,
+  ExpandIcon,
+  ExportIcon,
+  FileIcon,
+  PalettesIcon,
+  SaveIcon,
+  TrashIcon,
+} from '@/src/components/icons';
+import {
+  BottomSheet,
+  Button,
+  CopyField,
+  HarmonyRow,
+  type IconComponent,
+  LogoMark,
+  type MenuPoint,
+  Overline,
+  PaletteCard,
+  PaletteFullscreen,
+  PaletteStrip,
+  PillIconButton,
+  PopoverMenu,
+  type Rect,
+  SheetAction,
+  useToast,
+} from '@/src/components/ui';
+import {
+  EXPORT_FORMATS,
+  type ExportFormat,
+  exportPalette,
+  haptic,
+  UNSAVED_NAME,
+  useCopy,
+} from '@/src/hooks/usePaletteActions';
+import { useHeldTopInset } from '@/src/hooks/useTopInset';
+import { paletteColors, type SavedPalette, usePalette } from '@/src/state/palettes';
+import { fonts, iconTone, radius, colors as tokens, type } from '@/src/theme/tokens';
+import {
+  HARMONIES,
+  harmonyColors,
+  harmonyLabel,
+  hslString,
+  hsvString,
+  inkOn,
+} from '@/src/utils/color';
+
+const TOP_BAR = 60;
+const CONTROLS = 316;
+const PREVIEW_HEADER = 52;
+const BAND = 132;
+/** Least room kept under the band, so the gesture bar never sits on the colors */
+const MIN_BOTTOM_SAFE = 16;
+const GRID_PADDING = 24;
+const GRID_GAP = 12;
+
+/** Toast offset that clears the palette band at the bottom */
+export function tabletToastBottom(insetBottom: number): number {
+  return PREVIEW_HEADER + BAND + Math.max(insetBottom, MIN_BOTTOM_SAFE) + 16;
+}
+
+const exportLabel = (format: ExportFormat) => (format === 'ase' ? 'Adobe ASE' : 'Procreate');
+
+type TabletView = 'color' | 'palettes';
+
+/**
+ * Tablet held upright: Color and Palettes picked at the top. In Color the wheel takes the left,
+ * the controls a column on the right, and the palette runs edge to edge along the bottom.
+ */
+export function TabletWorkspace() {
+  const { hsv, harmony, base, colors, current, saved, setHsv, setHarmony, save, load, remove } =
+    usePalette();
+  const copy = useCopy();
+  const toast = useToast();
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const [view, setView] = useState<TabletView>('color');
+  const [exportAt, setExportAt] = useState<MenuPoint | null>(null);
+  const [selected, setSelected] = useState<SavedPalette | null>(null);
+  const [copyColor, setCopyColor] = useState<string | null>(null);
+  const [fullOpen, setFullOpen] = useState(false);
+  const [fullOrigin, setFullOrigin] = useState<Rect | null>(null);
+  const { top: topInset, hold: holdTopInset } = useHeldTopInset(fullOpen);
+  const bandRef = useRef<React.ComponentRef<typeof View>>(null);
+
+  const name = current?.name ?? UNSAVED_NAME;
+  const topBarHeight = TOP_BAR + topInset;
+  const bottomSafe = Math.max(insets.bottom, MIN_BOTTOM_SAFE);
+  const stageWidth = width - CONTROLS - insets.left - insets.right;
+  const stageHeight = height - topBarHeight - PREVIEW_HEADER - BAND - bottomSafe;
+  const wheelSize = Math.max(200, Math.min(480, stageWidth - 48, stageHeight - 48));
+  const cardWidth = (width - insets.left - insets.right - 2 * GRID_PADDING - GRID_GAP) / 2;
+  const selectedColors = selected ? paletteColors(selected) : [];
+
+  const onSave = () => {
+    const palette = save();
+    haptic();
+    toast(`Saved “${palette.name}”`);
+  };
+
+  const onExport = (format: ExportFormat) => {
+    setExportAt(null);
+    exportPalette(format, colors, name);
+  };
+
+  const open = (palette: SavedPalette) => {
+    load(palette.id);
+    setView('color');
+  };
+
+  // The full-screen view grows out of the band, so it needs the band's place on screen
+  const openFull = () => {
+    setFullOrigin(null);
+    holdTopInset();
+    setFullOpen(true);
+    bandRef.current?.measureInWindow((x, y, w, h) => setFullOrigin({ x, y, width: w, height: h }));
+  };
+
+  const copyAs = (text: string) => {
+    setCopyColor(null);
+    copy(text);
+  };
+
+  return (
+    <View style={styles.root}>
+      <View
+        style={[
+          styles.topBar,
+          {
+            height: topBarHeight,
+            paddingTop: topInset,
+            paddingLeft: 22 + insets.left,
+            paddingRight: 16 + insets.right,
+          },
+        ]}
+      >
+        <LogoMark />
+        <Text style={styles.brand}>Colorixer</Text>
+        <View style={styles.switch} accessibilityRole="tablist">
+          <SwitchButton
+            testID="view-color"
+            icon={ColorIcon}
+            label="Color"
+            selected={view === 'color'}
+            onPress={() => setView('color')}
+          />
+          <SwitchButton
+            testID="view-palettes"
+            icon={PalettesIcon}
+            label="Palettes"
+            count={saved.length}
+            selected={view === 'palettes'}
+            onPress={() => setView('palettes')}
+          />
+        </View>
+        <View style={styles.spacer} />
+        <Button
+          testID="save-button"
+          variant={current ? 'saved' : 'ghost'}
+          icon={current ? CheckIcon : SaveIcon}
+          label={current ? 'Saved' : 'Save'}
+          disabled={!!current}
+          onPress={onSave}
+        />
+        <Button
+          testID="share-button"
+          variant="primary"
+          icon={ExportIcon}
+          label="Export"
+          chevron
+          accessibilityState={{ expanded: exportAt !== null }}
+          // Right-aligned under the button
+          onPress={() => setExportAt({ x: width - 28 - insets.right, y: topBarHeight - 14 })}
+        />
+      </View>
+
+      {view === 'color' ? (
+        <>
+          <View style={styles.body}>
+            <View style={[styles.stage, { paddingLeft: insets.left }]}>
+              <ColorWheel
+                size={wheelSize}
+                hsv={hsv}
+                colors={colors}
+                onChange={(h, s) => setHsv([h, s, hsv[2]])}
+              />
+            </View>
+            <ScrollView
+              style={[styles.controls, { width: CONTROLS + insets.right }]}
+              contentContainerStyle={[styles.controlsContent, { paddingRight: 18 + insets.right }]}
+            >
+              <View style={styles.section}>
+                <Overline style={styles.sectionLabel}>Harmony</Overline>
+                <View testID="harmony-selector">
+                  {HARMONIES.map(({ key }) => (
+                    <HarmonyRow
+                      key={key}
+                      harmony={key}
+                      count={harmonyColors(key, base).length}
+                      selected={key === harmony}
+                      onPress={() => setHarmony(key)}
+                    />
+                  ))}
+                </View>
+              </View>
+              <View style={styles.section}>
+                <Overline style={styles.sectionLabel}>Hue, saturation, value</Overline>
+                <View style={styles.sliders}>
+                  <HsvSlider channel="h" hsv={hsv} onChange={(h) => setHsv([h, hsv[1], hsv[2]])} />
+                  <HsvSlider channel="s" hsv={hsv} onChange={(s) => setHsv([hsv[0], s, hsv[2]])} />
+                  <HsvSlider channel="v" hsv={hsv} onChange={(v) => setHsv([hsv[0], hsv[1], v])} />
+                </View>
+              </View>
+              <View style={styles.section}>
+                <Overline>Base color</Overline>
+                <View style={[styles.baseSwatch, { backgroundColor: base }]}>
+                  <Text style={[styles.baseHex, { color: inkOn(base) }]}>{base}</Text>
+                </View>
+                <CopyField label="HEX" value={base} onCopy={() => copy(base)} />
+                <CopyField
+                  label="HSL"
+                  value={hslString(base)}
+                  onCopy={() => copy(hslString(base))}
+                />
+                <CopyField
+                  label="HSV"
+                  value={hsvString(base)}
+                  onCopy={() => copy(hsvString(base))}
+                />
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Edge to edge along the bottom, above the gesture bar's safe area */}
+          <View style={[styles.preview, { paddingBottom: bottomSafe }]}>
+            <View
+              style={[
+                styles.previewHeader,
+                { paddingLeft: 20 + insets.left, paddingRight: 12 + insets.right },
+              ]}
+            >
+              <Overline style={styles.paletteName}>
+                {`${current ? `${current.name} · ` : ''}${harmonyLabel(harmony)} · ${colors.length} colors`}
+              </Overline>
+              <PillIconButton
+                testID="fullscreen-button"
+                icon={ExpandIcon}
+                accessibilityLabel="Show the palette in full screen"
+                onPress={openFull}
+              />
+            </View>
+            <View ref={bandRef} collapsable={false}>
+              <PaletteStrip
+                testID="generated-colors"
+                colors={colors}
+                height={BAND}
+                radius={0}
+                labels
+                onPressColor={copy}
+                onLongPressColor={setCopyColor}
+              />
+            </View>
+          </View>
+        </>
+      ) : (
+        <ScrollView
+          style={styles.gridScroll}
+          contentContainerStyle={[
+            styles.grid,
+            {
+              paddingLeft: GRID_PADDING + insets.left,
+              paddingRight: GRID_PADDING + insets.right,
+              paddingBottom: 40 + insets.bottom,
+            },
+          ]}
+        >
+          {saved.length > 0 ? (
+            saved.map((palette) => (
+              <View key={palette.id} style={{ width: cardWidth }}>
+                <PaletteCard
+                  palette={palette}
+                  current={palette.id === current?.id}
+                  onPress={() => open(palette)}
+                  onMore={() => setSelected(palette)}
+                />
+              </View>
+            ))
+          ) : (
+            <View style={styles.empty}>
+              <Text style={styles.emptyTitle}>No saved palettes</Text>
+              <Text style={styles.emptyText}>Save a palette in Color and it shows up here.</Text>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      <PopoverMenu
+        testID="export-menu"
+        at={exportAt}
+        items={EXPORT_FORMATS.length}
+        onClose={() => setExportAt(null)}
+      >
+        {EXPORT_FORMATS.map(({ format, ext }) => (
+          <SheetAction
+            key={format}
+            compact
+            icon={FileIcon}
+            label={exportLabel(format)}
+            ext={ext}
+            onPress={() => onExport(format)}
+          />
+        ))}
+      </PopoverMenu>
+
+      <PaletteFullscreen
+        testID="palette-fullscreen"
+        visible={fullOpen}
+        origin={fullOrigin}
+        colors={colors}
+        label={`${current ? `${current.name} · ` : ''}${harmonyLabel(harmony)} · ${colors.length} colors`}
+        onClose={() => setFullOpen(false)}
+      />
+
+      <BottomSheet
+        testID="palette-sheet"
+        visible={selected !== null}
+        onClose={() => setSelected(null)}
+        title={selected?.name}
+        subtitle={
+          selected
+            ? `${harmonyLabel(selected.harmony)} · ${selectedColors.length} colors`
+            : undefined
+        }
+        palette={selectedColors}
+      >
+        {selected && (
+          <>
+            {EXPORT_FORMATS.map(({ format, app, ext }) => (
+              <SheetAction
+                key={format}
+                icon={FileIcon}
+                label={`Export to ${app}`}
+                ext={ext}
+                onPress={() => {
+                  setSelected(null);
+                  exportPalette(format, selectedColors, selected.name);
+                }}
+              />
+            ))}
+            <SheetAction
+              icon={TrashIcon}
+              tone="danger"
+              label="Delete palette"
+              onPress={() => {
+                remove(selected.id);
+                setSelected(null);
+                toast(`Deleted “${selected.name}”`);
+              }}
+            />
+          </>
+        )}
+        <SheetAction label="Cancel" tone="cancel" onPress={() => setSelected(null)} />
+      </BottomSheet>
+
+      <BottomSheet
+        testID="copy-sheet"
+        visible={copyColor !== null}
+        onClose={() => setCopyColor(null)}
+        title={copyColor ?? undefined}
+        subtitle="Copy the color as"
+      >
+        {copyColor && (
+          <>
+            <SheetAction label="Copy as HEX" ext={copyColor} onPress={() => copyAs(copyColor)} />
+            <SheetAction
+              label="Copy as HSL"
+              ext={hslString(copyColor)}
+              onPress={() => copyAs(hslString(copyColor))}
+            />
+            <SheetAction
+              label="Copy as HSV"
+              ext={hsvString(copyColor)}
+              onPress={() => copyAs(hsvString(copyColor))}
+            />
+          </>
+        )}
+        <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
+      </BottomSheet>
+    </View>
+  );
+}
+
+interface SwitchButtonProps {
+  icon: IconComponent;
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  /** Muted number after the label, e.g. how many palettes are saved */
+  count?: number;
+  testID?: string;
+}
+
+/** One side of the Color / Palettes switch in the top bar */
+function SwitchButton({ icon: Icon, label, selected, onPress, count, testID }: SwitchButtonProps) {
+  return (
+    <Pressable
+      testID={testID}
+      accessibilityRole="tab"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.switchButton,
+        selected && styles.switchButtonOn,
+        pressed && !selected && styles.switchButtonPressed,
+      ]}
+    >
+      <Icon size={18} color={selected ? iconTone.onPrimary : iconTone.muted} />
+      <Text
+        style={[type.labelButton, { color: selected ? tokens.textOnPrimary : tokens.textMuted }]}
+      >
+        {label}
+      </Text>
+      {count !== undefined && <Text style={styles.switchCount}>{count}</Text>}
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: tokens.bgApp,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: tokens.surfacePanel,
+    borderBottomWidth: 1,
+    borderBottomColor: tokens.lineSubtle,
+    zIndex: 2,
+  },
+  brand: {
+    ...type.titleApp,
+    fontSize: 19,
+    color: tokens.textStrong,
+  },
+  switch: {
+    flexDirection: 'row',
+    gap: 4,
+    padding: 4,
+    marginLeft: 10,
+    borderRadius: radius.md,
+    backgroundColor: tokens.surfaceRaised,
+  },
+  switchButton: {
+    height: 36,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    borderRadius: radius.sm,
+  },
+  switchButtonOn: {
+    backgroundColor: tokens.surfaceSegmentOn,
+  },
+  switchButtonPressed: {
+    backgroundColor: tokens.surfaceHover,
+  },
+  switchCount: {
+    ...type.monoSmall,
+    color: tokens.textMuted,
+  },
+  spacer: {
+    flex: 1,
+  },
+  body: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  stage: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: tokens.bgCanvas,
+  },
+  controls: {
+    flexGrow: 0,
+    backgroundColor: tokens.surfacePanel,
+    borderLeftWidth: 1,
+    borderLeftColor: tokens.lineSubtle,
+  },
+  controlsContent: {
+    paddingVertical: 20,
+    paddingLeft: 18,
+    gap: 26,
+  },
+  section: {
+    gap: 6,
+  },
+  sectionLabel: {
+    paddingBottom: 4,
+  },
+  sliders: {
+    gap: 12,
+  },
+  baseSwatch: {
+    height: 72,
+    borderRadius: radius.md,
+    justifyContent: 'flex-end',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 4,
+  },
+  baseHex: {
+    fontFamily: fonts.monoSemibold,
+    fontSize: 13,
+  },
+  preview: {
+    borderTopWidth: 1,
+    borderTopColor: tokens.lineSubtle,
+    backgroundColor: tokens.bgApp,
+  },
+  previewHeader: {
+    height: PREVIEW_HEADER,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  paletteName: {
+    flexShrink: 1,
+  },
+  gridScroll: {
+    flex: 1,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignContent: 'flex-start',
+    gap: GRID_GAP,
+    paddingTop: GRID_PADDING,
+  },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+    paddingTop: 120,
+  },
+  emptyTitle: {
+    ...type.bodyStrong,
+    color: tokens.textPrimary,
+  },
+  emptyText: {
+    ...type.bodyDefault,
+    color: tokens.textMuted,
+  },
+});

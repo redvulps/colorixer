@@ -114,3 +114,6 @@ export const shadows = {
 
 /** Window width from which the three-column workspace replaces the tabs */
 export const WIDE_BREAKPOINT = 1024;
+
+/** Shortest window side, in dp, from which a device counts as a tablet (Android's sw600dp) */
+export const TABLET_MIN_SIDE = 600;

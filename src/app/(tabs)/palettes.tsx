@@ -1,11 +1,9 @@
 import { Redirect } from 'expo-router';
-import { useWindowDimensions } from 'react-native';
 
+import { useLayout } from '@/src/hooks/useLayout';
 import { PalettesScreen } from '@/src/screens/PalettesScreen';
-import { WIDE_BREAKPOINT } from '@/src/theme/tokens';
 
 export default function PalettesTab() {
-  const { width } = useWindowDimensions();
-  // The wide workspace lists saved palettes in its sidebar
-  return width >= WIDE_BREAKPOINT ? <Redirect href="/" /> : <PalettesScreen />;
+  // The workspace and the tablet layout show saved palettes on the Color route
+  return useLayout() === 'phone' ? <PalettesScreen /> : <Redirect href="/" />;
 }

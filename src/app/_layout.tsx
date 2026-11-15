@@ -16,13 +16,10 @@ import { useEffect } from 'react';
 import { Dimensions, Platform } from 'react-native';
 
 import { PaletteProvider } from '@/src/state/palettes';
-import { colors } from '@/src/theme/tokens';
+import { colors, TABLET_MIN_SIDE } from '@/src/theme/tokens';
 
 // Keep the splash screen up until the fonts are ready
 SplashScreen.preventAutoHideAsync();
-
-/** Shortest screen side, in dp, from which a device counts as a tablet (Android's sw600dp) */
-const TABLET_MIN_SIDE = 600;
 
 /**
  * Phones stay upright. Tablets turn freely, and in landscape they are wide enough for the
