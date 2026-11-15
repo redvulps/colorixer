@@ -70,7 +70,7 @@ describe('Color tab', () => {
     expect(screen.getByText('Palette 1 · Analogous')).toBeOnTheScreen();
   });
 
-  it('exports the current palette from the app bar', async () => {
+  it('exports the current palette from the palette header', async () => {
     await renderWithProviders(<ColorScreen />);
     await fireEvent.press(screen.getByTestId('share-button'));
     expect(screen.getByText('Current palette')).toBeOnTheScreen();

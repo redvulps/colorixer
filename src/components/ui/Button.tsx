@@ -100,6 +100,25 @@ export function PillButton({ saved, ...props }: PillButtonProps) {
   );
 }
 
+interface PillIconButtonProps extends Omit<PressableProps, 'style' | 'children'> {
+  icon: IconComponent;
+  accessibilityLabel: string;
+}
+
+/** Icon-only companion of the Save pill: 34 px round, with a hit area of 44 px */
+export function PillIconButton({ icon: Icon, ...props }: PillIconButtonProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      hitSlop={(control.touch - control.sm) / 2}
+      style={({ pressed }) => [styles.pillIcon, pressed && pressedStyle]}
+      {...props}
+    >
+      <Icon size={17} color={iconTone.strong} />
+    </Pressable>
+  );
+}
+
 interface IconButtonProps extends Omit<PressableProps, 'style' | 'children'> {
   icon: IconComponent;
   accessibilityLabel: string;
@@ -156,6 +175,14 @@ const styles = StyleSheet.create({
   pillSaved: {
     borderWidth: 1,
     borderColor: colors.lineDefault,
+  },
+  pillIcon: {
+    width: control.sm,
+    height: control.sm,
+    borderRadius: control.sm / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.buttonSecondary,
   },
   iconButton: {
     width: control.touch,

@@ -6,13 +6,12 @@ import { ColorWheel } from '@/src/components/ColorWheel';
 import { HsvSlider } from '@/src/components/HsvSlider';
 import { ExportIcon, FileIcon } from '@/src/components/icons';
 import {
-  AppBar,
   BottomSheet,
   HarmonyStrip,
-  IconButton,
   Overline,
   PaletteStrip,
   PillButton,
+  PillIconButton,
   SheetAction,
   useToast,
 } from '@/src/components/ui';
@@ -27,7 +26,13 @@ import { usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
 import { harmonyLabel, hslString, hsvString } from '@/src/utils/color';
 
-/** Color tab: wheel, H/S/V sliders, harmony, and the resulting palette */
+/** Largest wheel, for tablets and narrow browser windows */
+const MAX_WHEEL = 480;
+
+/**
+ * Color tab: the harmony picker on top, then the wheel centered in the free height, the palette
+ * and the H/S/V sliders. The palette sticks to the top once the wheel scrolls away.
+ */
 export function ColorScreen() {
   const { hsv, harmony, colors, current, setHsv, setHarmony, save } = usePalette();
   const toast = useToast();
@@ -36,7 +41,7 @@ export function ColorScreen() {
   const [exportOpen, setExportOpen] = useState(false);
   const [copyColor, setCopyColor] = useState<string | null>(null);
 
-  const wheelSize = Math.min(320, width - 48);
+  const wheelSize = Math.min(MAX_WHEEL, width - 32);
   const name = current?.name ?? UNSAVED_NAME;
 
   const onSave = () => {
@@ -52,17 +57,10 @@ export function ColorScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
-      <AppBar
-        right={
-          <IconButton
-            testID="share-button"
-            icon={ExportIcon}
-            accessibilityLabel="Export palette"
-            onPress={() => setExportOpen(true)}
-          />
-        }
-      />
-      <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <HarmonyStrip value={harmony} onChange={setHarmony} />
+      </View>
+      <ScrollView contentContainerStyle={styles.content} stickyHeaderIndices={[1]}>
         <View style={styles.wheel}>
           <ColorWheel
             size={wheelSize}
@@ -72,39 +70,45 @@ export function ColorScreen() {
           />
         </View>
 
+        {/* Sticky: stays in view while the sliders scroll */}
+        <View style={styles.paletteBlock}>
+          <View style={styles.paletteHeader}>
+            <Overline style={styles.paletteName}>
+              {current ? `${current.name} · ${harmonyLabel(harmony)}` : harmonyLabel(harmony)}
+            </Overline>
+            <View style={styles.paletteActions}>
+              <PillButton testID="save-button" saved={!!current} onPress={onSave} />
+              <PillIconButton
+                testID="share-button"
+                icon={ExportIcon}
+                accessibilityLabel="Export palette"
+                onPress={() => setExportOpen(true)}
+              />
+            </View>
+          </View>
+          <View style={styles.palette}>
+            <PaletteStrip
+              testID="generated-colors"
+              colors={colors}
+              height={52}
+              radius={14}
+              onPressColor={copy}
+              onLongPressColor={setCopyColor}
+            />
+            <View style={styles.hexRow}>
+              {colors.map((color, i) => (
+                <Text key={`${color}-${i}`} style={styles.hex}>
+                  {color}
+                </Text>
+              ))}
+            </View>
+          </View>
+        </View>
+
         <View style={styles.sliders}>
           <HsvSlider channel="h" hsv={hsv} onChange={(h) => setHsv([h, hsv[1], hsv[2]])} />
           <HsvSlider channel="s" hsv={hsv} onChange={(s) => setHsv([hsv[0], s, hsv[2]])} />
           <HsvSlider channel="v" hsv={hsv} onChange={(v) => setHsv([hsv[0], hsv[1], v])} />
-        </View>
-
-        <View style={styles.section}>
-          <HarmonyStrip value={harmony} onChange={setHarmony} />
-        </View>
-
-        <View style={[styles.section, styles.paletteHeader]}>
-          <Overline style={styles.paletteName}>
-            {current ? `${current.name} · ${harmonyLabel(harmony)}` : harmonyLabel(harmony)}
-          </Overline>
-          <PillButton testID="save-button" saved={!!current} onPress={onSave} />
-        </View>
-
-        <View style={[styles.section, styles.palette]}>
-          <PaletteStrip
-            testID="generated-colors"
-            colors={colors}
-            height={52}
-            radius={14}
-            onPressColor={copy}
-            onLongPressColor={setCopyColor}
-          />
-          <View style={styles.hexRow}>
-            {colors.map((color, i) => (
-              <Text key={`${color}-${i}`} style={styles.hex}>
-                {color}
-              </Text>
-            ))}
-          </View>
         </View>
       </ScrollView>
 
@@ -164,21 +168,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: tokens.bgApp,
   },
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
+  // Grows to the screen height, so the palette and sliders sit on the tab bar
   content: {
+    flexGrow: 1,
     paddingBottom: 16,
   },
+  // Takes the free height and centers the wheel in it
   wheel: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingTop: 10,
     paddingBottom: 8,
   },
-  sliders: {
-    paddingHorizontal: 24,
-    gap: 12,
-  },
-  section: {
+  paletteBlock: {
     paddingHorizontal: 16,
-    paddingTop: 14,
+    paddingTop: 8,
+    paddingBottom: 10,
+    gap: 10,
+    backgroundColor: tokens.bgApp,
   },
   paletteHeader: {
     flexDirection: 'row',
@@ -189,9 +201,17 @@ const styles = StyleSheet.create({
   paletteName: {
     flexShrink: 1,
   },
+  paletteActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   palette: {
-    paddingTop: 10,
     gap: 6,
+  },
+  sliders: {
+    paddingHorizontal: 24,
+    gap: 12,
   },
   hexRow: {
     flexDirection: 'row',
