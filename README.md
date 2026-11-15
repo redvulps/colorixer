@@ -4,7 +4,7 @@ Colorixer is a powerful color picker application that helps artists and designer
 
 ## Features
 
-- **Color wheel and H/S/V controls**: Drag on the wheel to pick hue and saturation, or set hue, saturation and value with sliders and numeric fields
+- **Color wheel and HSV/HSL controls**: Drag on the wheel to pick hue and saturation, or set hue, saturation and value with sliders and numeric fields. The HSV/HSL switch above the sliders trades value for lightness, and the app remembers the choice
 - **Color Harmony Generation**: Analogous, triadic, tetratriadic, complementary and monochromatic palettes, drawn on the wheel
 - **Saved palettes**: Save a palette, reopen it later, export or delete it from the Palettes tab
 - **Full-screen palette**: The full-screen button next to Save shows the palette over the whole screen; tap anywhere to go back
@@ -77,7 +77,7 @@ The flows are platform-agnostic. Android-only checks live in `.maestro/subflows/
 
 ## Usage
 
-1. **Select a Base Color**: Drag on the color wheel, or use the H, S and V sliders and fields
+1. **Select a Base Color**: Drag on the color wheel, or use the H, S and V (or H, S and L) sliders and fields
 2. **Choose a Harmony Type**: Tap one of the harmony diagrams to generate related colors
 3. **Save**: Keep the palette in the Palettes tab (Palettes at the top on upright tablets, the sidebar on wide screens)
 4. **Export**: Share your palette with drawing applications in your preferred format

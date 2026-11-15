@@ -2,8 +2,11 @@ import {
   harmonyColors,
   hexToHsv,
   hslString,
+  hslToHex,
+  hslToHsv,
   hsvString,
   hsvToHex,
+  hsvToHsl,
   inkOn,
   rgbString,
 } from '../color';
@@ -60,6 +63,26 @@ describe('color formats', () => {
     expect(h).toBe(0);
     expect(s).toBe(0);
     expect(v).toBeCloseTo(0.502, 3);
+  });
+
+  it('converts between HSV and HSL without losing the hue', () => {
+    expect(hsvToHsl([0, 1, 1])).toEqual([0, 1, 0.5]);
+    expect(hslToHsv([0, 1, 0.5])).toEqual([0, 1, 1]);
+    expect(hslToHex([0, 1, 0.25])).toBe('#800000');
+    const [h, s, l] = hsvToHsl(hslToHsv([210, 0.4, 0.7]));
+    expect(h).toBe(210);
+    expect(s).toBeCloseTo(0.4, 10);
+    expect(l).toBeCloseTo(0.7, 10);
+    // Greys keep the hue they had
+    expect(hsvToHsl([200, 0, 0.5])).toEqual([200, 0, 0.5]);
+  });
+
+  it('keeps the HSL saturation of black, so it comes back from black', () => {
+    const black = hslToHsv([120, 0.6, 0]);
+    expect(black[2]).toBe(0);
+    expect(hsvToHsl(black)[1]).toBeCloseTo(0.6, 10);
+    // White has no saturation
+    expect(hsvToHsl(hslToHsv([120, 0.6, 1]))).toEqual([120, 0, 1]);
   });
 
   it('picks text that stays readable on a swatch', () => {

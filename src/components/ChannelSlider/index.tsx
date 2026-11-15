@@ -11,36 +11,30 @@ import {
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { colors, radius, shadows, type } from '@/src/theme/tokens';
-import { type Hsv, hsvToHex } from '@/src/utils/color';
 
-export type HsvChannel = 'h' | 's' | 'v';
+/** Hue, saturation, value or lightness */
+export type Channel = 'h' | 's' | 'v' | 'l';
 
-const INDEX: Record<HsvChannel, 0 | 1 | 2> = { h: 0, s: 1, v: 2 };
-const MAX: Record<HsvChannel, number> = { h: 360, s: 1, v: 1 };
+const NAME: Record<Channel, string> = { h: 'Hue', s: 'Saturation', v: 'Value', l: 'Lightness' };
 const THUMB = 20;
-const RAINBOW = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff', '#ff0000'];
 
-/** Value as shown in the field: degrees for hue, percent for saturation and value */
-function display(channel: HsvChannel, value: number): string {
+/** Value as shown in the field: degrees for hue, percent for the others */
+function display(channel: Channel, value: number): string {
   return channel === 'h' ? `${Math.round(value)}°` : `${Math.round(value * 100)}%`;
 }
 
-function trackStops(channel: HsvChannel, [h, s, v]: Hsv): string[] {
-  if (channel === 'h') return RAINBOW;
-  if (channel === 's') return [hsvToHex([h, 0, v]), hsvToHex([h, 1, v])];
-  return ['#000000', hsvToHex([h, s, 1])];
-}
-
-interface HsvSliderProps {
-  channel: HsvChannel;
-  hsv: Hsv;
-  /** New value of the channel: degrees for hue, 0-1 for saturation and value */
+interface ChannelSliderProps {
+  channel: Channel;
+  /** Degrees for hue, 0-1 for the others */
+  value: number;
+  /** Colors of the track, left to right */
+  stops: string[];
+  /** New value of the channel: degrees for hue, 0-1 for the others */
   onChange: (value: number) => void;
 }
 
-export function HsvSlider({ channel, hsv, onChange }: HsvSliderProps) {
-  const value = hsv[INDEX[channel]];
-  const max = MAX[channel];
+export function ChannelSlider({ channel, value, stops, onChange }: ChannelSliderProps) {
+  const max = channel === 'h' ? 360 : 1;
   const [width, setWidth] = useState(0);
   const [draft, setDraft] = useState<string | null>(null);
 
@@ -87,7 +81,6 @@ export function HsvSlider({ channel, hsv, onChange }: HsvSliderProps) {
     setDraft(null);
   };
 
-  const stops = trackStops(channel, hsv);
   const fraction = value / max;
   const label = channel.toUpperCase();
 
@@ -100,7 +93,7 @@ export function HsvSlider({ channel, hsv, onChange }: HsvSliderProps) {
         onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
         accessible
         accessibilityRole="adjustable"
-        accessibilityLabel={{ h: 'Hue', s: 'Saturation', v: 'Value' }[channel]}
+        accessibilityLabel={NAME[channel]}
         accessibilityValue={{ text: display(channel, value) }}
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
         onAccessibilityAction={onAccessibilityAction}

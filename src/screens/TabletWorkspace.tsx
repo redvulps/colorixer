@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ColorSliders } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
-import { HsvSlider } from '@/src/components/HsvSlider';
 import {
   CheckIcon,
   ColorIcon,
@@ -211,14 +211,7 @@ export function TabletWorkspace() {
                   ))}
                 </View>
               </View>
-              <View style={styles.section}>
-                <Overline style={styles.sectionLabel}>Hue, saturation, value</Overline>
-                <View style={styles.sliders}>
-                  <HsvSlider channel="h" hsv={hsv} onChange={(h) => setHsv([h, hsv[1], hsv[2]])} />
-                  <HsvSlider channel="s" hsv={hsv} onChange={(s) => setHsv([hsv[0], s, hsv[2]])} />
-                  <HsvSlider channel="v" hsv={hsv} onChange={(v) => setHsv([hsv[0], hsv[1], v])} />
-                </View>
-              </View>
+              <ColorSliders />
               <View style={styles.section}>
                 <Overline>Base color</Overline>
                 <View style={[styles.baseSwatch, { backgroundColor: base }]}>
@@ -517,9 +510,6 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     paddingBottom: 4,
-  },
-  sliders: {
-    gap: 12,
   },
   baseSwatch: {
     height: 72,

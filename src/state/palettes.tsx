@@ -6,12 +6,17 @@ import React, {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from 'react';
 
 import { harmonyColors, hexToHsv, type Hsv, hsvToHex } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
 
 export const STORAGE_KEY = 'colorixer:palettes:v1';
+export const SLIDER_MODE_KEY = 'colorixer:slider-mode:v1';
+
+/** Channels the sliders edit: hue, saturation and value, or hue, saturation and lightness */
+export type SliderMode = 'hsv' | 'hsl';
 
 export interface SavedPalette {
   id: string;
@@ -26,6 +31,7 @@ export interface SavedPalette {
 interface State {
   hsv: Hsv;
   harmony: ColorHarmonyType;
+  sliderMode: SliderMode;
   /** Saved palette open in the editor, until the color or harmony changes */
   currentId: string | null;
   saved: SavedPalette[];
@@ -35,6 +41,7 @@ interface State {
 type Action =
   | { type: 'setHsv'; hsv: Hsv }
   | { type: 'setHarmony'; harmony: ColorHarmonyType }
+  | { type: 'setSliderMode'; mode: SliderMode }
   | { type: 'save'; palette: SavedPalette }
   | { type: 'load'; id: string }
   | { type: 'remove'; id: string }
@@ -43,6 +50,7 @@ type Action =
 const initialState: State = {
   hsv: [0, 1, 1],
   harmony: 'analogous',
+  sliderMode: 'hsv',
   currentId: null,
   saved: [],
   hydrated: false,
@@ -56,6 +64,8 @@ function reducer(state: State, action: Action): State {
       return action.harmony === state.harmony
         ? state
         : { ...state, harmony: action.harmony, currentId: null };
+    case 'setSliderMode':
+      return { ...state, sliderMode: action.mode };
     case 'save':
       return { ...state, saved: [action.palette, ...state.saved], currentId: action.palette.id };
     case 'load': {
@@ -96,6 +106,7 @@ function newId(): string {
 interface PaletteContextValue {
   hsv: Hsv;
   harmony: ColorHarmonyType;
+  sliderMode: SliderMode;
   /** Base color as hex */
   base: string;
   /** Harmony colors, base first */
@@ -105,6 +116,7 @@ interface PaletteContextValue {
   saved: SavedPalette[];
   setHsv: (hsv: Hsv) => void;
   setHarmony: (harmony: ColorHarmonyType) => void;
+  setSliderMode: (mode: SliderMode) => void;
   save: () => SavedPalette;
   load: (id: string) => SavedPalette | null;
   remove: (id: string) => void;
@@ -124,6 +136,18 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       });
   }, []);
 
+  // A mode picked before storage answers wins over the stored one
+  const modePicked = useRef(false);
+  useEffect(() => {
+    AsyncStorage.getItem(SLIDER_MODE_KEY)
+      .then((mode) => {
+        if (!modePicked.current && (mode === 'hsv' || mode === 'hsl')) {
+          dispatch({ type: 'setSliderMode', mode });
+        }
+      })
+      .catch((error) => console.warn('Could not read the slider mode:', error));
+  }, []);
+
   useEffect(() => {
     if (!state.hydrated) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state.saved)).catch((error) =>
@@ -140,6 +164,13 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
     (harmony: ColorHarmonyType) => dispatch({ type: 'setHarmony', harmony }),
     [],
   );
+  const setSliderMode = useCallback((mode: SliderMode) => {
+    modePicked.current = true;
+    dispatch({ type: 'setSliderMode', mode });
+    AsyncStorage.setItem(SLIDER_MODE_KEY, mode).catch((error) =>
+      console.warn('Could not store the slider mode:', error),
+    );
+  }, []);
   const save = useCallback(() => {
     const palette: SavedPalette = {
       id: newId(),
@@ -164,12 +195,14 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
     () => ({
       hsv: state.hsv,
       harmony: state.harmony,
+      sliderMode: state.sliderMode,
       base,
       colors,
       current,
       saved: state.saved,
       setHsv,
       setHarmony,
+      setSliderMode,
       save,
       load,
       remove,
@@ -177,12 +210,14 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
     [
       state.hsv,
       state.harmony,
+      state.sliderMode,
       state.saved,
       base,
       colors,
       current,
       setHsv,
       setHarmony,
+      setSliderMode,
       save,
       load,
       remove,

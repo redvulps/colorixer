@@ -121,6 +121,36 @@ describe('Color tab controls', () => {
     expect(screen.getByText('#804040')).toBeOnTheScreen();
   });
 
+  it('switches the sliders to HSL and sets saturation and lightness', async () => {
+    await renderWithProviders(<ColorScreen />);
+    expect(screen.getByText('Hue, saturation, value')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId('slider-mode-hsl'));
+    expect(screen.getByText('Hue, saturation, lightness')).toBeOnTheScreen();
+    expect(screen.queryByTestId('value-v')).toBeNull();
+    expect(screen.getByTestId('value-l').props.value).toBe('50%');
+
+    await setChannel(screen.getByTestId('value-l'), '25');
+    expect(screen.getByText('#800000')).toBeOnTheScreen();
+    await setChannel(screen.getByTestId('value-s'), '50');
+    expect(screen.getByText('#602020')).toBeOnTheScreen();
+
+    // Back in HSV, the sliders show the same color
+    await fireEvent.press(screen.getByTestId('slider-mode-hsv'));
+    expect(screen.getByTestId('value-s').props.value).toBe('67%');
+    expect(screen.getByTestId('value-v').props.value).toBe('38%');
+  });
+
+  it('brings the saturation back after lightness goes to white', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent.press(screen.getByTestId('slider-mode-hsl'));
+    await setChannel(screen.getByTestId('value-s'), '60');
+    await setChannel(screen.getByTestId('value-l'), '100');
+    expect(screen.getAllByText('#ffffff').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('value-s').props.value).toBe('60%');
+    await setChannel(screen.getByTestId('value-l'), '50');
+    expect(screen.getByText('#cc3333')).toBeOnTheScreen();
+  });
+
   it('closes the export sheet with Cancel, without exporting', async () => {
     await renderWithProviders(<ColorScreen />);
     await fireEvent.press(screen.getByTestId('share-button'));

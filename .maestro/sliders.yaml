@@ -1,5 +1,5 @@
 appId: com.redvulps.colorixer
-name: Typing H, S and V values sets the base color
+name: Typing H, S and V values, or H, S and L, sets the base color
 ---
 - launchApp:
     clearState: true
@@ -18,3 +18,14 @@ name: Typing H, S and V values sets the base color
 - inputText: '50'
 - pressKey: Enter
 - assertVisible: '#008000'
+
+# The HSL switch swaps V for L and keeps the color
+- tapOn:
+    id: 'slider-mode-hsl'
+- assertVisible: 'Hue, saturation, lightness'
+- tapOn:
+    id: 'value-l'
+- eraseText
+- inputText: '50'
+- pressKey: Enter
+- assertVisible: '#00ff00'

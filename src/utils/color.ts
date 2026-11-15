@@ -28,6 +28,31 @@ export function hexToHsv(hex: string): Hsv {
   return [Number.isNaN(h) ? 0 : h, s, v];
 }
 
+/** HSL with hue in degrees (0-360) and saturation/lightness as fractions (0-1) */
+export type Hsl = [h: number, s: number, l: number];
+
+const unit = (n: number) => Math.min(Math.max(n, 0), 1);
+
+/**
+ * HSV to HSL by formula, so the hue never goes through RGB and survives greys. Black keeps the
+ * saturation its HSV saturation tends to; white has none (0), so callers that need one keep it.
+ */
+export function hsvToHsl([h, s, v]: Hsv): Hsl {
+  const l = v * (1 - s / 2);
+  const m = Math.min(l, 1 - l);
+  return [h, m > 0 ? unit((v - l) / m) : l === 0 ? s / (2 - s) : 0, l];
+}
+
+/** HSL to HSV by formula; black keeps its saturation, so it comes back from black */
+export function hslToHsv([h, s, l]: Hsl): Hsv {
+  const v = l + s * Math.min(l, 1 - l);
+  return [h, v > 0 ? unit(2 * (1 - l / v)) : (2 * s) / (1 + s), v];
+}
+
+export function hslToHex([h, s, l]: Hsl): string {
+  return chroma.hsl(h, s, l).hex();
+}
+
 /** Colors of a harmony built from a base color; the base comes first */
 export function harmonyColors(harmony: ColorHarmonyType, base: string): string[] {
   const [h, s, l] = chroma(base).hsl();

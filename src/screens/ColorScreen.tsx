@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
+import { ColorSliders } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
-import { HsvSlider } from '@/src/components/HsvSlider';
 import { ExpandIcon, ExportIcon, FileIcon } from '@/src/components/icons';
 import {
   BottomSheet,
@@ -33,7 +33,7 @@ const MAX_WHEEL = 480;
 
 /**
  * Color tab: the harmony picker on top, then the wheel centered in the free height, the palette
- * and the H/S/V sliders. The palette sticks to the top once the wheel scrolls away.
+ * and the HSV or HSL sliders. The palette sticks to the top once the wheel scrolls away.
  */
 export function ColorScreen() {
   const { hsv, harmony, colors, current, setHsv, setHarmony, save } = usePalette();
@@ -130,11 +130,7 @@ export function ColorScreen() {
           </View>
         </View>
 
-        <View style={styles.sliders}>
-          <HsvSlider channel="h" hsv={hsv} onChange={(h) => setHsv([h, hsv[1], hsv[2]])} />
-          <HsvSlider channel="s" hsv={hsv} onChange={(s) => setHsv([hsv[0], s, hsv[2]])} />
-          <HsvSlider channel="v" hsv={hsv} onChange={(v) => setHsv([hsv[0], hsv[1], v])} />
-        </View>
+        <ColorSliders style={styles.sliders} />
       </ScrollView>
 
       <PaletteFullscreen
@@ -252,7 +248,6 @@ const styles = StyleSheet.create({
   },
   sliders: {
     paddingHorizontal: 24,
-    gap: 12,
   },
   hexRow: {
     flexDirection: 'row',

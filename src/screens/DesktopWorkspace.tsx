@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ColorSliders, SLIDERS_HEADER } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
-import { HsvSlider } from '@/src/components/HsvSlider';
 import { CheckIcon, ExportIcon, FileIcon, SaveIcon, TrashIcon } from '@/src/components/icons';
 import {
   Button,
@@ -67,12 +67,13 @@ export function DesktopWorkspace() {
   const topInset = useTopInset();
   const topBarHeight = TOP_BAR + topInset;
   const canvasWidth = width - SIDEBAR - INSPECTOR - insets.left - insets.right;
-  // Wheel, three 34 px sliders with 12 px gaps, 18 px between them, 48 px of margin
+  // Wheel, the sliders' header and three 34 px sliders with 12 px gaps, 18 px between them,
+  // 48 px of margin
   const wheelSize = Math.max(
     220,
     Math.min(
       400,
-      height - topBarHeight - insets.bottom - (3 * 34 + 2 * 12) - 18 - 48,
+      height - topBarHeight - insets.bottom - (SLIDERS_HEADER + 3 * 34 + 3 * 12) - 18 - 48,
       canvasWidth - 48,
     ),
   );
@@ -191,11 +192,7 @@ export function DesktopWorkspace() {
             colors={colors}
             onChange={(h, s) => setHsv([h, s, hsv[2]])}
           />
-          <View style={[styles.sliders, { width: sliderWidth }]}>
-            <HsvSlider channel="h" hsv={hsv} onChange={(h) => setHsv([h, hsv[1], hsv[2]])} />
-            <HsvSlider channel="s" hsv={hsv} onChange={(s) => setHsv([hsv[0], s, hsv[2]])} />
-            <HsvSlider channel="v" hsv={hsv} onChange={(v) => setHsv([hsv[0], hsv[1], v])} />
-          </View>
+          <ColorSliders style={{ width: sliderWidth }} />
         </ScrollView>
 
         <ScrollView
@@ -403,9 +400,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 18,
     paddingVertical: 24,
-  },
-  sliders: {
-    gap: 12,
   },
   inspector: {
     width: INSPECTOR,

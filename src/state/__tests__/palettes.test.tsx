@@ -2,7 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import React from 'react';
 
-import { PaletteProvider, type SavedPalette, STORAGE_KEY, usePalette } from '../palettes';
+import {
+  PaletteProvider,
+  type SavedPalette,
+  SLIDER_MODE_KEY,
+  STORAGE_KEY,
+  usePalette,
+} from '../palettes';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <PaletteProvider>{children}</PaletteProvider>
@@ -82,6 +88,18 @@ describe('palette store', () => {
 
     expect(result.current.saved).toEqual([]);
     expect(result.current.current).toBeNull();
+  });
+
+  it('stores the slider mode and reads it on the next start', async () => {
+    const first = await renderStore();
+    expect(first.result.current.sliderMode).toBe('hsv');
+    await act(async () => first.result.current.setSliderMode('hsl'));
+    expect(first.result.current.sliderMode).toBe('hsl');
+    await waitFor(async () => expect(await AsyncStorage.getItem(SLIDER_MODE_KEY)).toBe('hsl'));
+    await first.unmount();
+
+    const second = await renderStore();
+    await waitFor(() => expect(second.result.current.sliderMode).toBe('hsl'));
   });
 
   it('stores saved palettes and reads them on the next start', async () => {
