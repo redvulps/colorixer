@@ -7,7 +7,8 @@ import type { Hsv } from '@/src/utils/color';
 
 // Must match INSET in scripts/generate-color-wheel.js
 const INSET = 0.035;
-// Room around the wheel so markers on the edge are not clipped
+// Room around the wheel so markers on the edge are not clipped. The frame includes it, because
+// some Android versions clip a view's children to its bounds whatever its overflow says.
 const PAD = 24;
 const WHEEL_IMAGE = require('@/assets/images/color-wheel.png');
 
@@ -78,20 +79,26 @@ export function ColorWheel({
   const markerRadius = Math.max(7, size * 0.0275);
 
   return (
+    // The negative margin keeps the wheel's footprint at `size` in the parent's layout
     <View
-      testID={testID}
-      accessible
-      accessibilityRole="adjustable"
-      accessibilityLabel="Color wheel"
-      accessibilityValue={{ text: colors[0] }}
-      style={[styles.wheel, { width: size, height: size, borderRadius: radius }]}
-      {...responder.panHandlers}
+      pointerEvents="box-none"
+      style={{ width: size + 2 * PAD, height: size + 2 * PAD, margin: -PAD }}
     >
-      <Image source={WHEEL_IMAGE} style={{ width: size, height: size }} pointerEvents="none" />
       <View
-        pointerEvents="none"
-        style={[styles.dim, { borderRadius: radius, opacity: 1 - hsv[2] }]}
-      />
+        testID={testID}
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel="Color wheel"
+        accessibilityValue={{ text: colors[0] }}
+        style={{ width: size, height: size, borderRadius: radius, margin: PAD }}
+        {...responder.panHandlers}
+      >
+        <Image source={WHEEL_IMAGE} style={{ width: size, height: size }} pointerEvents="none" />
+        <View
+          pointerEvents="none"
+          style={[styles.dim, { borderRadius: radius, opacity: 1 - hsv[2] }]}
+        />
+      </View>
       <Svg
         width={size + 2 * PAD}
         height={size + 2 * PAD}
@@ -146,13 +153,10 @@ export function ColorWheel({
 }
 
 const styles = StyleSheet.create({
-  wheel: {
-    overflow: 'visible',
-  },
   overlay: {
     position: 'absolute',
-    top: -PAD,
-    left: -PAD,
+    top: 0,
+    left: 0,
   },
   dim: {
     position: 'absolute',
