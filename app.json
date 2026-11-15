@@ -2,6 +2,7 @@
   "expo": {
     "name": "colorixer",
     "slug": "colorixer",
+    "owner": "redvulps",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -41,6 +42,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d5a8b6ea-6802-4c3f-b08a-1c7341537f14"
+      }
     },
     "backgroundColor": "#111318"
   }
