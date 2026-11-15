@@ -212,13 +212,13 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 16,
   },
-  // Takes the free height and centers the wheel in it
+  // Takes the free height and centers the wheel in it. The palette block keeps its own space
+  // below, so a small padding is enough, and everything fits a 914 dp phone without scrolling.
   wheel: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 10,
-    paddingBottom: 8,
+    paddingTop: 4,
   },
   // The space around the palette is its own, so it keeps it while stuck to the top
   paletteBlock: {
