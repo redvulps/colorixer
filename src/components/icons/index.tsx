@@ -42,6 +42,15 @@ export const ExportIcon = (p: IconProps) => (
   </StrokeIcon>
 );
 
+export const ExpandIcon = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <Path d="M15 3h6v6" />
+    <Path d="M9 21H3v-6" />
+    <Path d="M21 3l-7 7" />
+    <Path d="M3 21l7-7" />
+  </StrokeIcon>
+);
+
 export const CopyIcon = (p: IconProps) => (
   <StrokeIcon {...p}>
     <Rect x={9} y={9} width={11} height={11} rx={2} />

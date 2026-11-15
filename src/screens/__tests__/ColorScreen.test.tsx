@@ -44,9 +44,16 @@ describe('Color tab', () => {
     expect(screen.queryByText('#ff0000')).toBeNull();
   });
 
-  it('shows the palette in full screen when a swatch is tapped, and closes on a tap', async () => {
+  it('copies HEX when a swatch is tapped', async () => {
     await renderWithProviders(<ColorScreen />);
     await fireEvent.press(screen.getByTestId('swatch-#ff8000'));
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith('#ff8000');
+    expect(screen.getByText('Copied #ff8000')).toBeOnTheScreen();
+  });
+
+  it('shows the palette in full screen from its button, and closes on a tap', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent.press(screen.getByTestId('fullscreen-button'));
     const full = await screen.findByTestId('palette-fullscreen');
     for (const hex of ANALOGOUS_RED) {
       expect(within(full).getByText(hex)).toBeOnTheScreen();

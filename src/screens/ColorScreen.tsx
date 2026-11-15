@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorWheel } from '@/src/components/ColorWheel';
 import { HsvSlider } from '@/src/components/HsvSlider';
-import { ExportIcon, FileIcon } from '@/src/components/icons';
+import { ExpandIcon, ExportIcon, FileIcon } from '@/src/components/icons';
 import {
   BottomSheet,
   HarmonyStrip,
@@ -101,6 +101,12 @@ export function ColorScreen() {
               <View style={styles.paletteActions}>
                 <PillButton testID="save-button" saved={!!current} onPress={onSave} />
                 <PillIconButton
+                  testID="fullscreen-button"
+                  icon={ExpandIcon}
+                  accessibilityLabel="Show the palette in full screen"
+                  onPress={openFull}
+                />
+                <PillIconButton
                   testID="share-button"
                   icon={ExportIcon}
                   accessibilityLabel="Export palette"
@@ -115,9 +121,8 @@ export function ColorScreen() {
                   colors={colors}
                   height={52}
                   radius={14}
-                  onPressColor={openFull}
+                  onPressColor={copy}
                   onLongPressColor={setCopyColor}
-                  swatchHint="Shows the palette in full screen. Long press to copy the color."
                 />
               </View>
               <View style={styles.hexRow}>

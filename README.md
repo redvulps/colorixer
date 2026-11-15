@@ -7,8 +7,8 @@ Colorixer is a powerful color picker application that helps artists and designer
 - **Color wheel and H/S/V controls**: Drag on the wheel to pick hue and saturation, or set hue, saturation and value with sliders and numeric fields
 - **Color Harmony Generation**: Analogous, triadic, tetratriadic, complementary and monochromatic palettes, drawn on the wheel
 - **Saved palettes**: Save a palette, reopen it later, export or delete it from the Palettes tab
-- **Full-screen palette**: Tap the color bar to see the palette over the whole screen, and tap again to go back
-- **Copy in any format**: Long press a swatch to copy it as HEX, HSL or HSV
+- **Full-screen palette**: The full-screen button next to Save shows the palette over the whole screen; tap anywhere to go back
+- **Copy in any format**: Tap a swatch to copy its HEX value, long press for HSL or HSV
 - **Export to Drawing Applications**: Export color palettes in multiple formats:
   - Adobe Swatch Exchange (ASE) for Photoshop and other Adobe applications
   - Procreate Swatches for the popular iPad drawing app

@@ -1,5 +1,5 @@
 appId: com.redvulps.colorixer
-name: Swatches copy their color as HEX, HSL or HSV from the long-press sheet
+name: Swatches copy their color, in HEX on tap and in other formats on long press
 ---
 - launchApp:
     clearState: true
@@ -13,10 +13,9 @@ name: Swatches copy their color as HEX, HSL or HSV from the long-press sheet
 - tapOn: 'Cancel'
 - assertNotVisible: 'Copy as HEX'
 
-# Long press > Copy as HEX
-- longPressOn:
+# Tap copies the HEX value
+- tapOn:
     id: 'swatch-#ff8000'
-- tapOn: 'Copy as HEX'
 - assertVisible: 'Copied #ff8000'
 - runFlow:
     when:
