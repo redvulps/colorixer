@@ -27,7 +27,7 @@ describe('PaletteFullscreen', () => {
 
   it('shows every color with its hex, and the palette label', async () => {
     await render(fullscreen(true));
-    expect(screen.getByText('#0077b6')).toBeOnTheScreen();
+    expect(await screen.findByText('#0077b6')).toBeOnTheScreen();
     expect(screen.getByText('#b63f00')).toBeOnTheScreen();
     expect(screen.getByText('Oceano · Complementary · 2 colors')).toBeOnTheScreen();
   });
@@ -35,12 +35,13 @@ describe('PaletteFullscreen', () => {
   it('asks to close when tapped', async () => {
     const onClose = jest.fn();
     await render(fullscreen(true, onClose));
-    await fireEvent.press(screen.getByTestId('full'));
+    await fireEvent.press(await screen.findByTestId('full'));
     expect(onClose).toHaveBeenCalled();
   });
 
   it('stays mounted while it shrinks back, then goes away', async () => {
     const { rerender } = await render(fullscreen(true));
+    await screen.findByText('#0077b6');
     await rerender(fullscreen(false));
     expect(screen.getByText('#0077b6')).toBeOnTheScreen();
     await waitFor(() => expect(screen.queryByText('#0077b6')).toBeNull());

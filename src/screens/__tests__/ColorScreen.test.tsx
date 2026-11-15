@@ -47,7 +47,7 @@ describe('Color tab', () => {
   it('shows the palette in full screen when a swatch is tapped, and closes on a tap', async () => {
     await renderWithProviders(<ColorScreen />);
     await fireEvent.press(screen.getByTestId('swatch-#ff8000'));
-    const full = screen.getByTestId('palette-fullscreen');
+    const full = await screen.findByTestId('palette-fullscreen');
     for (const hex of ANALOGOUS_RED) {
       expect(within(full).getByText(hex)).toBeOnTheScreen();
     }

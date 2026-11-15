@@ -1,4 +1,4 @@
-import { StatusBar } from 'expo-status-bar';
+import { setStatusBarHidden } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -20,6 +20,8 @@ import { inkOn } from '@/src/utils/color';
 const OPEN_MS = 340;
 const CLOSE_MS = 240;
 const HINT_MS = 1800;
+/** Time for the app to hide its status bar before the modal shows and copies that state */
+const STATUS_BAR_MS = 60;
 /** How long to wait for the bar's position before growing from the bottom edge instead */
 const ORIGIN_WAIT_MS = 150;
 /** Corner radius of the palette bar the view grows out of */
@@ -108,16 +110,29 @@ export function PaletteFullscreen({
     if (visible) {
       // Cancels a closing animation, so its callback won't unmount the reopened view
       progress.stopAnimation();
-      setMounted(true);
-      if (started.current) open();
-    } else if (mountedRef.current) {
+      if (started.current) {
+        open();
+        return;
+      }
+      // An Android modal copies the status bar's visibility from the app only when it shows,
+      // so the app hides it first
+      setStatusBarHidden(true, 'fade');
+      const timer = setTimeout(() => setMounted(true), STATUS_BAR_MS);
+      return () => clearTimeout(timer);
+    }
+    if (mountedRef.current) {
       animateTo(0, () => {
         laidOut.current = false;
         started.current = false;
         setMounted(false);
+        setStatusBarHidden(false, 'fade');
       });
+    } else {
+      setStatusBarHidden(false, 'fade');
     }
   }, [visible, animateTo, open, progress]);
+
+  useEffect(() => () => setStatusBarHidden(false, 'none'), []);
 
   useEffect(() => {
     if (origin) tryOpen();
@@ -164,7 +179,6 @@ export function PaletteFullscreen({
       statusBarTranslucent
       navigationBarTranslucent
     >
-      <StatusBar hidden animated />
       <View style={styles.root} onLayout={onRootLayout}>
         <Animated.View style={[styles.frame, frame]}>
           <Pressable

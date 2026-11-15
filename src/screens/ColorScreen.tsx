@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorWheel } from '@/src/components/ColorWheel';
 import { HsvSlider } from '@/src/components/HsvSlider';
@@ -44,6 +44,13 @@ export function ColorScreen() {
   const [copyColor, setCopyColor] = useState<string | null>(null);
   const [fullOpen, setFullOpen] = useState(false);
   const [fullOrigin, setFullOrigin] = useState<Rect | null>(null);
+  // The full-screen view hides the status bar, which shrinks the top inset. The screen keeps
+  // the inset it had, so nothing behind the view moves, until the status bar is back.
+  const insets = useSafeAreaInsets();
+  const [frozenTop, setFrozenTop] = useState<number | null>(null);
+  useEffect(() => {
+    if (!fullOpen && frozenTop !== null && insets.top >= frozenTop) setFrozenTop(null);
+  }, [fullOpen, frozenTop, insets.top]);
   const stripRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const wheelSize = Math.min(MAX_WHEEL, width - 32);
@@ -58,6 +65,7 @@ export function ColorScreen() {
   // The full-screen view grows out of the bar, so it needs the bar's place on screen
   const openFull = () => {
     setFullOrigin(null);
+    setFrozenTop(insets.top);
     setFullOpen(true);
     stripRef.current?.measureInWindow((x, y, w, h) => setFullOrigin({ x, y, width: w, height: h }));
   };
@@ -68,7 +76,7 @@ export function ColorScreen() {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={styles.screen}>
+    <View style={[styles.screen, { paddingTop: frozenTop ?? insets.top }]}>
       <View style={styles.header}>
         <HarmonyStrip value={harmony} onChange={setHarmony} />
       </View>
@@ -183,7 +191,7 @@ export function ColorScreen() {
         )}
         <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
       </BottomSheet>
-    </SafeAreaView>
+    </View>
   );
 }
 
