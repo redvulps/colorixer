@@ -88,6 +88,7 @@ const es: Dictionary = {
   'image.cameraPhoto': 'Foto de la cámara',
   'image.photoLabel': 'Foto {name}',
   'image.noCamera': 'Colorixer no tiene acceso a la cámara. Permítelo en los ajustes del sistema.',
+  'image.cameraFailed': 'No se pudo abrir la cámara en este dispositivo.',
   'image.unreadable': 'No se pudo leer esta imagen.',
   'settings.version': 'Versión {version}',
   'settings.language': 'Idioma',

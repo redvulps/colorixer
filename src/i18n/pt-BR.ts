@@ -88,6 +88,7 @@ const ptBR: Dictionary = {
   'image.cameraPhoto': 'Foto da câmera',
   'image.photoLabel': 'Foto {name}',
   'image.noCamera': 'O Colorixer não tem acesso à câmera. Permita nos ajustes do sistema.',
+  'image.cameraFailed': 'Não foi possível abrir a câmera neste aparelho.',
   'image.unreadable': 'Não foi possível ler esta imagem.',
   'settings.version': 'Versão {version}',
   'settings.language': 'Idioma',

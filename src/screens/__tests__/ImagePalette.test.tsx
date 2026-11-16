@@ -125,6 +125,25 @@ describe('Palette from an image', () => {
     expect(screen.queryByTestId('image-palette')).toBeNull();
   });
 
+  it('says so when the device has no camera to open', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest
+      .mocked(ImagePicker.launchCameraAsync)
+      .mockRejectedValue(
+        new Error("Failed to resolve activity to handle the intent of type 'null'"),
+      );
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent.press(screen.getByTestId('image-button'));
+    await fireEvent.press(screen.getByText('From camera'));
+    await settle();
+    await waitFor(() =>
+      expect(screen.getByText('Could not open the camera on this device.')).toBeOnTheScreen(),
+    );
+    expect(screen.getByTestId('image-source')).toBeOnTheScreen();
+    expect(screen.queryByTestId('image-palette')).toBeNull();
+    warn.mockRestore();
+  });
+
   it('opens nothing when the picker is cancelled', async () => {
     jest.mocked(ImagePicker.launchImageLibraryAsync).mockResolvedValue({
       canceled: true,

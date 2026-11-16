@@ -89,20 +89,32 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
         setAsking(false);
         await wait(imageFlowTiming.sheetCloseMs);
       }
+      const fail = (message: string) => {
+        setError(message);
+        // The message shows in the view when it is open, else back in the sheet
+        if (!visible) setAsking(true);
+      };
       if (source === 'camera') {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
         if (!permission.granted) {
-          setError(t('image.noCamera'));
-          // The message shows in the view when it is open, else back in the sheet
-          if (!visible) setAsking(true);
+          fail(t('image.noCamera'));
           return;
         }
       }
       const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 1 };
-      const result =
-        source === 'camera'
-          ? await ImagePicker.launchCameraAsync(options)
-          : await ImagePicker.launchImageLibraryAsync(options);
+      let result: ImagePicker.ImagePickerResult;
+      if (source === 'camera') {
+        try {
+          result = await ImagePicker.launchCameraAsync(options);
+        } catch (e) {
+          // A device without a camera has no app to take the photo
+          console.warn('Could not open the camera:', e);
+          fail(t('image.cameraFailed'));
+          return;
+        }
+      } else {
+        result = await ImagePicker.launchImageLibraryAsync(options);
+      }
       const asset = result.canceled ? null : result.assets[0];
       if (!asset) return;
       setPicked({

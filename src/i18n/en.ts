@@ -87,6 +87,7 @@ const en = {
   'image.cameraPhoto': 'Camera photo',
   'image.photoLabel': 'Photo {name}',
   'image.noCamera': 'Colorixer has no access to the camera. Allow it in the system settings.',
+  'image.cameraFailed': 'Could not open the camera on this device.',
   'image.unreadable': 'Could not read this image.',
   'settings.version': 'Version {version}',
   'settings.language': 'Language',
