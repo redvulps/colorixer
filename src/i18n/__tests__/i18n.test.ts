@@ -1,6 +1,16 @@
 import en from '../en';
 import es from '../es';
-import { formatShortDate, pickLocale, setLocale, t } from '../index';
+import {
+  deviceLocale,
+  formatShortDate,
+  isLanguageChoice,
+  LOCALE_NAMES,
+  LOCALES,
+  pickLocale,
+  resolveLocale,
+  setLocale,
+  t,
+} from '../index';
 import ptBR from '../pt-BR';
 
 const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
@@ -22,6 +32,28 @@ describe('pickLocale', () => {
     [[null, undefined], 'en'],
   ])('picks %j as %s', (tags, expected) => {
     expect(pickLocale(tags as string[])).toBe(expected);
+  });
+});
+
+describe('language choice', () => {
+  it('stands for the device language when automatic, and for itself otherwise', () => {
+    expect(resolveLocale('auto')).toBe(deviceLocale());
+    expect(resolveLocale('es')).toBe('es');
+    expect(resolveLocale('pt-BR')).toBe('pt-BR');
+  });
+
+  it('accepts only automatic and the app languages', () => {
+    expect(['auto', ...LOCALES].every(isLanguageChoice)).toBe(true);
+    expect(isLanguageChoice('fr')).toBe(false);
+    expect(isLanguageChoice(null)).toBe(false);
+  });
+
+  it('names each language in itself', () => {
+    expect(LOCALES.map((l) => LOCALE_NAMES[l])).toEqual([
+      'Português (Brasil)',
+      'English',
+      'Español',
+    ]);
   });
 });
 

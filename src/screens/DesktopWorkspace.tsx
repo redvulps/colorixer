@@ -8,6 +8,7 @@ import {
   CheckIcon,
   ExportIcon,
   FileIcon,
+  GearIcon,
   ImageIcon,
   SaveIcon,
   TrashIcon,
@@ -38,6 +39,7 @@ import {
 } from '@/src/hooks/usePaletteActions';
 import { useTopInset } from '@/src/hooks/useTopInset';
 import { t } from '@/src/i18n';
+import { SettingsDialog } from '@/src/screens/SettingsScreen';
 import {
   type ImagePalette,
   paletteColors,
@@ -55,6 +57,8 @@ import {
 } from '@/src/utils/color';
 
 const TOP_BAR = 60;
+/** The gear right of Export: its 40 px and the 12 px gap before it */
+const GEAR_SPACE = 40 + 12;
 const SIDEBAR = 252;
 const INSPECTOR = 320;
 
@@ -89,6 +93,7 @@ export function DesktopWorkspace() {
   // Zero in a browser; on a tablet, the system bars the workspace has to stay clear of
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState<Menu | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const imageFlow = useRef<ImagePaletteHandle>(null);
   const closeMenu = () => setMenu(null);
 
@@ -180,10 +185,20 @@ export function DesktopWorkspace() {
           label={t('common.export')}
           chevron
           accessibilityState={{ expanded: menu?.kind === 'export' }}
-          // Right-aligned under the button
+          // Right-aligned under the button, which has the gear and a gap to its right
           onPress={() =>
-            setMenu({ kind: 'export', at: { x: width - 28 - insets.right, y: topBarHeight - 14 } })
+            setMenu({
+              kind: 'export',
+              at: { x: width - 28 - GEAR_SPACE - insets.right, y: topBarHeight - 14 },
+            })
           }
+        />
+        <Button
+          testID="settings-button"
+          variant="ghost"
+          icon={GearIcon}
+          accessibilityLabel={t('tab.settings')}
+          onPress={() => setSettingsOpen(true)}
         />
       </View>
 
@@ -367,6 +382,7 @@ export function DesktopWorkspace() {
         )}
       </PopoverMenu>
       <ImagePaletteView ref={imageFlow} layout="dialog" onUse={onUseImage} />
+      <SettingsDialog visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </View>
   );
 }

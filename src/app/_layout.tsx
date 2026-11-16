@@ -15,6 +15,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Dimensions, Platform } from 'react-native';
 
+import { LanguageProvider } from '@/src/state/language';
 import { PaletteProvider } from '@/src/state/palettes';
 import { colors, TABLET_MIN_SIDE } from '@/src/theme/tokens';
 
@@ -54,11 +55,13 @@ export default function RootLayout() {
   }
 
   return (
-    <PaletteProvider>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
-      />
-    </PaletteProvider>
+    <LanguageProvider>
+      <PaletteProvider>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp } }}
+        />
+      </PaletteProvider>
+    </LanguageProvider>
   );
 }

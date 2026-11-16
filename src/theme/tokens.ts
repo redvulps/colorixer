@@ -21,6 +21,8 @@ export const colors = {
   lineSubtle: '#23262E',
   lineDefault: '#2B2F38',
   lineCurrent: '#3B6FAE',
+  /** Ring of an unselected radio */
+  controlOff: '#4A505C',
   textStrong: '#F1F3F7',
   textPrimary: '#E8EAF0',
   textSecondary: '#C3C8D2',

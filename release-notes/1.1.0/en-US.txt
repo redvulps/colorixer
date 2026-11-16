@@ -3,5 +3,5 @@
 • Make palettes from photos, from the gallery or the camera, in 6 moods
 • HSV or HSL sliders
 • Copy colors as RGB, besides HEX, HSL and HSV
-• Now in Portuguese and Spanish
+• Now in Portuguese and Spanish, with a language choice in the new Settings tab
 Your saved palettes keep their colors.

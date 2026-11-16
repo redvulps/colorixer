@@ -3,19 +3,22 @@ import React from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ColorIcon, PalettesIcon } from '@/src/components/icons';
+import { ColorIcon, GearIcon, PalettesIcon } from '@/src/components/icons';
 import { TabButton, ToastProvider } from '@/src/components/ui';
 import { layoutFor } from '@/src/hooks/useLayout';
 import { t } from '@/src/i18n';
 import { tabletToastBottom } from '@/src/screens/TabletWorkspace';
+import { useLanguage } from '@/src/state/language';
 import { colors, control } from '@/src/theme/tokens';
 
 /**
- * Color and Palettes tabs. On wide windows the index route shows the three-column workspace,
- * and on an upright tablet the tablet layout, which switches Color and Palettes itself; both
+ * Color, Palettes and Settings tabs. On wide windows the index route shows the three-column
+ * workspace, and on an upright tablet the tablet layout, which switches its views itself; both
  * hide the tab bar.
  */
 export default function TabsLayout() {
+  // The tab labels follow the language picked in Settings
+  useLanguage();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const layout = layoutFor(width, height);
@@ -39,6 +42,9 @@ export default function TabsLayout() {
           </TabTrigger>
           <TabTrigger name="palettes" href="/palettes" asChild>
             <TabButton testID="tab-palettes" label={t('tab.palettes')} icon={PalettesIcon} />
+          </TabTrigger>
+          <TabTrigger name="settings" href="/settings" asChild>
+            <TabButton testID="tab-settings" label={t('tab.settings')} icon={GearIcon} />
           </TabTrigger>
         </TabList>
       </Tabs>

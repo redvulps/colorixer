@@ -13,7 +13,8 @@ Colorixer is a powerful color picker application that helps artists and designer
 - **Export to Drawing Applications**: Export color palettes in multiple formats:
   - Adobe Swatch Exchange (ASE) for Photoshop and other Adobe applications
   - Procreate Swatches for the popular iPad drawing app
-- **Languages**: English, Brazilian Portuguese and Spanish, picked from the device's preferred languages
+- **Languages**: English, Brazilian Portuguese and Spanish, picked from the device's preferred languages or chosen in Settings
+- **Settings**: The Settings tab (a third view on upright tablets, the gear right of Export on wide screens) shows the app's version, picks the language and links to the privacy policy and the source code
 - **Cross-Platform**: Works on web, iOS, and Android. Windows 1024 px wide or more get a three-column workspace, and upright tablets get Color and Palettes side by side in one screen. Phones stay in portrait; tablets turn
 
 ## Getting Started
@@ -136,7 +137,9 @@ The extraction (`src/utils/extract.ts`) follows published, open methods rather t
 
 ## Languages
 
-The app speaks English, Brazilian Portuguese and Spanish, and follows the device: it takes the first of the person's preferred languages that it speaks (`expo-localization`). Any Portuguese gets Brazilian Portuguese, any Spanish gets Spanish, and anything else falls back to English. There is no language setting in the app.
+The app speaks English, Brazilian Portuguese and Spanish. By default (Automatic) it follows the device: it takes the first of the person's preferred languages that it speaks (`expo-localization`). Any Portuguese gets Brazilian Portuguese, any Spanish gets Spanish, and anything else falls back to English. Settings can pin one of the three instead; the choice is kept on the device (`colorixer:language:v1`) and applies at once.
+
+- `src/state/language.tsx` holds the choice. The palette store passes the language on, so every screen renders again in the new language.
 
 - Texts live in `src/i18n`: `en.ts` defines every key, and `pt-BR.ts` and `es.ts` must give the same keys with the same `{placeholders}`; TypeScript and `src/i18n/__tests__` check both. Texts that depend on a count give a `one` and an `other` form.
 - `t(key, params)` returns the text in the current language; dates go through `formatShortDate`.

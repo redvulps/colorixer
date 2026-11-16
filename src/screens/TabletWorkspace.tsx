@@ -10,6 +10,7 @@ import {
   ExpandIcon,
   ExportIcon,
   FileIcon,
+  GearIcon,
   ImageIcon,
   PalettesIcon,
   SaveIcon,
@@ -45,6 +46,7 @@ import {
 } from '@/src/hooks/usePaletteActions';
 import { useHeldTopInset } from '@/src/hooks/useTopInset';
 import { t } from '@/src/i18n';
+import { SettingsView } from '@/src/screens/SettingsScreen';
 import {
   type ImagePalette,
   paletteColors,
@@ -78,11 +80,12 @@ export function tabletToastBottom(insetBottom: number): number {
 
 const exportLabel = (format: ExportFormat) => (format === 'ase' ? 'Adobe ASE' : 'Procreate');
 
-type TabletView = 'color' | 'palettes';
+type TabletView = 'color' | 'palettes' | 'settings';
 
 /**
- * Tablet held upright: Color and Palettes picked at the top. In Color the wheel takes the left,
- * the controls a column on the right, and the palette runs edge to edge along the bottom.
+ * Tablet held upright: Color, Palettes and Settings picked at the top. In Color the wheel takes
+ * the left, the controls a column on the right, and the palette runs edge to edge along the
+ * bottom.
  */
 export function TabletWorkspace() {
   const {
@@ -171,8 +174,10 @@ export function TabletWorkspace() {
           },
         ]}
       >
-        <LogoMark />
-        <Text style={styles.brand}>Colorixer</Text>
+        {/* The mark alone: with three views, the name no longer fits beside the actions */}
+        <View accessible accessibilityRole="image" accessibilityLabel="Colorixer">
+          <LogoMark />
+        </View>
         <View style={styles.switch} accessibilityRole="tablist">
           <SwitchButton
             testID="view-color"
@@ -188,6 +193,13 @@ export function TabletWorkspace() {
             count={saved.length}
             selected={view === 'palettes'}
             onPress={() => setView('palettes')}
+          />
+          <SwitchButton
+            testID="view-settings"
+            icon={GearIcon}
+            label={t('tab.settings')}
+            selected={view === 'settings'}
+            onPress={() => setView('settings')}
           />
         </View>
         <View style={styles.spacer} />
@@ -304,6 +316,8 @@ export function TabletWorkspace() {
             </View>
           </View>
         </>
+      ) : view === 'settings' ? (
+        <SettingsView bottomInset={insets.bottom} />
       ) : (
         <ScrollView
           style={styles.gridScroll}
@@ -485,16 +499,12 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    // Three views and three actions in 800 dp, in any of the app's languages
+    gap: 8,
     backgroundColor: tokens.surfacePanel,
     borderBottomWidth: 1,
     borderBottomColor: tokens.lineSubtle,
     zIndex: 2,
-  },
-  brand: {
-    ...type.titleApp,
-    fontSize: 19,
-    color: tokens.textStrong,
   },
   switch: {
     flexDirection: 'row',
@@ -509,7 +519,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     borderRadius: radius.sm,
   },
   switchButtonOn: {

@@ -11,6 +11,7 @@ const es: Dictionary = {
 
   'tab.color': 'Color',
   'tab.palettes': 'Paletas',
+  'tab.settings': 'Ajustes',
 
   'toast.saved': '“{name}” guardada',
   'toast.deleted': '“{name}” eliminada',
@@ -88,6 +89,12 @@ const es: Dictionary = {
   'image.photoLabel': 'Foto {name}',
   'image.noCamera': 'Colorixer no tiene acceso a la cámara. Permítelo en los ajustes del sistema.',
   'image.unreadable': 'No se pudo leer esta imagen.',
+  'settings.version': 'Versión {version}',
+  'settings.language': 'Idioma',
+  'settings.auto': 'Automático · sigue el dispositivo',
+  'settings.about': 'Acerca de',
+  'settings.privacy': 'Política de privacidad',
+  'settings.source': 'Código fuente',
 };
 
 export default es;

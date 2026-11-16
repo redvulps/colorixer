@@ -9,6 +9,19 @@ export type { MessageKey } from './types';
 
 export type Locale = 'en' | 'pt-BR' | 'es';
 
+/** The language the person picked: one of the app's, or the device's */
+export type LanguageChoice = 'auto' | Locale;
+
+/** The app's languages, in the order the language picker lists them */
+export const LOCALES: readonly Locale[] = ['pt-BR', 'en', 'es'];
+
+/** Each language by its own name, as language pickers show them */
+export const LOCALE_NAMES: Record<Locale, string> = {
+  'pt-BR': 'Português (Brasil)',
+  en: 'English',
+  es: 'Español',
+};
+
 const DICTIONARIES: Record<Locale, Dictionary> = { en: en as Dictionary, 'pt-BR': ptBR, es };
 
 /**
@@ -25,7 +38,8 @@ export function pickLocale(tags: (string | null | undefined)[]): Locale {
   return 'en';
 }
 
-function deviceLocale(): Locale {
+/** The language the device asks for, among the app's */
+export function deviceLocale(): Locale {
   try {
     return pickLocale(getLocales().map((l) => l.languageTag));
   } catch {
@@ -40,9 +54,18 @@ export function getLocale(): Locale {
   return current;
 }
 
-/** For tests: speak another language from now on */
+/** Speak another language from now on; screens show it when they render again */
 export function setLocale(locale: Locale) {
   current = locale;
+}
+
+/** The language a choice stands for: the device's for "auto" */
+export function resolveLocale(choice: LanguageChoice): Locale {
+  return choice === 'auto' ? deviceLocale() : choice;
+}
+
+export function isLanguageChoice(value: unknown): value is LanguageChoice {
+  return value === 'auto' || LOCALES.includes(value as Locale);
 }
 
 /**

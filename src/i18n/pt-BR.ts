@@ -11,6 +11,7 @@ const ptBR: Dictionary = {
 
   'tab.color': 'Cor',
   'tab.palettes': 'Paletas',
+  'tab.settings': 'Ajustes',
 
   'toast.saved': '“{name}” salva',
   'toast.deleted': '“{name}” excluída',
@@ -88,6 +89,12 @@ const ptBR: Dictionary = {
   'image.photoLabel': 'Foto {name}',
   'image.noCamera': 'O Colorixer não tem acesso à câmera. Permita nos ajustes do sistema.',
   'image.unreadable': 'Não foi possível ler esta imagem.',
+  'settings.version': 'Versão {version}',
+  'settings.language': 'Idioma',
+  'settings.auto': 'Automático · segue o aparelho',
+  'settings.about': 'Sobre',
+  'settings.privacy': 'Política de privacidade',
+  'settings.source': 'Código-fonte',
 };
 
 export default ptBR;

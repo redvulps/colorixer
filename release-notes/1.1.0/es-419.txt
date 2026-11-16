@@ -3,5 +3,5 @@
 • Crea paletas a partir de fotos de la galería o de la cámara, en 6 estilos
 • Controles en HSV o HSL
 • Copia colores en RGB, además de HEX, HSL y HSV
-• Ahora en portugués y español
+• Ahora en portugués y español, con el idioma a elegir en la nueva pestaña Ajustes
 Tus paletas guardadas conservan sus colores.

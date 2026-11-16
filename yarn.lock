@@ -5910,6 +5910,7 @@ __metadata:
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^7.1.1"
     expo: "npm:~58.0.25"
+    expo-application: "npm:~58.1.2"
     expo-blur: "npm:~58.0.6"
     expo-clipboard: "npm:~58.0.4"
     expo-constants: "npm:~58.0.16"
@@ -7137,6 +7138,15 @@ __metadata:
     jest-mock: "npm:30.5.2"
     jest-util: "npm:30.5.1"
   checksum: 10c0/31bf2307499008f267c84992a8ea27f76e97f207f685075439aa12f60b93dd81d024e5fcb0142755ed499233056f27fa51d01843d04cba437dfe7588387c352f
+  languageName: node
+  linkType: hard
+
+"expo-application@npm:~58.1.2":
+  version: 58.1.2
+  resolution: "expo-application@npm:58.1.2"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/73928e60fea00d0f786154a7204b7c98b410667fd669121d7b0e65da07a44deeefaf76b05910db47b6631807990036cf522b6acdb1781741dfd5d7afbb279063
   languageName: node
   linkType: hard
 

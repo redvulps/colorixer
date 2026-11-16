@@ -35,7 +35,8 @@ const VARIANTS: Record<ButtonVariant, { box: ViewStyle; text: string; tone: Icon
 };
 
 interface ButtonProps extends Omit<PressableProps, 'style' | 'children'> {
-  label: string;
+  /** Without a label, the button is a 40 px square around its icon */
+  label?: string;
   icon?: IconComponent;
   variant?: ButtonVariant;
   chevron?: boolean;
@@ -58,6 +59,7 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         chevron && styles.withChevron,
+        !label && styles.iconOnly,
         v.box,
         pressed && pressedStyle,
         style,
@@ -65,7 +67,7 @@ export function Button({
       {...props}
     >
       {Icon && <Icon size={18} color={iconTone[v.tone]} />}
-      <Text style={[type.labelButton, { color: v.text }]}>{label}</Text>
+      {label && <Text style={[type.labelButton, { color: v.text }]}>{label}</Text>}
       {chevron && <ChevronDownIcon size={16} color={iconTone[v.tone]} />}
     </Pressable>
   );
@@ -160,6 +162,12 @@ const styles = StyleSheet.create({
   },
   withChevron: {
     paddingRight: 14,
+  },
+  iconOnly: {
+    width: control.md,
+    paddingLeft: 0,
+    paddingRight: 0,
+    justifyContent: 'center',
   },
   pill: {
     height: control.sm,

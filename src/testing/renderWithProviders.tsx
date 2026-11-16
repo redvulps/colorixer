@@ -5,14 +5,17 @@ import React from 'react';
 type Element = ReturnType<typeof screen.getByTestId>;
 
 import { ToastProvider } from '@/src/components/ui';
+import { LanguageProvider } from '@/src/state/language';
 import { PaletteProvider } from '@/src/state/palettes';
 
-/** Renders a screen inside the app providers and waits for saved palettes to load */
+/** Renders a screen inside the app providers and waits for the language and saved palettes to load */
 export async function renderWithProviders(ui: React.ReactElement) {
   const result = await render(
-    <PaletteProvider>
-      <ToastProvider bottom={24}>{ui}</ToastProvider>
-    </PaletteProvider>,
+    <LanguageProvider>
+      <PaletteProvider>
+        <ToastProvider bottom={24}>{ui}</ToastProvider>
+      </PaletteProvider>
+    </LanguageProvider>,
   );
   await act(async () => {});
   return result;

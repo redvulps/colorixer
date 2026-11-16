@@ -10,6 +10,7 @@ const en = {
 
   'tab.color': 'Color',
   'tab.palettes': 'Palettes',
+  'tab.settings': 'Settings',
 
   'toast.saved': 'Saved “{name}”',
   'toast.deleted': 'Deleted “{name}”',
@@ -87,6 +88,12 @@ const en = {
   'image.photoLabel': 'Photo {name}',
   'image.noCamera': 'Colorixer has no access to the camera. Allow it in the system settings.',
   'image.unreadable': 'Could not read this image.',
+  'settings.version': 'Version {version}',
+  'settings.language': 'Language',
+  'settings.auto': 'Automatic · follows the device',
+  'settings.about': 'About',
+  'settings.privacy': 'Privacy policy',
+  'settings.source': 'Source code',
 };
 
 export default en;

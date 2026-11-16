@@ -9,7 +9,8 @@ import React, {
   useRef,
 } from 'react';
 
-import { formatShortDate, t } from '@/src/i18n';
+import { formatShortDate, type Locale, t } from '@/src/i18n';
+import { useLanguage } from '@/src/state/language';
 import { harmonyColors, harmonyLabel, hexToHsv, type Hsv, hsvToHex } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
 import { type ImageMood, moodLabel } from '@/src/utils/extract';
@@ -172,12 +173,16 @@ interface PaletteContextValue {
   save: () => SavedPalette;
   load: (id: string) => SavedPalette | null;
   remove: (id: string) => void;
+  /** Language in use, so screens render again when it changes */
+  locale: Locale;
 }
 
 const PaletteContext = createContext<PaletteContextValue | null>(null);
 
 export function PaletteProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  // A new language gives a new value, so every screen renders its texts again
+  const { locale } = useLanguage();
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
@@ -283,8 +288,10 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       save,
       load,
       remove,
+      locale,
     }),
     [
+      locale,
       state.hsv,
       state.harmony,
       state.sliderMode,
