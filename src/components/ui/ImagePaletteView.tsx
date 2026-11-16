@@ -1,9 +1,10 @@
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,12 +14,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BottomSheet, SheetAction } from './BottomSheet';
 import { Button, IconButton } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
-import { CloseIcon, ImageIcon } from '@/src/components/icons';
+import { CameraIcon, CloseIcon, ImageIcon } from '@/src/components/icons';
 import type { ImagePalette } from '@/src/state/palettes';
-import { colors, iconTone, radius, type } from '@/src/theme/tokens';
+import { colors, radius, type } from '@/src/theme/tokens';
 import {
   extractPalettes,
   IMAGE_MOODS,
@@ -30,6 +32,8 @@ import { readPixels } from '@/src/utils/imagePixels';
 /** Full screen on phones, a centered sheet on upright tablets, a two-column dialog when wide */
 export type ImagePaletteLayout = 'screen' | 'sheet' | 'dialog';
 
+type Source = 'gallery' | 'camera';
+
 interface Picked {
   uri: string;
   name: string;
@@ -38,11 +42,14 @@ interface Picked {
 }
 
 interface ImagePaletteViewProps {
-  visible: boolean;
   layout: ImagePaletteLayout;
-  onClose: () => void;
   /** Takes the palette to the editor */
   onUse: (palette: ImagePalette) => void;
+}
+
+export interface ImagePaletteHandle {
+  /** Asks where the photo comes from, then shows its colors */
+  start: () => void;
 }
 
 const SPOT = 26;
@@ -54,233 +61,293 @@ const MAX_PHOTO_HEIGHT: Record<ImagePaletteLayout, number> = {
 const SHEET_WIDTH = 560;
 const DIALOG_WIDTH = 920;
 const DIALOG_SIDE = 380;
+/** Waits for the source sheet's closing animation, so the system picker doesn't open over it */
+export const imageFlowTiming = { sheetCloseMs: 300 };
 
-/** Picks a photo and takes five colors from it, in the mood the person chooses */
-export function ImagePaletteView({ visible, layout, onClose, onUse }: ImagePaletteViewProps) {
-  const insets = useSafeAreaInsets();
-  const window = useWindowDimensions();
-  const [picked, setPicked] = useState<Picked | null>(null);
-  const [palettes, setPalettes] = useState<Record<ImageMood, MoodPalette> | null>(null);
-  const [mood, setMood] = useState<ImageMood>('vibrant');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const choose = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 1,
-    });
-    if (result.canceled || !result.assets[0]) return;
-    const asset = result.assets[0];
-    setBusy(true);
-    setError(null);
-    try {
-      const pixels = await readPixels(asset.uri, asset.width, asset.height);
-      setPalettes(extractPalettes(pixels));
+/**
+ * Palette from a photo: asks for the gallery or the camera, then shows the photo, where its colors
+ * come from and five colors in the mood the person chooses. The web has no camera to offer, so
+ * the file chooser opens straight away.
+ */
+export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewProps>(
+  function ImagePaletteView({ layout, onUse }, ref) {
+    const insets = useSafeAreaInsets();
+    const window = useWindowDimensions();
+    const [visible, setVisible] = useState(false);
+    const [asking, setAsking] = useState(false);
+    const [picked, setPicked] = useState<Picked | null>(null);
+    const [palettes, setPalettes] = useState<Record<ImageMood, MoodPalette> | null>(null);
+    const [mood, setMood] = useState<ImageMood>('vibrant');
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const pickFrom = async (source: Source) => {
+      if (asking) {
+        setAsking(false);
+        await wait(imageFlowTiming.sheetCloseMs);
+      }
+      if (source === 'camera') {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) {
+          setError('Colorixer has no access to the camera. Allow it in the system settings.');
+          // The message shows in the view when it is open, else back in the sheet
+          if (!visible) setAsking(true);
+          return;
+        }
+      }
+      const options: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 1 };
+      const result =
+        source === 'camera'
+          ? await ImagePicker.launchCameraAsync(options)
+          : await ImagePicker.launchImageLibraryAsync(options);
+      const asset = result.canceled ? null : result.assets[0];
+      if (!asset) return;
       setPicked({
         uri: asset.uri,
-        name: asset.fileName ?? 'Image',
+        // The camera names its files with an id, which says nothing to the person
+        name: source === 'camera' ? 'Camera photo' : (asset.fileName ?? 'Photo'),
         width: asset.width,
         height: asset.height,
       });
-    } catch (e) {
-      setError(`Could not read this image. ${e instanceof Error ? e.message : ''}`.trim());
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const current = palettes?.[mood] ?? null;
-
-  // Room for the photo, kept to its aspect ratio
-  const contentWidth =
-    layout === 'screen'
-      ? window.width - 32 - insets.left - insets.right
-      : layout === 'sheet'
-        ? Math.min(SHEET_WIDTH, window.width - 48) - 48
-        : Math.min(DIALOG_WIDTH, window.width - 48) - 48 - DIALOG_SIDE - 24;
-  const aspect = picked ? picked.width / picked.height : 3 / 2;
-  const photoHeight = Math.min(contentWidth / aspect, MAX_PHOTO_HEIGHT[layout]);
-  const photoWidth = photoHeight * aspect;
-
-  const photo = (
-    <View style={[styles.photo, { width: photoWidth, height: photoHeight }]}>
-      {picked ? (
-        <>
-          <Image
-            source={{ uri: picked.uri }}
-            style={{ width: photoWidth, height: photoHeight }}
-            accessibilityIgnoresInvertColors
-            accessibilityLabel={`Photo ${picked.name}`}
-          />
-          {current?.spots.map((spot, i) => (
-            <View
-              key={i}
-              pointerEvents="none"
-              style={[
-                styles.spot,
-                {
-                  left: spot.x * photoWidth - SPOT / 2,
-                  top: spot.y * photoHeight - SPOT / 2,
-                  backgroundColor: current.colors[i],
-                },
-              ]}
-            />
-          ))}
-        </>
-      ) : (
-        <View style={styles.empty}>
-          <ImageIcon size={32} color={iconTone.muted} />
-          <Text style={styles.emptyText}>Choose a photo to take its colors</Text>
-        </View>
-      )}
-      {busy && (
-        <View style={styles.busy}>
-          <ActivityIndicator color={colors.textStrong} />
-        </View>
-      )}
-    </View>
-  );
-
-  const moods = (
-    <ScrollView
-      horizontal={layout !== 'dialog'}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={[styles.moods, layout === 'dialog' && styles.moodsWrap]}
-      style={styles.moodsScroll}
-      accessibilityRole="tablist"
-    >
-      {IMAGE_MOODS.map(({ key, label }) => {
-        const selected = key === mood;
-        return (
-          <Pressable
-            key={key}
-            testID={`mood-${key}`}
-            accessibilityRole="tab"
-            accessibilityState={{ selected, disabled: !palettes }}
-            disabled={!palettes}
-            onPress={() => setMood(key)}
-            style={[styles.chip, selected && styles.chipOn, !palettes && styles.chipOff]}
-          >
-            <Text style={[styles.chipLabel, selected && styles.chipLabelOn]}>{label}</Text>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  );
-
-  const result = (
-    <View style={styles.result}>
-      {current ? (
-        <>
-          <PaletteStrip testID="image-colors" colors={current.colors} height={52} radius={14} />
-          <View style={styles.hexRow}>
-            {current.colors.map((color, i) => (
-              <Text key={`${color}-${i}`} style={styles.hex}>
-                {color}
-              </Text>
-            ))}
-          </View>
-        </>
-      ) : null}
-      {error && <Text style={styles.error}>{error}</Text>}
-      <View style={styles.source}>
-        <Text style={styles.sourceText} numberOfLines={1}>
-          {picked && current ? `${picked.name} · ${current.colors.length} colors` : 'No photo yet'}
-        </Text>
-        <Button
-          testID="choose-image"
-          label={picked ? 'Choose another' : 'Choose image'}
-          variant={picked ? 'ghost' : 'primary'}
-          icon={ImageIcon}
-          disabled={busy}
-          onPress={choose}
-        />
-      </View>
-    </View>
-  );
-
-  const use = (
-    <Button
-      testID="use-palette"
-      label="Use palette"
-      variant="primary"
-      disabled={!picked || !current || busy}
-      style={!picked || !current ? { ...styles.use, ...styles.useOff } : styles.use}
-      onPress={() =>
-        picked && current && onUse({ colors: current.colors, mood, name: picked.name })
+      setPalettes(null);
+      setError(null);
+      setVisible(true);
+      setBusy(true);
+      try {
+        const pixels = await readPixels(asset.uri, asset.width, asset.height);
+        setPalettes(extractPalettes(pixels));
+      } catch (e) {
+        setError(`Could not read this image. ${e instanceof Error ? e.message : ''}`.trim());
+      } finally {
+        setBusy(false);
       }
-    />
-  );
+    };
 
-  const header = (
-    <View style={styles.header}>
-      <IconButton icon={CloseIcon} accessibilityLabel="Close" onPress={onClose} />
-      <Text style={styles.title}>From image</Text>
-    </View>
-  );
+    const start = () => {
+      setError(null);
+      if (Platform.OS === 'web') pickFrom('gallery');
+      else setAsking(true);
+    };
+    useImperativeHandle(ref, () => ({ start }));
 
-  return (
-    <Modal
-      testID="image-palette"
-      visible={visible}
-      transparent={layout !== 'screen'}
-      animationType={layout === 'screen' ? 'slide' : 'fade'}
-      onRequestClose={onClose}
-      statusBarTranslucent
-      navigationBarTranslucent
-    >
-      {layout === 'screen' ? (
-        <View
-          style={[
-            styles.screen,
-            { paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right },
-          ]}
-        >
-          {header}
-          <ScrollView contentContainerStyle={styles.screenContent}>
-            {photo}
-            {moods}
-            {result}
-          </ScrollView>
-          <View style={[styles.footer, { paddingBottom: 16 + insets.bottom }]}>{use}</View>
+    const sourceSheet = (
+      <BottomSheet
+        testID="image-source"
+        visible={asking}
+        onClose={() => setAsking(false)}
+        title="Take colors from a photo"
+      >
+        {error && !visible && <Text style={[styles.error, styles.sheetError]}>{error}</Text>}
+        <SheetAction
+          testID="source-gallery"
+          icon={ImageIcon}
+          label="From gallery"
+          onPress={() => pickFrom('gallery')}
+        />
+        <SheetAction
+          testID="source-camera"
+          icon={CameraIcon}
+          label="From camera"
+          onPress={() => pickFrom('camera')}
+        />
+        <SheetAction label="Cancel" tone="cancel" onPress={() => setAsking(false)} />
+      </BottomSheet>
+    );
+
+    if (!visible || !picked) return sourceSheet;
+
+    const current = palettes?.[mood] ?? null;
+
+    // Room for the photo, kept to its aspect ratio
+    const contentWidth =
+      layout === 'screen'
+        ? window.width - 32 - insets.left - insets.right
+        : layout === 'sheet'
+          ? Math.min(SHEET_WIDTH, window.width - 48) - 48
+          : Math.min(DIALOG_WIDTH, window.width - 48) - 48 - DIALOG_SIDE - 24;
+    const aspect = picked.width / picked.height;
+    const photoHeight = Math.min(contentWidth / aspect, MAX_PHOTO_HEIGHT[layout]);
+    const photoWidth = photoHeight * aspect;
+    const close = () => setVisible(false);
+
+    const photo = (
+      <View style={[styles.photo, { width: photoWidth, height: photoHeight }]}>
+        <Image
+          source={{ uri: picked.uri }}
+          style={{ width: photoWidth, height: photoHeight }}
+          accessibilityIgnoresInvertColors
+          accessibilityLabel={`Photo ${picked.name}`}
+        />
+        {current?.spots.map((spot, i) => (
+          <View
+            key={i}
+            pointerEvents="none"
+            style={[
+              styles.spot,
+              {
+                left: spot.x * photoWidth - SPOT / 2,
+                top: spot.y * photoHeight - SPOT / 2,
+                backgroundColor: current.colors[i],
+              },
+            ]}
+          />
+        ))}
+        {busy && (
+          <View style={styles.busy}>
+            <ActivityIndicator color={colors.textStrong} />
+          </View>
+        )}
+      </View>
+    );
+
+    const moods = (
+      <ScrollView
+        horizontal={layout !== 'dialog'}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={[styles.moods, layout === 'dialog' && styles.moodsWrap]}
+        style={styles.moodsScroll}
+        accessibilityRole="tablist"
+      >
+        {IMAGE_MOODS.map(({ key, label }) => {
+          const selected = key === mood;
+          return (
+            <Pressable
+              key={key}
+              testID={`mood-${key}`}
+              accessibilityRole="tab"
+              accessibilityState={{ selected, disabled: !palettes }}
+              disabled={!palettes}
+              onPress={() => setMood(key)}
+              style={[styles.chip, selected && styles.chipOn, !palettes && styles.chipOff]}
+            >
+              <Text style={[styles.chipLabel, selected && styles.chipLabelOn]}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    );
+
+    const result = (
+      <View style={styles.result}>
+        {current && (
+          <>
+            <PaletteStrip testID="image-colors" colors={current.colors} height={52} radius={14} />
+            <View style={styles.hexRow}>
+              {current.colors.map((color, i) => (
+                <Text key={`${color}-${i}`} style={styles.hex}>
+                  {color}
+                </Text>
+              ))}
+            </View>
+          </>
+        )}
+        {error && <Text style={styles.error}>{error}</Text>}
+        <View style={styles.source}>
+          <Text style={styles.sourceText} numberOfLines={1}>
+            {current ? `${picked.name} · ${current.colors.length} colors` : picked.name}
+          </Text>
+          <Button
+            testID="choose-image"
+            label="Choose another"
+            variant="ghost"
+            icon={ImageIcon}
+            disabled={busy}
+            onPress={start}
+          />
         </View>
-      ) : (
-        <View style={styles.scrim}>
-          <Pressable style={StyleSheet.absoluteFill} accessibilityLabel="Close" onPress={onClose} />
+      </View>
+    );
+
+    const use = (
+      <Button
+        testID="use-palette"
+        label="Use palette"
+        variant="primary"
+        disabled={!current || busy}
+        style={current ? styles.use : { ...styles.use, ...styles.useOff }}
+        onPress={() => {
+          if (!current) return;
+          setVisible(false);
+          onUse({ colors: current.colors, mood, name: picked.name });
+        }}
+      />
+    );
+
+    const header = (
+      <View style={styles.header}>
+        <IconButton icon={CloseIcon} accessibilityLabel="Close" onPress={close} />
+        <Text style={styles.title}>From image</Text>
+      </View>
+    );
+
+    return (
+      <Modal
+        testID="image-palette"
+        visible
+        transparent={layout !== 'screen'}
+        animationType={layout === 'screen' ? 'slide' : 'fade'}
+        onRequestClose={close}
+        statusBarTranslucent
+        navigationBarTranslucent
+      >
+        {layout === 'screen' ? (
           <View
             style={[
-              styles.card,
-              layout === 'sheet'
-                ? { width: Math.min(SHEET_WIDTH, window.width - 48) }
-                : { width: Math.min(DIALOG_WIDTH, window.width - 48), flexDirection: 'column' },
+              styles.screen,
+              { paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right },
             ]}
           >
             {header}
-            {layout === 'sheet' ? (
-              <View style={styles.cardColumn}>
-                {photo}
-                {moods}
-                {result}
-                {use}
-              </View>
-            ) : (
-              <View style={styles.cardRow}>
-                {photo}
-                <View style={styles.side}>
+            <ScrollView contentContainerStyle={styles.screenContent}>
+              {photo}
+              {moods}
+              {result}
+            </ScrollView>
+            <View style={[styles.footer, { paddingBottom: 16 + insets.bottom }]}>{use}</View>
+          </View>
+        ) : (
+          <View style={styles.scrim}>
+            <Pressable style={StyleSheet.absoluteFill} accessibilityLabel="Close" onPress={close} />
+            <View
+              style={[
+                styles.card,
+                {
+                  width: Math.min(
+                    layout === 'sheet' ? SHEET_WIDTH : DIALOG_WIDTH,
+                    window.width - 48,
+                  ),
+                },
+              ]}
+            >
+              {header}
+              {layout === 'sheet' ? (
+                <View style={styles.cardColumn}>
+                  {photo}
                   {moods}
                   {result}
-                  <View style={styles.spacer} />
                   {use}
                 </View>
-              </View>
-            )}
+              ) : (
+                <View style={styles.cardRow}>
+                  {photo}
+                  <View style={styles.side}>
+                    {moods}
+                    {result}
+                    <View style={styles.spacer} />
+                    {use}
+                  </View>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
-      )}
-    </Modal>
-  );
-}
+        )}
+        {sourceSheet}
+      </Modal>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   screen: {
@@ -317,18 +384,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#FFFFFF',
     boxShadow: '0 0 0 1px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.4)',
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    padding: 24,
-  },
-  emptyText: {
-    ...type.bodyDefault,
-    color: colors.textMuted,
-    textAlign: 'center',
   },
   busy: {
     ...StyleSheet.absoluteFill,
@@ -383,6 +438,10 @@ const styles = StyleSheet.create({
   error: {
     ...type.caption,
     color: colors.danger,
+  },
+  sheetError: {
+    marginHorizontal: 12,
+    marginBottom: 8,
   },
   source: {
     flexDirection: 'row',

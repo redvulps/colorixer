@@ -7,6 +7,7 @@ import { ExpandIcon, ExportIcon, FileIcon, ImageIcon } from '@/src/components/ic
 import {
   BottomSheet,
   HarmonyStrip,
+  type ImagePaletteHandle,
   ImagePaletteView,
   Overline,
   PaletteFullscreen,
@@ -54,7 +55,7 @@ export function ColorScreen() {
   const [exportOpen, setExportOpen] = useState(false);
   const [copyColor, setCopyColor] = useState<string | null>(null);
   const [fullOpen, setFullOpen] = useState(false);
-  const [imageOpen, setImageOpen] = useState(false);
+  const imageFlow = useRef<ImagePaletteHandle>(null);
   const [fullOrigin, setFullOrigin] = useState<Rect | null>(null);
   const { top: topInset, hold: holdTopInset } = useHeldTopInset(fullOpen);
   const stripRef = useRef<React.ComponentRef<typeof View>>(null);
@@ -77,7 +78,6 @@ export function ColorScreen() {
   };
 
   const onUseImage = (palette: ImagePalette) => {
-    setImageOpen(false);
     applyImage(palette);
     toast(`Palette from ${palette.name}`);
   };
@@ -116,7 +116,7 @@ export function ColorScreen() {
                   testID="image-button"
                   icon={ImageIcon}
                   accessibilityLabel="Take a palette from an image"
-                  onPress={() => setImageOpen(true)}
+                  onPress={() => imageFlow.current?.start()}
                 />
                 <PillIconButton
                   testID="fullscreen-button"
@@ -218,12 +218,7 @@ export function ColorScreen() {
         )}
         <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
       </BottomSheet>
-      <ImagePaletteView
-        visible={imageOpen}
-        layout="screen"
-        onClose={() => setImageOpen(false)}
-        onUse={onUseImage}
-      />
+      <ImagePaletteView ref={imageFlow} layout="screen" onUse={onUseImage} />
     </View>
   );
 }

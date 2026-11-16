@@ -43,7 +43,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Colorixer opens the photos you pick to take their colors.",
-          "cameraPermission": false,
+          "cameraPermission": "Colorixer uses the camera to take a photo and pull its colors.",
           "microphonePermission": false
         }
       ]

@@ -21,6 +21,7 @@ import {
   CopyField,
   HarmonyRow,
   type IconComponent,
+  type ImagePaletteHandle,
   ImagePaletteView,
   LogoMark,
   type MenuPoint,
@@ -103,7 +104,7 @@ export function TabletWorkspace() {
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [view, setView] = useState<TabletView>('color');
-  const [imageOpen, setImageOpen] = useState(false);
+  const imageFlow = useRef<ImagePaletteHandle>(null);
   const [exportAt, setExportAt] = useState<MenuPoint | null>(null);
   const [selected, setSelected] = useState<SavedPalette | null>(null);
   const [copyColor, setCopyColor] = useState<string | null>(null);
@@ -151,7 +152,6 @@ export function TabletWorkspace() {
   };
 
   const onUseImage = (palette: ImagePalette) => {
-    setImageOpen(false);
     setView('color');
     applyImage(palette);
     toast(`Palette from ${palette.name}`);
@@ -195,7 +195,7 @@ export function TabletWorkspace() {
           variant="ghost"
           icon={ImageIcon}
           label="Image"
-          onPress={() => setImageOpen(true)}
+          onPress={() => imageFlow.current?.start()}
         />
         <Button
           testID="save-button"
@@ -430,12 +430,7 @@ export function TabletWorkspace() {
         )}
         <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
       </BottomSheet>
-      <ImagePaletteView
-        visible={imageOpen}
-        layout="sheet"
-        onClose={() => setImageOpen(false)}
-        onUse={onUseImage}
-      />
+      <ImagePaletteView ref={imageFlow} layout="sheet" onUse={onUseImage} />
     </View>
   );
 }

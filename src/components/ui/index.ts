@@ -3,7 +3,11 @@ export { BottomSheet, SheetAction } from './BottomSheet';
 export { Button, IconButton, PillButton, PillIconButton, type IconComponent } from './Button';
 export { CopyField, ExportOption, HarmonyRow, Overline, PaletteValue, SavedRow } from './Desktop';
 export { HarmonyStrip } from './HarmonyStrip';
-export { ImagePaletteView, type ImagePaletteLayout } from './ImagePaletteView';
+export {
+  type ImagePaletteHandle,
+  type ImagePaletteLayout,
+  ImagePaletteView,
+} from './ImagePaletteView';
 export { PaletteCard } from './PaletteCard';
 export { PaletteFullscreen, type Rect } from './PaletteFullscreen';
 export { PaletteStrip } from './PaletteStrip';

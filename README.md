@@ -6,7 +6,7 @@ Colorixer is a powerful color picker application that helps artists and designer
 
 - **Color wheel and HSV/HSL controls**: The wheel is the painter's RYB circle (red, yellow and blue primaries, after Gossett and Chen's pigment-mixing model), so complements are red and green, blue and orange, yellow and violet. Drag on it to pick hue and saturation, or set hue, saturation and value with sliders and numeric fields. The HSV/HSL switch above the sliders trades value for lightness, and the app remembers the choice
 - **Color Harmony Generation**: Analogous, complementary, split complementary, triadic, square, compound, shades and monochromatic palettes of five colors, drawn on the wheel. Saved palettes keep the colors they were saved with
-- **Palettes from images**: The image button next to Save takes five colors from a photo, in one of six moods (Natural, Vibrant, Light, Muted, Deep, Dark), and marks where each color comes from. The photo is read on the device; nothing is uploaded
+- **Palettes from images**: The image button next to Save asks for a photo from the gallery or the camera and takes five colors from it, in one of six moods (Natural, Vibrant, Light, Muted, Deep, Dark), and marks where each color comes from. The photo is read on the device; nothing is uploaded
 - **Saved palettes**: Save a palette, reopen it later, export or delete it from the Palettes tab
 - **Full-screen palette**: The full-screen button next to Save shows the palette over the whole screen; tap anywhere to go back
 - **Copy in any format**: Tap a swatch to copy its HEX value, long press for RGB, HSL or HSV
@@ -80,7 +80,7 @@ The flows are platform-agnostic. Android-only checks live in `.maestro/subflows/
 
 1. **Select a Base Color**: Drag on the color wheel, or use the H, S and V (or H, S and L) sliders and fields
 2. **Choose a Harmony Type**: Tap one of the harmony diagrams to generate related colors; on phones the row of diagrams scrolls sideways
-3. **Or start from a photo**: Tap the image button, choose a photo and a mood, then Use palette
+3. **Or start from a photo**: Tap the image button, pick From gallery or From camera, choose a mood, then Use palette; Choose another takes a new photo
 4. **Save**: Keep the palette in the Palettes tab (Palettes at the top on upright tablets, the sidebar on wide screens)
 5. **Export**: Share your palette with drawing applications in your preferred format
 

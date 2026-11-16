@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,6 +17,7 @@ import {
   CopyField,
   ExportOption,
   HarmonyRow,
+  type ImagePaletteHandle,
   ImagePaletteView,
   LogoMark,
   type MenuPoint,
@@ -87,7 +88,7 @@ export function DesktopWorkspace() {
   // Zero in a browser; on a tablet, the system bars the workspace has to stay clear of
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState<Menu | null>(null);
-  const [imageOpen, setImageOpen] = useState(false);
+  const imageFlow = useRef<ImagePaletteHandle>(null);
   const closeMenu = () => setMenu(null);
 
   const topInset = useTopInset();
@@ -132,7 +133,6 @@ export function DesktopWorkspace() {
   };
 
   const onUseImage = (palette: ImagePalette) => {
-    setImageOpen(false);
     applyImage(palette);
     toast(`Palette from ${palette.name}`);
   };
@@ -161,7 +161,7 @@ export function DesktopWorkspace() {
           variant="ghost"
           icon={ImageIcon}
           label="Image"
-          onPress={() => setImageOpen(true)}
+          onPress={() => imageFlow.current?.start()}
         />
         <Button
           testID="save-button"
@@ -362,12 +362,7 @@ export function DesktopWorkspace() {
           </>
         )}
       </PopoverMenu>
-      <ImagePaletteView
-        visible={imageOpen}
-        layout="dialog"
-        onClose={() => setImageOpen(false)}
-        onUse={onUseImage}
-      />
+      <ImagePaletteView ref={imageFlow} layout="dialog" onUse={onUseImage} />
     </View>
   );
 }

@@ -50,6 +50,13 @@ export const ImageIcon = (p: IconProps) => (
   </StrokeIcon>
 );
 
+export const CameraIcon = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <Path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+    <Path d="M15.5 13.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z" />
+  </StrokeIcon>
+);
+
 export const CloseIcon = (p: IconProps) => (
   <StrokeIcon {...p}>
     <Path d="M6 6l12 12" />
