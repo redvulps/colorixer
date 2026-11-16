@@ -15,6 +15,7 @@ import type { IconComponent } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
 import { useReduceMotion } from '@/src/hooks/useReduceMotion';
+import { t } from '@/src/i18n';
 import { colors, control, iconTone, radius, type } from '@/src/theme/tokens';
 
 const OPEN_MS = 280;
@@ -107,7 +108,7 @@ export function BottomSheet({
     >
       <View style={styles.root}>
         <Animated.View style={[styles.scrim, { opacity: progress }]}>
-          <Pressable style={styles.fill} onPress={onClose} accessibilityLabel="Close" />
+          <Pressable style={styles.fill} onPress={onClose} accessibilityLabel={t('common.close')} />
         </Animated.View>
         <Animated.View
           testID={testID}

@@ -5,6 +5,7 @@ import { IconButton } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
 import { HarmonyIcon, ImageIcon, MoreIcon } from '@/src/components/icons';
+import { t } from '@/src/i18n';
 import {
   formatPaletteDate,
   paletteColors,
@@ -30,7 +31,7 @@ export function PaletteCard({ palette, current, onPress, onMore }: PaletteCardPr
         testID={`palette-${palette.name}`}
         accessibilityRole="button"
         accessibilityLabel={`${palette.name}, ${paletteLabel(palette)}`}
-        accessibilityHint="Opens the palette in the Color tab"
+        accessibilityHint={t('palette.openHint')}
         onPress={onPress}
         style={({ pressed }) => [styles.main, pressed && styles.mainPressed]}
       >
@@ -45,7 +46,7 @@ export function PaletteCard({ palette, current, onPress, onMore }: PaletteCardPr
               {palette.name}
             </Text>
             <Text style={styles.meta}>
-              {paletteLabel(palette)} · {swatches.length} colors ·{' '}
+              {paletteLabel(palette)} · {t('common.colors', { count: swatches.length })} ·{' '}
               {formatPaletteDate(palette.createdAt)}
             </Text>
           </View>
@@ -56,7 +57,7 @@ export function PaletteCard({ palette, current, onPress, onMore }: PaletteCardPr
       <IconButton
         icon={MoreIcon}
         tone="muted"
-        accessibilityLabel={`More actions for ${palette.name}`}
+        accessibilityLabel={t('palette.more', { name: palette.name })}
         onPress={onMore}
         testID={`palette-more-${palette.name}`}
         style={styles.more}

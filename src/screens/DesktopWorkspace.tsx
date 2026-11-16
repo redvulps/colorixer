@@ -33,10 +33,11 @@ import {
   EXPORT_FORMATS,
   type ExportFormat,
   exportPalette,
-  UNSAVED_NAME,
+  unsavedName,
   useCopy,
 } from '@/src/hooks/usePaletteActions';
 import { useTopInset } from '@/src/hooks/useTopInset';
+import { t } from '@/src/i18n';
 import {
   type ImagePalette,
   paletteColors,
@@ -105,11 +106,11 @@ export function DesktopWorkspace() {
     ),
   );
   const sliderWidth = Math.min(470, canvasWidth - 48);
-  const name = current?.name ?? UNSAVED_NAME;
+  const name = current?.name ?? unsavedName();
 
   const onSave = () => {
     const palette = save();
-    toast(`Saved “${palette.name}”`);
+    toast(t('toast.saved', { name: palette.name }));
   };
 
   const onExport = (format: ExportFormat, palette?: SavedPalette) => {
@@ -124,7 +125,7 @@ export function DesktopWorkspace() {
   const onDelete = (palette: SavedPalette) => {
     setMenu(null);
     remove(palette.id);
-    toast(`Deleted “${palette.name}”`);
+    toast(t('toast.deleted', { name: palette.name }));
   };
 
   const onCopy = (text: string) => {
@@ -134,7 +135,7 @@ export function DesktopWorkspace() {
 
   const onUseImage = (palette: ImagePalette) => {
     applyImage(palette);
-    toast(`Palette from ${palette.name}`);
+    toast(t('toast.fromImage', { name: palette.name }));
   };
 
   return (
@@ -153,21 +154,22 @@ export function DesktopWorkspace() {
         <LogoMark />
         <Text style={styles.brand}>Colorixer</Text>
         <Text style={styles.crumb}>
-          / Palettes / <Text style={styles.crumbName}>{current?.name ?? 'Untitled'}</Text>
+          / {t('tab.palettes')} /{' '}
+          <Text style={styles.crumbName}>{current?.name ?? t('palette.untitled')}</Text>
         </Text>
         <View style={styles.spacer} />
         <Button
           testID="image-button"
           variant="ghost"
           icon={ImageIcon}
-          label="Image"
+          label={t('common.image')}
           onPress={() => imageFlow.current?.start()}
         />
         <Button
           testID="save-button"
           variant={current ? 'saved' : 'ghost'}
           icon={current ? CheckIcon : SaveIcon}
-          label={current ? 'Saved' : 'Save'}
+          label={current ? t('common.saved') : t('common.save')}
           disabled={!!current}
           onPress={onSave}
         />
@@ -175,7 +177,7 @@ export function DesktopWorkspace() {
           testID="share-button"
           variant="primary"
           icon={ExportIcon}
-          label="Export"
+          label={t('common.export')}
           chevron
           accessibilityState={{ expanded: menu?.kind === 'export' }}
           // Right-aligned under the button
@@ -193,7 +195,7 @@ export function DesktopWorkspace() {
             { paddingLeft: 12 + insets.left, paddingBottom: 18 + insets.bottom },
           ]}
         >
-          <Overline style={styles.sidebarLabel}>Harmony</Overline>
+          <Overline style={styles.sidebarLabel}>{t('section.harmony')}</Overline>
           <View testID="harmony-selector">
             {HARMONIES.map(({ key }) => (
               <HarmonyRow
@@ -205,7 +207,9 @@ export function DesktopWorkspace() {
               />
             ))}
           </View>
-          <Overline style={[styles.sidebarLabel, styles.sidebarLabelGap]}>Saved palettes</Overline>
+          <Overline style={[styles.sidebarLabel, styles.sidebarLabelGap]}>
+            {t('section.savedPalettes')}
+          </Overline>
           {saved.length > 0 ? (
             saved.map((palette) => (
               <SavedRow
@@ -217,7 +221,7 @@ export function DesktopWorkspace() {
               />
             ))
           ) : (
-            <Text style={styles.sidebarEmpty}>Saved palettes show up here.</Text>
+            <Text style={styles.sidebarEmpty}>{t('section.savedEmpty')}</Text>
           )}
         </ScrollView>
 
@@ -242,7 +246,7 @@ export function DesktopWorkspace() {
           ]}
         >
           <View style={styles.section}>
-            <Overline>Base color</Overline>
+            <Overline>{t('section.baseColor')}</Overline>
             <View style={[styles.baseSwatch, { backgroundColor: base }]}>
               <Text style={[styles.baseHex, { color: inkOn(base) }]}>{base}</Text>
             </View>
@@ -253,7 +257,7 @@ export function DesktopWorkspace() {
           </View>
 
           <View testID="generated-colors" style={styles.paletteSection}>
-            <Overline style={styles.paletteLabel}>{`Palette · ${kind}`}</Overline>
+            <Overline style={styles.paletteLabel}>{t('palette.header', { kind })}</Overline>
             {colors.map((color, i) => (
               <PaletteValue
                 key={`${color}-${i}`}
@@ -265,7 +269,7 @@ export function DesktopWorkspace() {
           </View>
 
           <View style={styles.exportSection}>
-            <Overline>Export</Overline>
+            <Overline>{t('common.export')}</Overline>
             {EXPORT_FORMATS.map(({ format, ext }) => (
               <ExportOption
                 key={format}
@@ -310,7 +314,7 @@ export function DesktopWorkspace() {
                 key={format}
                 compact
                 icon={FileIcon}
-                label={`Export to ${exportLabel(format)}`}
+                label={t('export.to', { app: exportLabel(format) })}
                 ext={ext}
                 onPress={() => onExport(format, menu.palette)}
               />
@@ -319,7 +323,7 @@ export function DesktopWorkspace() {
               compact
               icon={TrashIcon}
               tone="danger"
-              label="Delete palette"
+              label={t('palette.delete')}
               onPress={() => onDelete(menu.palette)}
             />
           </>
@@ -337,25 +341,25 @@ export function DesktopWorkspace() {
           <>
             <SheetAction
               compact
-              label="Copy as HEX"
+              label={t('copy.as', { format: 'HEX' })}
               ext={menu.color}
               onPress={() => onCopy(menu.color)}
             />
             <SheetAction
               compact
-              label="Copy as RGB"
+              label={t('copy.as', { format: 'RGB' })}
               ext={rgbString(menu.color)}
               onPress={() => onCopy(rgbString(menu.color))}
             />
             <SheetAction
               compact
-              label="Copy as HSL"
+              label={t('copy.as', { format: 'HSL' })}
               ext={hslString(menu.color)}
               onPress={() => onCopy(hslString(menu.color))}
             />
             <SheetAction
               compact
-              label="Copy as HSV"
+              label={t('copy.as', { format: 'HSV' })}
               ext={hsvString(menu.color)}
               onPress={() => onCopy(hsvString(menu.color))}
             />

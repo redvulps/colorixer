@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Colorixer usa la cámara para tomar una foto y sacar sus colores.",
+    "NSPhotoLibraryUsageDescription": "Colorixer abre las fotos que eliges para sacar sus colores."
+  }
+}

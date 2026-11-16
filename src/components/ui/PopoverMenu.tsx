@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 
+import { t } from '@/src/i18n';
 import { colors, control, radius, shadows } from '@/src/theme/tokens';
 
 export interface MenuPoint {
@@ -66,7 +67,7 @@ export function PopoverMenu({
       <Pressable
         style={StyleSheet.absoluteFill}
         onPress={onClose}
-        accessibilityLabel="Close menu"
+        accessibilityLabel={t('menu.close')}
       />
       <View testID={testID} accessibilityRole="menu" style={[styles.menu, { top, left, width }]}>
         {children}

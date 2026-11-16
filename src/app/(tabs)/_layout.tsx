@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ColorIcon, PalettesIcon } from '@/src/components/icons';
 import { TabButton, ToastProvider } from '@/src/components/ui';
 import { layoutFor } from '@/src/hooks/useLayout';
+import { t } from '@/src/i18n';
 import { tabletToastBottom } from '@/src/screens/TabletWorkspace';
 import { colors, control } from '@/src/theme/tokens';
 
@@ -34,10 +35,10 @@ export default function TabsLayout() {
           style={[styles.bar, { paddingBottom: barBottom }, layout !== 'phone' && styles.hidden]}
         >
           <TabTrigger name="index" href="/" asChild>
-            <TabButton testID="tab-color" label="Color" icon={ColorIcon} />
+            <TabButton testID="tab-color" label={t('tab.color')} icon={ColorIcon} />
           </TabTrigger>
           <TabTrigger name="palettes" href="/palettes" asChild>
-            <TabButton testID="tab-palettes" label="Palettes" icon={PalettesIcon} />
+            <TabButton testID="tab-palettes" label={t('tab.palettes')} icon={PalettesIcon} />
           </TabTrigger>
         </TabList>
       </Tabs>

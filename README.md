@@ -13,6 +13,7 @@ Colorixer is a powerful color picker application that helps artists and designer
 - **Export to Drawing Applications**: Export color palettes in multiple formats:
   - Adobe Swatch Exchange (ASE) for Photoshop and other Adobe applications
   - Procreate Swatches for the popular iPad drawing app
+- **Languages**: English, Brazilian Portuguese and Spanish, picked from the device's preferred languages
 - **Cross-Platform**: Works on web, iOS, and Android. Windows 1024 px wide or more get a three-column workspace, and upright tablets get Color and Palettes side by side in one screen. Phones stay in portrait; tablets turn
 
 ## Getting Started
@@ -132,6 +133,16 @@ The extraction (`src/utils/extract.ts`) follows published, open methods rather t
 | Muted | 0.42–0.90, aiming at 0.68 | 0.015–0.095, aiming at 0.05 |
 | Deep | 0.30–0.62, aiming at 0.46 | at least 0.08, aiming at 0.20 |
 | Dark | up to 0.42, aiming at 0.27 | aiming at 0.10 |
+
+## Languages
+
+The app speaks English, Brazilian Portuguese and Spanish, and follows the device: it takes the first of the person's preferred languages that it speaks (`expo-localization`). Any Portuguese gets Brazilian Portuguese, any Spanish gets Spanish, and anything else falls back to English. There is no language setting in the app.
+
+- Texts live in `src/i18n`: `en.ts` defines every key, and `pt-BR.ts` and `es.ts` must give the same keys with the same `{placeholders}`; TypeScript and `src/i18n/__tests__` check both. Texts that depend on a count give a `one` and an `other` form.
+- `t(key, params)` returns the text in the current language; dates go through `formatShortDate`.
+- Copied values (`hsl(…)`, `rgb(…)`, hex) and format names (HEX, RGB, HSL, HSV) are not translated.
+- iOS permission texts are translated in `locales/pt-BR.json` and `locales/es.json`, registered under `locales` in `app.json`.
+- To check a language on an Android 13+ emulator without changing the system: `adb shell cmd locale set-app-locales com.redvulps.colorixer --locales pt-BR` (an empty `--locales ""` goes back to the system language).
 
 ## Supported Export Formats
 

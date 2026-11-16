@@ -3,6 +3,7 @@ import React, { useMemo, useRef } from 'react';
 import { Image, PanResponder, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 
+import { t } from '@/src/i18n';
 import type { Hsv } from '@/src/utils/color';
 import { hueToRyb, rybToHue } from '@/src/utils/ryb';
 
@@ -89,7 +90,7 @@ export function ColorWheel({
         testID={testID}
         accessible
         accessibilityRole="adjustable"
-        accessibilityLabel="Color wheel"
+        accessibilityLabel={t('wheel.label')}
         accessibilityValue={{ text: colors[0] }}
         style={{ width: size, height: size, borderRadius: radius, margin: PAD }}
         {...responder.panHandlers}

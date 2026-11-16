@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, type PressableProps, StyleSheet, Text, type ViewStyle } from 'react-native';
 
 import { CheckIcon, ChevronDownIcon, type IconProps, SaveIcon } from '@/src/components/icons';
+import { t } from '@/src/i18n';
 import { colors, control, iconTone, type IconTone, type } from '@/src/theme/tokens';
 
 export type IconComponent = React.ComponentType<IconProps>;
@@ -94,7 +95,7 @@ export function PillButton({ saved, ...props }: PillButtonProps) {
         <SaveIcon size={17} color={iconTone.strong} />
       )}
       <Text style={[type.labelPill, { color: saved ? colors.textMuted : colors.textStrong }]}>
-        {saved ? 'Saved' : 'Save'}
+        {saved ? t('common.saved') : t('common.save')}
       </Text>
     </Pressable>
   );

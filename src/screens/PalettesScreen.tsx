@@ -6,6 +6,7 @@ import { FileIcon, TrashIcon } from '@/src/components/icons';
 import { AppBar, BottomSheet, PaletteCard, SheetAction, useToast } from '@/src/components/ui';
 import { EXPORT_FORMATS, exportPalette } from '@/src/hooks/usePaletteActions';
 import { useTopInset } from '@/src/hooks/useTopInset';
+import { t } from '@/src/i18n';
 import { paletteColors, paletteLabel, type SavedPalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
 
@@ -25,7 +26,7 @@ export function PalettesScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: topInset }]}>
-      <AppBar title="Palettes" meta={`${saved.length} saved`} />
+      <AppBar title={t('tab.palettes')} meta={t('palette.savedCount', { count: saved.length })} />
       <FlatList
         data={saved}
         keyExtractor={(p) => p.id}
@@ -40,10 +41,8 @@ export function PalettesScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No saved palettes</Text>
-            <Text style={styles.emptyText}>
-              Save a palette on the Color tab and it shows up here.
-            </Text>
+            <Text style={styles.emptyTitle}>{t('palette.emptyTitle')}</Text>
+            <Text style={styles.emptyText}>{t('palette.emptyPhone')}</Text>
           </View>
         }
       />
@@ -54,7 +53,9 @@ export function PalettesScreen() {
         onClose={() => setSelected(null)}
         title={selected?.name}
         subtitle={
-          selected ? `${paletteLabel(selected)} · ${selectedColors.length} colors` : undefined
+          selected
+            ? `${paletteLabel(selected)} · ${t('common.colors', { count: selectedColors.length })}`
+            : undefined
         }
         palette={selectedColors}
       >
@@ -64,7 +65,7 @@ export function PalettesScreen() {
               <SheetAction
                 key={format}
                 icon={FileIcon}
-                label={`Export to ${app}`}
+                label={t('export.to', { app })}
                 ext={ext}
                 onPress={() => {
                   setSelected(null);
@@ -75,16 +76,16 @@ export function PalettesScreen() {
             <SheetAction
               icon={TrashIcon}
               tone="danger"
-              label="Delete palette"
+              label={t('palette.delete')}
               onPress={() => {
                 remove(selected.id);
                 setSelected(null);
-                toast(`Deleted “${selected.name}”`);
+                toast(t('toast.deleted', { name: selected.name }));
               }}
             />
           </>
         )}
-        <SheetAction label="Cancel" tone="cancel" onPress={() => setSelected(null)} />
+        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setSelected(null)} />
       </BottomSheet>
     </View>
   );

@@ -22,10 +22,11 @@ import {
   EXPORT_FORMATS,
   exportPalette,
   haptic,
-  UNSAVED_NAME,
+  unsavedName,
   useCopy,
 } from '@/src/hooks/usePaletteActions';
 import { useHeldTopInset } from '@/src/hooks/useTopInset';
+import { t } from '@/src/i18n';
 import { type ImagePalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
 import { hslString, hsvString, rgbString } from '@/src/utils/color';
@@ -61,12 +62,12 @@ export function ColorScreen() {
   const stripRef = useRef<React.ComponentRef<typeof View>>(null);
 
   const wheelSize = Math.min(MAX_WHEEL, width - 32);
-  const name = current?.name ?? UNSAVED_NAME;
+  const name = current?.name ?? unsavedName();
 
   const onSave = () => {
     const palette = save();
     haptic();
-    toast(`Saved “${palette.name}”`);
+    toast(t('toast.saved', { name: palette.name }));
   };
 
   // The full-screen view grows out of the bar, so it needs the bar's place on screen
@@ -79,7 +80,7 @@ export function ColorScreen() {
 
   const onUseImage = (palette: ImagePalette) => {
     applyImage(palette);
-    toast(`Palette from ${palette.name}`);
+    toast(t('toast.fromImage', { name: palette.name }));
   };
 
   const copyAs = (text: string) => {
@@ -115,19 +116,19 @@ export function ColorScreen() {
                 <PillIconButton
                   testID="image-button"
                   icon={ImageIcon}
-                  accessibilityLabel="Take a palette from an image"
+                  accessibilityLabel={t('image.take')}
                   onPress={() => imageFlow.current?.start()}
                 />
                 <PillIconButton
                   testID="fullscreen-button"
                   icon={ExpandIcon}
-                  accessibilityLabel="Show the palette in full screen"
+                  accessibilityLabel={t('fullscreen.show')}
                   onPress={openFull}
                 />
                 <PillIconButton
                   testID="share-button"
                   icon={ExportIcon}
-                  accessibilityLabel="Export palette"
+                  accessibilityLabel={t('export.palette')}
                   onPress={() => setExportOpen(true)}
                 />
               </View>
@@ -162,7 +163,7 @@ export function ColorScreen() {
         visible={fullOpen}
         origin={fullOrigin}
         colors={colors}
-        label={`${current ? `${current.name} · ` : ''}${kind} · ${colors.length} colors`}
+        label={`${current ? `${current.name} · ` : ''}${kind} · ${t('common.colors', { count: colors.length })}`}
         onClose={() => setFullOpen(false)}
       />
 
@@ -170,15 +171,15 @@ export function ColorScreen() {
         testID="export-sheet"
         visible={exportOpen}
         onClose={() => setExportOpen(false)}
-        title={current?.name ?? 'Current palette'}
-        subtitle={`${kind} · ${colors.length} colors`}
+        title={current?.name ?? t('palette.current')}
+        subtitle={`${kind} · ${t('common.colors', { count: colors.length })}`}
         palette={colors}
       >
         {EXPORT_FORMATS.map(({ format, app, ext }) => (
           <SheetAction
             key={format}
             icon={FileIcon}
-            label={`Export to ${app}`}
+            label={t('export.to', { app })}
             ext={ext}
             onPress={() => {
               setExportOpen(false);
@@ -186,7 +187,11 @@ export function ColorScreen() {
             }}
           />
         ))}
-        <SheetAction label="Cancel" tone="cancel" onPress={() => setExportOpen(false)} />
+        <SheetAction
+          label={t('common.cancel')}
+          tone="cancel"
+          onPress={() => setExportOpen(false)}
+        />
       </BottomSheet>
 
       <BottomSheet
@@ -194,29 +199,33 @@ export function ColorScreen() {
         visible={copyColor !== null}
         onClose={() => setCopyColor(null)}
         title={copyColor ?? undefined}
-        subtitle="Copy the color as"
+        subtitle={t('copy.title')}
       >
         {copyColor && (
           <>
-            <SheetAction label="Copy as HEX" ext={copyColor} onPress={() => copyAs(copyColor)} />
             <SheetAction
-              label="Copy as RGB"
+              label={t('copy.as', { format: 'HEX' })}
+              ext={copyColor}
+              onPress={() => copyAs(copyColor)}
+            />
+            <SheetAction
+              label={t('copy.as', { format: 'RGB' })}
               ext={rgbString(copyColor)}
               onPress={() => copyAs(rgbString(copyColor))}
             />
             <SheetAction
-              label="Copy as HSL"
+              label={t('copy.as', { format: 'HSL' })}
               ext={hslString(copyColor)}
               onPress={() => copyAs(hslString(copyColor))}
             />
             <SheetAction
-              label="Copy as HSV"
+              label={t('copy.as', { format: 'HSV' })}
               ext={hsvString(copyColor)}
               onPress={() => copyAs(hsvString(copyColor))}
             />
           </>
         )}
-        <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
+        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setCopyColor(null)} />
       </BottomSheet>
       <ImagePaletteView ref={imageFlow} layout="screen" onUse={onUseImage} />
     </View>

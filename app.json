@@ -10,7 +10,10 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.redvulps.colorixer"
+      "bundleIdentifier": "com.redvulps.colorixer",
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -46,7 +49,8 @@
           "cameraPermission": "Colorixer uses the camera to take a photo and pull its colors.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true
@@ -56,6 +60,10 @@
         "projectId": "d5a8b6ea-6802-4c3f-b08a-1c7341537f14"
       }
     },
-    "backgroundColor": "#111318"
+    "backgroundColor": "#111318",
+    "locales": {
+      "pt-BR": "./locales/pt-BR.json",
+      "es": "./locales/es.json"
+    }
   }
 }

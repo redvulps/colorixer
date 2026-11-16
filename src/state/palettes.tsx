@@ -9,6 +9,7 @@ import React, {
   useRef,
 } from 'react';
 
+import { formatShortDate, t } from '@/src/i18n';
 import { harmonyColors, harmonyLabel, hexToHsv, type Hsv, hsvToHex } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
 import { type ImageMood, moodLabel } from '@/src/utils/extract';
@@ -132,13 +133,15 @@ export function migratePalette(stored: StoredPalette): SavedPalette {
   };
 }
 
-/** Next free "Palette N" name */
+/** Next free "Palette N" name, in the current language */
 function nextName(saved: SavedPalette[]): string {
+  const [prefix, suffix] = t('palette.numbered', { number: '#' }).split('#');
   const used = saved
-    .map((p) => /^Palette (\d+)$/.exec(p.name)?.[1])
-    .filter((n): n is string => !!n)
-    .map(Number);
-  return `Palette ${Math.max(saved.length, ...used) + 1}`;
+    .map((p) => p.name)
+    .filter((name) => name.startsWith(prefix) && name.endsWith(suffix))
+    .map((name) => Number(name.slice(prefix.length, name.length - suffix.length)))
+    .filter((n) => Number.isInteger(n) && n > 0);
+  return t('palette.numbered', { number: Math.max(saved.length, ...used) + 1 });
 }
 
 function newId(): string {
@@ -219,7 +222,7 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
   const kind = current
     ? paletteLabel(current)
     : state.image
-      ? `Image · ${moodLabel(state.image.mood)}`
+      ? t('palette.fromImage', { mood: moodLabel(state.image.mood) })
       : harmonyLabel(state.harmony);
 
   const setHsv = useCallback((hsv: Hsv) => dispatch({ type: 'setHsv', hsv }), []);
@@ -313,7 +316,9 @@ export function usePalette(): PaletteContextValue {
 
 /** What made a saved palette: its harmony, or the image mood */
 export function paletteLabel(palette: SavedPalette): string {
-  return palette.mood ? `Image · ${moodLabel(palette.mood)}` : harmonyLabel(palette.harmony);
+  return palette.mood
+    ? t('palette.fromImage', { mood: moodLabel(palette.mood) })
+    : harmonyLabel(palette.harmony);
 }
 
 /** Colors of a saved palette */
@@ -323,5 +328,5 @@ export function paletteColors(palette: SavedPalette): string[] {
 
 /** e.g. Nov 12 */
 export function formatPaletteDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return formatShortDate(iso);
 }

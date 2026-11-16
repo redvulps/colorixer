@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native'
 
 import { ChannelSlider } from '@/src/components/ChannelSlider';
 import { Overline } from '@/src/components/ui/Desktop';
+import { t } from '@/src/i18n';
 import { type SliderMode, usePalette } from '@/src/state/palettes';
 import { colors, radius, type } from '@/src/theme/tokens';
 import { hslToHex, hslToHsv, hsvToHex, hsvToHsl } from '@/src/utils/color';
@@ -11,9 +12,21 @@ const RAINBOW = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff
 const HEADER = 32;
 const BUTTON = 26;
 
-const MODES: { mode: SliderMode; label: string; title: string }[] = [
-  { mode: 'hsv', label: 'HSV', title: 'Hue, saturation, value' },
-  { mode: 'hsl', label: 'HSL', title: 'Hue, saturation, lightness' },
+const MODES: { mode: SliderMode; label: string; readonly title: string }[] = [
+  {
+    mode: 'hsv',
+    label: 'HSV',
+    get title() {
+      return t('sliders.hsv');
+    },
+  },
+  {
+    mode: 'hsl',
+    label: 'HSL',
+    get title() {
+      return t('sliders.hsl');
+    },
+  },
 ];
 
 /** Height of the header above the sliders, for layouts that budget their height */

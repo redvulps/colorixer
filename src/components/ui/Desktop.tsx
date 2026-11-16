@@ -5,6 +5,7 @@ import { type IconComponent, IconButton } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
 import { CopyIcon, FileIcon, HarmonyIcon, MoreIcon } from '@/src/components/icons';
+import { t } from '@/src/i18n';
 import { paletteColors, paletteLabel, type SavedPalette } from '@/src/state/palettes';
 import { colors, control, iconTone, radius, type } from '@/src/theme/tokens';
 import { harmonyLabel } from '@/src/utils/color';
@@ -34,7 +35,7 @@ export function CopyField({
       <Pressable
         testID={`copy-${label.toLowerCase()}`}
         accessibilityRole="button"
-        accessibilityLabel={`Copy ${label}`}
+        accessibilityLabel={t('copy.field', { label })}
         onPress={onCopy}
         style={({ pressed }) => [styles.copy, pressed && styles.copyPressed]}
       >
@@ -59,7 +60,7 @@ export function ExportOption({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Export to ${label}`}
+      accessibilityLabel={t('export.to', { app: label })}
       onPress={onPress}
       style={({ pressed }) => [styles.option, pressed && styles.pressed]}
     >
@@ -155,7 +156,7 @@ export function SavedRow({
         tone="muted"
         iconSize={18}
         style={styles.moreButton}
-        accessibilityLabel={`More actions for ${palette.name}`}
+        accessibilityLabel={t('palette.more', { name: palette.name })}
         onPress={onMore}
       />
     </View>
@@ -177,7 +178,7 @@ export function PaletteValue({
       <Pressable
         testID={`swatch-${color}`}
         accessibilityRole="button"
-        accessibilityLabel={`Copy ${color}`}
+        accessibilityLabel={t('copy.color', { color })}
         onPress={onPress}
         style={styles.valueMain}
       >
@@ -190,7 +191,7 @@ export function PaletteValue({
         tone="muted"
         iconSize={16}
         style={styles.valueMore}
-        accessibilityLabel={`Copy ${color} in another format`}
+        accessibilityLabel={t('copy.otherFormat', { color })}
         onPress={onMore}
       />
     </View>

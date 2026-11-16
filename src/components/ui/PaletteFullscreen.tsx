@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useReduceMotion } from '@/src/hooks/useReduceMotion';
+import { t } from '@/src/i18n';
 import { colors, fonts, type } from '@/src/theme/tokens';
 import { inkOn } from '@/src/utils/color';
 
@@ -184,7 +185,7 @@ export function PaletteFullscreen({
           <Pressable
             testID={testID}
             accessibilityRole="button"
-            accessibilityLabel={`${label}. Close full screen`}
+            accessibilityLabel={t('fullscreen.close', { label })}
             onPress={onClose}
             style={styles.columns}
           >
@@ -214,7 +215,7 @@ export function PaletteFullscreen({
           </Animated.View>
           <Animated.View pointerEvents="none" style={[styles.hintBox, { opacity: labelOpacity }]}>
             <Animated.View style={[styles.chip, styles.hint, { opacity: hint }]}>
-              <Text style={styles.chipText}>Tap anywhere to close</Text>
+              <Text style={styles.chipText}>{t('fullscreen.hint')}</Text>
             </Animated.View>
           </Animated.View>
         </Animated.View>

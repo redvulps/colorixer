@@ -3,22 +3,34 @@ import chroma from 'chroma-js';
 import type { ColorHarmonyType } from './colorUtils';
 import { getHarmonyColors } from './harmonies';
 
+import { t } from '@/src/i18n';
+
 /** HSV with hue in degrees (0-360) and saturation/value as fractions (0-1) */
 export type Hsv = [h: number, s: number, v: number];
 
-export const HARMONIES: { key: ColorHarmonyType; label: string }[] = [
-  { key: 'analogous', label: 'Analogous' },
-  { key: 'complementary', label: 'Complementary' },
-  { key: 'splitComplementary', label: 'Split complementary' },
-  { key: 'triadic', label: 'Triadic' },
-  { key: 'square', label: 'Square' },
-  { key: 'compound', label: 'Compound' },
-  { key: 'shades', label: 'Shades' },
-  { key: 'monochromatic', label: 'Monochromatic' },
+const HARMONY_KEYS: ColorHarmonyType[] = [
+  'analogous',
+  'complementary',
+  'splitComplementary',
+  'triadic',
+  'square',
+  'compound',
+  'shades',
+  'monochromatic',
 ];
 
+/** Harmonies in the order they are offered, with their names in the current language */
+export const HARMONIES: { key: ColorHarmonyType; readonly label: string }[] = HARMONY_KEYS.map(
+  (key) => ({
+    key,
+    get label() {
+      return t(`harmony.${key}`);
+    },
+  }),
+);
+
 export function harmonyLabel(harmony: ColorHarmonyType): string {
-  return HARMONIES.find((h) => h.key === harmony)?.label ?? harmony;
+  return t(`harmony.${harmony}`);
 }
 
 export function hsvToHex([h, s, v]: Hsv): string {

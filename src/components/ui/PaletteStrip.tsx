@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
+import { t } from '@/src/i18n';
 import { fonts } from '@/src/theme/tokens';
 import { inkOn } from '@/src/utils/color';
 
@@ -43,7 +44,7 @@ export function PaletteStrip({
             testID={`swatch-${color}`}
             accessibilityRole="button"
             accessibilityLabel={color}
-            accessibilityHint="Copies the color. Long press for other formats."
+            accessibilityHint={t('copy.hint')}
             style={[styles.swatch, labels && styles.labeled, { backgroundColor: color }]}
             onPress={() => onPressColor?.(color)}
             onLongPress={() => onLongPressColor?.(color)}

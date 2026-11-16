@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "O Colorixer usa a câmera para tirar uma foto e pegar as cores dela.",
+    "NSPhotoLibraryUsageDescription": "O Colorixer abre as fotos que você escolhe para pegar as cores delas."
+  }
+}

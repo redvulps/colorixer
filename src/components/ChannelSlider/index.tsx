@@ -10,12 +10,12 @@ import {
 } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
+import { t } from '@/src/i18n';
 import { colors, radius, shadows, type } from '@/src/theme/tokens';
 
 /** Hue, saturation, value or lightness */
 export type Channel = 'h' | 's' | 'v' | 'l';
 
-const NAME: Record<Channel, string> = { h: 'Hue', s: 'Saturation', v: 'Value', l: 'Lightness' };
 const THUMB = 20;
 
 /** Value as shown in the field: degrees for hue, percent for the others */
@@ -93,7 +93,7 @@ export function ChannelSlider({ channel, value, stops, onChange }: ChannelSlider
         onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
         accessible
         accessibilityRole="adjustable"
-        accessibilityLabel={NAME[channel]}
+        accessibilityLabel={t(`channel.${channel}`)}
         accessibilityValue={{ text: display(channel, value) }}
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
         onAccessibilityAction={onAccessibilityAction}
@@ -128,7 +128,7 @@ export function ChannelSlider({ channel, value, stops, onChange }: ChannelSlider
         keyboardType="number-pad"
         returnKeyType="done"
         selectTextOnFocus
-        accessibilityLabel={`${label} value`}
+        accessibilityLabel={t('channel.field', { label })}
       />
     </View>
   );

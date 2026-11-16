@@ -40,10 +40,11 @@ import {
   type ExportFormat,
   exportPalette,
   haptic,
-  UNSAVED_NAME,
+  unsavedName,
   useCopy,
 } from '@/src/hooks/usePaletteActions';
 import { useHeldTopInset } from '@/src/hooks/useTopInset';
+import { t } from '@/src/i18n';
 import {
   type ImagePalette,
   paletteColors,
@@ -113,7 +114,7 @@ export function TabletWorkspace() {
   const { top: topInset, hold: holdTopInset } = useHeldTopInset(fullOpen);
   const bandRef = useRef<React.ComponentRef<typeof View>>(null);
 
-  const name = current?.name ?? UNSAVED_NAME;
+  const name = current?.name ?? unsavedName();
   const topBarHeight = TOP_BAR + topInset;
   const bottomSafe = Math.max(insets.bottom, MIN_BOTTOM_SAFE);
   const stageWidth = width - CONTROLS - insets.left - insets.right;
@@ -125,7 +126,7 @@ export function TabletWorkspace() {
   const onSave = () => {
     const palette = save();
     haptic();
-    toast(`Saved “${palette.name}”`);
+    toast(t('toast.saved', { name: palette.name }));
   };
 
   const onExport = (format: ExportFormat) => {
@@ -154,7 +155,7 @@ export function TabletWorkspace() {
   const onUseImage = (palette: ImagePalette) => {
     setView('color');
     applyImage(palette);
-    toast(`Palette from ${palette.name}`);
+    toast(t('toast.fromImage', { name: palette.name }));
   };
 
   return (
@@ -176,14 +177,14 @@ export function TabletWorkspace() {
           <SwitchButton
             testID="view-color"
             icon={ColorIcon}
-            label="Color"
+            label={t('tab.color')}
             selected={view === 'color'}
             onPress={() => setView('color')}
           />
           <SwitchButton
             testID="view-palettes"
             icon={PalettesIcon}
-            label="Palettes"
+            label={t('tab.palettes')}
             count={saved.length}
             selected={view === 'palettes'}
             onPress={() => setView('palettes')}
@@ -194,14 +195,14 @@ export function TabletWorkspace() {
           testID="image-button"
           variant="ghost"
           icon={ImageIcon}
-          label="Image"
+          label={t('common.image')}
           onPress={() => imageFlow.current?.start()}
         />
         <Button
           testID="save-button"
           variant={current ? 'saved' : 'ghost'}
           icon={current ? CheckIcon : SaveIcon}
-          label={current ? 'Saved' : 'Save'}
+          label={current ? t('common.saved') : t('common.save')}
           disabled={!!current}
           onPress={onSave}
         />
@@ -209,7 +210,7 @@ export function TabletWorkspace() {
           testID="share-button"
           variant="primary"
           icon={ExportIcon}
-          label="Export"
+          label={t('common.export')}
           chevron
           accessibilityState={{ expanded: exportAt !== null }}
           // Right-aligned under the button
@@ -233,7 +234,7 @@ export function TabletWorkspace() {
               contentContainerStyle={[styles.controlsContent, { paddingRight: 18 + insets.right }]}
             >
               <View style={styles.section}>
-                <Overline style={styles.sectionLabel}>Harmony</Overline>
+                <Overline style={styles.sectionLabel}>{t('section.harmony')}</Overline>
                 <View testID="harmony-selector">
                   {HARMONIES.map(({ key }) => (
                     <HarmonyRow
@@ -248,7 +249,7 @@ export function TabletWorkspace() {
               </View>
               <ColorSliders />
               <View style={styles.section}>
-                <Overline>Base color</Overline>
+                <Overline>{t('section.baseColor')}</Overline>
                 <View style={[styles.baseSwatch, { backgroundColor: base }]}>
                   <Text style={[styles.baseHex, { color: inkOn(base) }]}>{base}</Text>
                 </View>
@@ -281,12 +282,12 @@ export function TabletWorkspace() {
               ]}
             >
               <Overline style={styles.paletteName}>
-                {`${current ? `${current.name} · ` : ''}${kind} · ${colors.length} colors`}
+                {`${current ? `${current.name} · ` : ''}${kind} · ${t('common.colors', { count: colors.length })}`}
               </Overline>
               <PillIconButton
                 testID="fullscreen-button"
                 icon={ExpandIcon}
-                accessibilityLabel="Show the palette in full screen"
+                accessibilityLabel={t('fullscreen.show')}
                 onPress={openFull}
               />
             </View>
@@ -328,8 +329,8 @@ export function TabletWorkspace() {
             ))
           ) : (
             <View style={styles.empty}>
-              <Text style={styles.emptyTitle}>No saved palettes</Text>
-              <Text style={styles.emptyText}>Save a palette in Color and it shows up here.</Text>
+              <Text style={styles.emptyTitle}>{t('palette.emptyTitle')}</Text>
+              <Text style={styles.emptyText}>{t('palette.emptyTablet')}</Text>
             </View>
           )}
         </ScrollView>
@@ -358,7 +359,7 @@ export function TabletWorkspace() {
         visible={fullOpen}
         origin={fullOrigin}
         colors={colors}
-        label={`${current ? `${current.name} · ` : ''}${kind} · ${colors.length} colors`}
+        label={`${current ? `${current.name} · ` : ''}${kind} · ${t('common.colors', { count: colors.length })}`}
         onClose={() => setFullOpen(false)}
       />
 
@@ -368,7 +369,9 @@ export function TabletWorkspace() {
         onClose={() => setSelected(null)}
         title={selected?.name}
         subtitle={
-          selected ? `${paletteLabel(selected)} · ${selectedColors.length} colors` : undefined
+          selected
+            ? `${paletteLabel(selected)} · ${t('common.colors', { count: selectedColors.length })}`
+            : undefined
         }
         palette={selectedColors}
       >
@@ -378,7 +381,7 @@ export function TabletWorkspace() {
               <SheetAction
                 key={format}
                 icon={FileIcon}
-                label={`Export to ${app}`}
+                label={t('export.to', { app })}
                 ext={ext}
                 onPress={() => {
                   setSelected(null);
@@ -389,16 +392,16 @@ export function TabletWorkspace() {
             <SheetAction
               icon={TrashIcon}
               tone="danger"
-              label="Delete palette"
+              label={t('palette.delete')}
               onPress={() => {
                 remove(selected.id);
                 setSelected(null);
-                toast(`Deleted “${selected.name}”`);
+                toast(t('toast.deleted', { name: selected.name }));
               }}
             />
           </>
         )}
-        <SheetAction label="Cancel" tone="cancel" onPress={() => setSelected(null)} />
+        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setSelected(null)} />
       </BottomSheet>
 
       <BottomSheet
@@ -406,29 +409,33 @@ export function TabletWorkspace() {
         visible={copyColor !== null}
         onClose={() => setCopyColor(null)}
         title={copyColor ?? undefined}
-        subtitle="Copy the color as"
+        subtitle={t('copy.title')}
       >
         {copyColor && (
           <>
-            <SheetAction label="Copy as HEX" ext={copyColor} onPress={() => copyAs(copyColor)} />
             <SheetAction
-              label="Copy as RGB"
+              label={t('copy.as', { format: 'HEX' })}
+              ext={copyColor}
+              onPress={() => copyAs(copyColor)}
+            />
+            <SheetAction
+              label={t('copy.as', { format: 'RGB' })}
               ext={rgbString(copyColor)}
               onPress={() => copyAs(rgbString(copyColor))}
             />
             <SheetAction
-              label="Copy as HSL"
+              label={t('copy.as', { format: 'HSL' })}
               ext={hslString(copyColor)}
               onPress={() => copyAs(hslString(copyColor))}
             />
             <SheetAction
-              label="Copy as HSV"
+              label={t('copy.as', { format: 'HSV' })}
               ext={hsvString(copyColor)}
               onPress={() => copyAs(hsvString(copyColor))}
             />
           </>
         )}
-        <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
+        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setCopyColor(null)} />
       </BottomSheet>
       <ImagePaletteView ref={imageFlow} layout="sheet" onUse={onUseImage} />
     </View>

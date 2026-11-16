@@ -1,0 +1,93 @@
+import type { Dictionary } from './types';
+
+const es: Dictionary = {
+  'common.cancel': 'Cancelar',
+  'common.close': 'Cerrar',
+  'common.save': 'Guardar',
+  'common.saved': 'Guardada',
+  'common.export': 'Exportar',
+  'common.image': 'Imagen',
+  'common.colors': { one: '{count} color', other: '{count} colores' },
+
+  'tab.color': 'Color',
+  'tab.palettes': 'Paletas',
+
+  'toast.saved': '“{name}” guardada',
+  'toast.deleted': '“{name}” eliminada',
+  'toast.copied': '{text} copiado',
+  'toast.fromImage': 'Paleta de {name}',
+
+  'palette.current': 'Paleta actual',
+  'palette.untitled': 'Sin título',
+  'palette.unsavedName': 'Paleta Colorixer',
+  'palette.numbered': 'Paleta {number}',
+  'palette.fromImage': 'Imagen · {mood}',
+  'palette.savedCount': { one: '{count} guardada', other: '{count} guardadas' },
+  'palette.delete': 'Eliminar paleta',
+  'palette.more': 'Más acciones de {name}',
+  'palette.openHint': 'Abre la paleta en la pestaña Color',
+  'palette.emptyTitle': 'No hay paletas guardadas',
+  'palette.emptyPhone': 'Guarda una paleta en la pestaña Color y aparecerá aquí.',
+  'palette.emptyTablet': 'Guarda una paleta en Color y aparecerá aquí.',
+  'palette.header': 'Paleta · {kind}',
+
+  'section.harmony': 'Armonía',
+  'section.baseColor': 'Color base',
+  'section.savedPalettes': 'Paletas guardadas',
+  'section.savedEmpty': 'Las paletas guardadas aparecen aquí.',
+
+  'export.palette': 'Exportar paleta',
+  'export.to': 'Exportar a {app}',
+
+  'copy.title': 'Copiar el color como',
+  'copy.as': 'Copiar como {format}',
+  'copy.field': 'Copiar {label}',
+  'copy.color': 'Copiar {color}',
+  'copy.otherFormat': 'Copiar {color} en otro formato',
+  'copy.hint': 'Copia el color. Mantén pulsado para otros formatos.',
+
+  'fullscreen.show': 'Mostrar la paleta en pantalla completa',
+  'fullscreen.close': '{label}. Cerrar la pantalla completa',
+  'fullscreen.hint': 'Toca en cualquier lugar para cerrar',
+
+  'wheel.label': 'Rueda de color',
+  'menu.close': 'Cerrar menú',
+  'sliders.hsv': 'Matiz, saturación, valor',
+  'sliders.hsl': 'Matiz, saturación, luminosidad',
+  'channel.h': 'Matiz',
+  'channel.s': 'Saturación',
+  'channel.v': 'Valor',
+  'channel.l': 'Luminosidad',
+  'channel.field': 'Valor de {label}',
+
+  'harmony.analogous': 'Análoga',
+  'harmony.complementary': 'Complementaria',
+  'harmony.splitComplementary': 'Complementaria dividida',
+  'harmony.triadic': 'Triádica',
+  'harmony.square': 'Cuadrada',
+  'harmony.compound': 'Compuesta',
+  'harmony.shades': 'Tonos',
+  'harmony.monochromatic': 'Monocromática',
+
+  'mood.natural': 'Natural',
+  'mood.vibrant': 'Vibrante',
+  'mood.light': 'Clara',
+  'mood.muted': 'Suave',
+  'mood.deep': 'Profunda',
+  'mood.dark': 'Oscura',
+
+  'image.take': 'Crear una paleta a partir de una imagen',
+  'image.sourceTitle': 'Tomar los colores de una foto',
+  'image.fromGallery': 'De la galería',
+  'image.fromCamera': 'De la cámara',
+  'image.title': 'De la imagen',
+  'image.chooseAnother': 'Elegir otra',
+  'image.use': 'Usar paleta',
+  'image.photo': 'Foto',
+  'image.cameraPhoto': 'Foto de la cámara',
+  'image.photoLabel': 'Foto {name}',
+  'image.noCamera': 'Colorixer no tiene acceso a la cámara. Permítelo en los ajustes del sistema.',
+  'image.unreadable': 'No se pudo leer esta imagen.',
+};
+
+export default es;

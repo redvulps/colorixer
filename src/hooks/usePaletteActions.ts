@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { Platform } from 'react-native';
 
 import { useToast } from '@/src/components/ui';
+import { t } from '@/src/i18n';
 import { exportAdobeAse } from '@/src/utils/exportAdobeAse';
 import { exportProcreateSwatch } from '@/src/utils/exportProcreateSwatch';
 
@@ -15,7 +16,8 @@ export const EXPORT_FORMATS: { format: ExportFormat; app: string; ext: string }[
 ];
 
 /** Name used for files of a palette that was not saved */
-export const UNSAVED_NAME = 'Colorixer palette';
+/** Name of a palette that was not saved, as exported files call it */
+export const unsavedName = () => t('palette.unsavedName');
 
 function haptic() {
   if (Platform.OS !== 'web') {
@@ -30,7 +32,7 @@ export function useCopy() {
     async (text: string) => {
       await Clipboard.setStringAsync(text);
       haptic();
-      toast(`Copied ${text}`);
+      toast(t('toast.copied', { text }));
     },
     [toast],
   );
@@ -38,7 +40,7 @@ export function useCopy() {
 
 /** Export colors as a Procreate or Adobe swatch file named after the palette */
 export async function exportPalette(format: ExportFormat, colors: string[], name: string) {
-  const fileName = name.replace(/[\\/:*?"<>|]/g, '-').trim() || UNSAVED_NAME;
+  const fileName = name.replace(/[\\/:*?"<>|]/g, '-').trim() || unsavedName();
   if (format === 'swatches') {
     await exportProcreateSwatch(colors, fileName);
   } else {

@@ -4,6 +4,7 @@ import * as Clipboard from 'expo-clipboard';
 import React from 'react';
 
 import { exportPalette } from '../../hooks/usePaletteActions';
+import { setLocale } from '../../i18n';
 import { renderWithProviders, setChannel, touchWheel } from '../../testing/renderWithProviders';
 import { ColorScreen } from '../ColorScreen';
 
@@ -113,6 +114,21 @@ describe('Color tab', () => {
     expect(screen.getByText('Current palette')).toBeOnTheScreen();
     await fireEvent.press(screen.getByText('Export to Adobe'));
     expect(exportPalette).toHaveBeenCalledWith('ase', ANALOGOUS_RED, 'Colorixer palette');
+  });
+});
+
+describe('Color tab in Brazilian Portuguese', () => {
+  afterEach(() => setLocale('en'));
+
+  it('speaks Portuguese, palette names included', async () => {
+    setLocale('pt-BR');
+    await renderWithProviders(<ColorScreen />);
+    expect(screen.getByText('Análoga')).toBeOnTheScreen();
+    expect(screen.getByText('Matiz, saturação, valor')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId('save-button'));
+    expect(screen.getByText('“Paleta 1” salva')).toBeOnTheScreen();
+    expect(screen.getByText('Paleta 1 · Análoga')).toBeOnTheScreen();
+    expect(screen.getByText('Salva')).toBeOnTheScreen();
   });
 });
 

@@ -9,6 +9,8 @@
  * 4. Five colors are picked at least some distance apart, so the palette stays varied.
  */
 
+import { t } from '@/src/i18n';
+
 /** RGB pixels, 3 bytes each, row by row */
 export interface Pixels {
   data: Uint8Array;
@@ -18,17 +20,18 @@ export interface Pixels {
 
 export type ImageMood = 'natural' | 'vibrant' | 'light' | 'muted' | 'deep' | 'dark';
 
-export const IMAGE_MOODS: { key: ImageMood; label: string }[] = [
-  { key: 'natural', label: 'Natural' },
-  { key: 'vibrant', label: 'Vibrant' },
-  { key: 'light', label: 'Light' },
-  { key: 'muted', label: 'Muted' },
-  { key: 'deep', label: 'Deep' },
-  { key: 'dark', label: 'Dark' },
-];
+const MOOD_KEYS: ImageMood[] = ['natural', 'vibrant', 'light', 'muted', 'deep', 'dark'];
+
+/** Moods in the order they are offered, with their names in the current language */
+export const IMAGE_MOODS: { key: ImageMood; readonly label: string }[] = MOOD_KEYS.map((key) => ({
+  key,
+  get label() {
+    return t(`mood.${key}`);
+  },
+}));
 
 export function moodLabel(mood: ImageMood): string {
-  return IMAGE_MOODS.find((m) => m.key === mood)?.label ?? mood;
+  return t(`mood.${mood}`);
 }
 
 /** Five colors of a mood and where each one sits in the image, as fractions of its size */

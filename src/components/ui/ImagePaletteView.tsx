@@ -19,6 +19,7 @@ import { Button, IconButton } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
 import { CameraIcon, CloseIcon, ImageIcon } from '@/src/components/icons';
+import { t } from '@/src/i18n';
 import type { ImagePalette } from '@/src/state/palettes';
 import { colors, radius, type } from '@/src/theme/tokens';
 import {
@@ -91,7 +92,7 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
       if (source === 'camera') {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
         if (!permission.granted) {
-          setError('Colorixer has no access to the camera. Allow it in the system settings.');
+          setError(t('image.noCamera'));
           // The message shows in the view when it is open, else back in the sheet
           if (!visible) setAsking(true);
           return;
@@ -107,7 +108,7 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
       setPicked({
         uri: asset.uri,
         // The camera names its files with an id, which says nothing to the person
-        name: source === 'camera' ? 'Camera photo' : (asset.fileName ?? 'Photo'),
+        name: source === 'camera' ? t('image.cameraPhoto') : (asset.fileName ?? t('image.photo')),
         width: asset.width,
         height: asset.height,
       });
@@ -119,7 +120,7 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
         const pixels = await readPixels(asset.uri, asset.width, asset.height);
         setPalettes(extractPalettes(pixels));
       } catch (e) {
-        setError(`Could not read this image. ${e instanceof Error ? e.message : ''}`.trim());
+        setError(`${t('image.unreadable')} ${e instanceof Error ? e.message : ''}`.trim());
       } finally {
         setBusy(false);
       }
@@ -137,22 +138,22 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
         testID="image-source"
         visible={asking}
         onClose={() => setAsking(false)}
-        title="Take colors from a photo"
+        title={t('image.sourceTitle')}
       >
         {error && !visible && <Text style={[styles.error, styles.sheetError]}>{error}</Text>}
         <SheetAction
           testID="source-gallery"
           icon={ImageIcon}
-          label="From gallery"
+          label={t('image.fromGallery')}
           onPress={() => pickFrom('gallery')}
         />
         <SheetAction
           testID="source-camera"
           icon={CameraIcon}
-          label="From camera"
+          label={t('image.fromCamera')}
           onPress={() => pickFrom('camera')}
         />
-        <SheetAction label="Cancel" tone="cancel" onPress={() => setAsking(false)} />
+        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setAsking(false)} />
       </BottomSheet>
     );
 
@@ -178,7 +179,7 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
           source={{ uri: picked.uri }}
           style={{ width: photoWidth, height: photoHeight }}
           accessibilityIgnoresInvertColors
-          accessibilityLabel={`Photo ${picked.name}`}
+          accessibilityLabel={t('image.photoLabel', { name: picked.name })}
         />
         {current?.spots.map((spot, i) => (
           <View
@@ -246,11 +247,13 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
         {error && <Text style={styles.error}>{error}</Text>}
         <View style={styles.source}>
           <Text style={styles.sourceText} numberOfLines={1}>
-            {current ? `${picked.name} · ${current.colors.length} colors` : picked.name}
+            {current
+              ? `${picked.name} · ${t('common.colors', { count: current.colors.length })}`
+              : picked.name}
           </Text>
           <Button
             testID="choose-image"
-            label="Choose another"
+            label={t('image.chooseAnother')}
             variant="ghost"
             icon={ImageIcon}
             disabled={busy}
@@ -263,7 +266,7 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
     const use = (
       <Button
         testID="use-palette"
-        label="Use palette"
+        label={t('image.use')}
         variant="primary"
         disabled={!current || busy}
         style={current ? styles.use : { ...styles.use, ...styles.useOff }}
@@ -277,8 +280,8 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
 
     const header = (
       <View style={styles.header}>
-        <IconButton icon={CloseIcon} accessibilityLabel="Close" onPress={close} />
-        <Text style={styles.title}>From image</Text>
+        <IconButton icon={CloseIcon} accessibilityLabel={t('common.close')} onPress={close} />
+        <Text style={styles.title}>{t('image.title')}</Text>
       </View>
     );
 
@@ -309,7 +312,11 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
           </View>
         ) : (
           <View style={styles.scrim}>
-            <Pressable style={StyleSheet.absoluteFill} accessibilityLabel="Close" onPress={close} />
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              accessibilityLabel={t('common.close')}
+              onPress={close}
+            />
             <View
               style={[
                 styles.card,

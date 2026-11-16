@@ -1,0 +1,93 @@
+import type { Dictionary } from './types';
+
+const ptBR: Dictionary = {
+  'common.cancel': 'Cancelar',
+  'common.close': 'Fechar',
+  'common.save': 'Salvar',
+  'common.saved': 'Salva',
+  'common.export': 'Exportar',
+  'common.image': 'Imagem',
+  'common.colors': { one: '{count} cor', other: '{count} cores' },
+
+  'tab.color': 'Cor',
+  'tab.palettes': 'Paletas',
+
+  'toast.saved': '“{name}” salva',
+  'toast.deleted': '“{name}” excluída',
+  'toast.copied': '{text} copiado',
+  'toast.fromImage': 'Paleta de {name}',
+
+  'palette.current': 'Paleta atual',
+  'palette.untitled': 'Sem título',
+  'palette.unsavedName': 'Paleta Colorixer',
+  'palette.numbered': 'Paleta {number}',
+  'palette.fromImage': 'Imagem · {mood}',
+  'palette.savedCount': { one: '{count} salva', other: '{count} salvas' },
+  'palette.delete': 'Excluir paleta',
+  'palette.more': 'Mais ações de {name}',
+  'palette.openHint': 'Abre a paleta na aba Cor',
+  'palette.emptyTitle': 'Nenhuma paleta salva',
+  'palette.emptyPhone': 'Salve uma paleta na aba Cor e ela aparece aqui.',
+  'palette.emptyTablet': 'Salve uma paleta em Cor e ela aparece aqui.',
+  'palette.header': 'Paleta · {kind}',
+
+  'section.harmony': 'Harmonia',
+  'section.baseColor': 'Cor base',
+  'section.savedPalettes': 'Paletas salvas',
+  'section.savedEmpty': 'As paletas salvas aparecem aqui.',
+
+  'export.palette': 'Exportar paleta',
+  'export.to': 'Exportar para {app}',
+
+  'copy.title': 'Copiar a cor como',
+  'copy.as': 'Copiar como {format}',
+  'copy.field': 'Copiar {label}',
+  'copy.color': 'Copiar {color}',
+  'copy.otherFormat': 'Copiar {color} em outro formato',
+  'copy.hint': 'Copia a cor. Toque e segure para outros formatos.',
+
+  'fullscreen.show': 'Mostrar a paleta em tela cheia',
+  'fullscreen.close': '{label}. Fechar a tela cheia',
+  'fullscreen.hint': 'Toque em qualquer lugar para fechar',
+
+  'wheel.label': 'Roda de cores',
+  'menu.close': 'Fechar menu',
+  'sliders.hsv': 'Matiz, saturação, valor',
+  'sliders.hsl': 'Matiz, saturação, luminosidade',
+  'channel.h': 'Matiz',
+  'channel.s': 'Saturação',
+  'channel.v': 'Valor',
+  'channel.l': 'Luminosidade',
+  'channel.field': 'Valor de {label}',
+
+  'harmony.analogous': 'Análoga',
+  'harmony.complementary': 'Complementar',
+  'harmony.splitComplementary': 'Complementar dividida',
+  'harmony.triadic': 'Triádica',
+  'harmony.square': 'Quadrada',
+  'harmony.compound': 'Composta',
+  'harmony.shades': 'Tons',
+  'harmony.monochromatic': 'Monocromática',
+
+  'mood.natural': 'Natural',
+  'mood.vibrant': 'Vibrante',
+  'mood.light': 'Clara',
+  'mood.muted': 'Suave',
+  'mood.deep': 'Profunda',
+  'mood.dark': 'Escura',
+
+  'image.take': 'Criar uma paleta a partir de uma imagem',
+  'image.sourceTitle': 'Pegar as cores de uma foto',
+  'image.fromGallery': 'Da galeria',
+  'image.fromCamera': 'Da câmera',
+  'image.title': 'Da imagem',
+  'image.chooseAnother': 'Escolher outra',
+  'image.use': 'Usar paleta',
+  'image.photo': 'Foto',
+  'image.cameraPhoto': 'Foto da câmera',
+  'image.photoLabel': 'Foto {name}',
+  'image.noCamera': 'O Colorixer não tem acesso à câmera. Permita nos ajustes do sistema.',
+  'image.unreadable': 'Não foi possível ler esta imagem.',
+};
+
+export default ptBR;
