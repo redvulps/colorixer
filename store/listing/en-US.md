@@ -2,12 +2,12 @@
 Colorixer: color palettes
 
 # Short description (80)
-Build harmonious palettes on a painter's color wheel or from your photos.
+Harmonious palettes for artists and designers, from one color or a photo.
 
 # Full description (4000)
 Colorixer helps artists and designers build color palettes that work together.
 
-A PAINTER'S COLOR WHEEL
+AN RYB COLOR WHEEL
 The wheel follows the RYB circle used in painting: red goes with green, blue with orange, yellow with violet. Pick the base color by dragging on the wheel or with HSV or HSL sliders.
 
 8 HARMONIES, 5 COLORS EACH

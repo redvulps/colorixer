@@ -1,4 +1,4 @@
-• Rueda de color de los pintores (RYB): complementarios como rojo y verde, azul y naranja
+• Nueva rueda de color RYB: complementarios como rojo y verde, azul y naranja
 • 8 armonías con 5 colores cada una, incluidas Complementaria dividida, Compuesta y Tonos
 • Crea paletas a partir de fotos de la galería o de la cámara, en 6 estilos
 • Controles en HSV o HSL

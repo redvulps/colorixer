@@ -2,12 +2,12 @@
 Colorixer: paletas de cores
 
 # Descrição curta (80)
-Crie paletas harmônicas na roda dos pintores ou a partir das suas fotos.
+Paletas harmônicas para artistas e designers, de uma cor ou de uma foto.
 
 # Descrição completa (4000)
 O Colorixer ajuda artistas e designers a criar paletas de cores que combinam.
 
-RODA DE CORES DOS PINTORES
+RODA DE CORES RYB
 A roda segue o círculo RYB usado na pintura: vermelho combina com verde, azul com laranja, amarelo com violeta. Escolha a cor base arrastando na roda ou com os sliders em HSV ou HSL.
 
 8 HARMONIAS, 5 CORES CADA
