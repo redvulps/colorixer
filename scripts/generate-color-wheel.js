@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 /**
- * Generates assets/images/color-wheel.png: the hue/saturation disc at full value.
+ * Generates assets/images/color-wheel.png: the hue/saturation disc at full value, on the painter's
+ * RYB circle.
  *
- * Hue follows the angle from the center (0° = red to the right, increasing clockwise on screen),
- * saturation grows with the distance and reaches 1 at INSET short of the edge, so the outer ring
+ * The angle from the center is the RYB angle (0° = red to the right, increasing clockwise on
+ * screen); rybToHue turns it into the HSV hue drawn there, as src/utils/ryb.ts does. Saturation
+ * grows with the distance and reaches 1 at INSET short of the edge, so the outer ring
  * shows fully saturated colors. ColorWheel uses the same INSET to map touches and place markers.
  *
  * Usage: node scripts/generate-color-wheel.js [size]
@@ -32,6 +34,59 @@ function hsvToRgb(h, s, v) {
   return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
 }
 
+// Gossett and Chen (IEEE InfoVis 2004): RYB cube corners as pigment colors. Must match src/utils/ryb.ts
+// prettier-ignore
+const CORNERS = [
+  [[0, 0, 0], [1, 1, 1]],
+  [[1, 0, 0], [1, 0, 0]],
+  [[0, 1, 0], [1, 1, 0]],
+  [[0, 0, 1], [0.163, 0.373, 0.6]],
+  [[1, 1, 0], [1, 0.5, 0]],
+  [[1, 0, 1], [0.5, 0, 0.5]],
+  [[0, 1, 1], [0, 0.66, 0.2]],
+  [[1, 1, 1], [0.2, 0.094, 0]],
+];
+
+function rybToRgb([r, y, b]) {
+  const out = [0, 0, 0];
+  for (const [[cr, cy, cb], rgb] of CORNERS) {
+    const w = (cr ? r : 1 - r) * (cy ? y : 1 - y) * (cb ? b : 1 - b);
+    for (let i = 0; i < 3; i++) out[i] += w * rgb[i];
+  }
+  return out;
+}
+
+function hueOf([r, g, b]) {
+  const max = Math.max(r, g, b);
+  const d = max - Math.min(r, g, b);
+  if (!d) return 0;
+  const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+}
+
+function pureRyb(angle) {
+  const x = angle / 60;
+  const f = 1 - Math.abs((x % 2) - 1);
+  return [
+    [1, f, 0],
+    [f, 1, 0],
+    [0, 1, f],
+    [0, f, 1],
+    [f, 0, 1],
+    [1, 0, f],
+  ][Math.floor(x) % 6];
+}
+
+const HUES = Array.from({ length: 361 }, (_, a) => hueOf(rybToRgb(pureRyb(a))));
+HUES[0] = 0;
+HUES[360] = 360;
+
+function rybToHue(angle) {
+  const a = ((angle % 360) + 360) % 360;
+  const i = Math.floor(a);
+  return HUES[i] + (a - i) * (HUES[i + 1] - HUES[i]);
+}
+
 // Raw RGBA rows
 const radius = SIZE / 2;
 const saturationRadius = radius * (1 - INSET);
@@ -41,8 +96,8 @@ for (let y = 0; y < SIZE; y++) {
     const dx = x + 0.5 - radius;
     const dy = y + 0.5 - radius;
     const dist = Math.hypot(dx, dy);
-    const hue = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
-    const [r, g, b] = hsvToRgb(hue, Math.min(dist / saturationRadius, 1), 1);
+    const angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+    const [r, g, b] = hsvToRgb(rybToHue(angle) % 360, Math.min(dist / saturationRadius, 1), 1);
     const alpha = Math.min(Math.max(radius - dist + 0.5, 0), 1); // antialiased edge
     const i = (y * SIZE + x) * 4;
     raw[i] = Math.round(r);

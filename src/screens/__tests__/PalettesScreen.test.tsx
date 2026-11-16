@@ -5,6 +5,7 @@ import React from 'react';
 import { exportPalette } from '../../hooks/usePaletteActions';
 import { type SavedPalette, STORAGE_KEY } from '../../state/palettes';
 import { renderWithProviders } from '../../testing/renderWithProviders';
+import { harmonyColors } from '../../utils/color';
 import { PalettesScreen } from '../PalettesScreen';
 
 const mockNavigate = jest.fn();
@@ -20,6 +21,7 @@ const SAVED: SavedPalette[] = [
     name: 'Oceano',
     harmony: 'complementary',
     base: '#0077b6',
+    colors: harmonyColors('complementary', '#0077b6'),
     createdAt: '2026-11-09T10:00:00.000Z',
   },
   {
@@ -27,6 +29,7 @@ const SAVED: SavedPalette[] = [
     name: 'Pôr do sol',
     harmony: 'analogous',
     base: '#ff6a00',
+    colors: harmonyColors('analogous', '#ff6a00'),
     createdAt: '2026-11-12T10:00:00.000Z',
   },
 ];
@@ -52,7 +55,7 @@ describe('Palettes tab', () => {
       await renderWithProviders(<PalettesScreen />);
       expect(screen.getByText('2 saved')).toBeOnTheScreen();
       expect(screen.getByText('Oceano')).toBeOnTheScreen();
-      expect(screen.getByText(/Complementary · 2 colors/)).toBeOnTheScreen();
+      expect(screen.getByText(/Complementary · 5 colors/)).toBeOnTheScreen();
       expect(screen.getByText(/Analogous · 5 colors/)).toBeOnTheScreen();
     });
 
@@ -66,7 +69,11 @@ describe('Palettes tab', () => {
       await renderWithProviders(<PalettesScreen />);
       await fireEvent.press(screen.getByTestId('palette-more-Oceano'));
       await fireEvent.press(screen.getByText('Export to Procreate'));
-      expect(exportPalette).toHaveBeenCalledWith('swatches', ['#0077b6', '#b63f00'], 'Oceano');
+      expect(exportPalette).toHaveBeenCalledWith(
+        'swatches',
+        ['#0077b6', '#b65000', '#1e5876', '#613d20', '#1b2d37'],
+        'Oceano',
+      );
     });
 
     it('deletes a palette from its sheet', async () => {

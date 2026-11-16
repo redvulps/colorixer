@@ -30,19 +30,19 @@ describe('palette store', () => {
     const { result } = await renderStore();
     expect(result.current.base).toBe('#ff0000');
     expect(result.current.harmony).toBe('analogous');
-    expect(result.current.colors).toEqual(['#ff0000', '#ff8000', '#ff0080', '#ffff00', '#ff00ff']);
+    expect(result.current.colors).toEqual(['#ff0000', '#ff002d', '#ff2600', '#ff006d', '#ff4d00']);
     expect(result.current.current).toBeNull();
   });
 
   it('names saved palettes in order and opens the newest', async () => {
     const { result } = await renderStore();
 
-    await act(async () => result.current.setHarmony('tetratriadic'));
+    await act(async () => result.current.setHarmony('square'));
     let first!: SavedPalette;
     await act(async () => {
       first = result.current.save();
     });
-    expect(first).toMatchObject({ name: 'Palette 1', harmony: 'tetratriadic', base: '#ff0000' });
+    expect(first).toMatchObject({ name: 'Palette 1', harmony: 'square', base: '#ff0000' });
     expect(result.current.current?.id).toBe(first.id);
 
     // Any change leaves the saved palette
@@ -73,7 +73,7 @@ describe('palette store', () => {
 
     expect(result.current.base).toBe('#008000');
     expect(result.current.harmony).toBe('complementary');
-    expect(result.current.colors).toEqual(['#008000', '#800080']);
+    expect(result.current.colors).toEqual(['#008000', '#80000c', '#104010', '#d54754', '#80ff80']);
     expect(result.current.current?.name).toBe('Palette 1');
   });
 
@@ -100,6 +100,34 @@ describe('palette store', () => {
 
     const second = await renderStore();
     await waitFor(() => expect(second.result.current.sliderMode).toBe('hsl'));
+  });
+
+  it('keeps the colors of palettes saved by the first versions', async () => {
+    await AsyncStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([
+        {
+          id: 'old',
+          name: 'Antiga',
+          harmony: 'tetratriadic',
+          base: '#ff0000',
+          createdAt: '2026-10-01T10:00:00.000Z',
+        },
+      ]),
+    );
+    const { result } = await renderStore();
+    await waitFor(() => expect(result.current.saved).toHaveLength(1));
+    const [old] = result.current.saved;
+    expect(old.harmony).toBe('square');
+    expect(old.colors).toEqual(['#ff0000', '#80ff00', '#00ffff', '#7f00ff']);
+
+    // Open, it shows the colors it was saved with; any change goes back to the rules
+    await act(async () => {
+      result.current.load('old');
+    });
+    expect(result.current.colors).toEqual(['#ff0000', '#80ff00', '#00ffff', '#7f00ff']);
+    await act(async () => result.current.setHsv([0, 1, 0.9]));
+    expect(result.current.colors).toHaveLength(5);
   });
 
   it('stores saved palettes and reads them on the next start', async () => {

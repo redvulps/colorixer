@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-import type { HSL } from '../colorUtils';
+import type { HSL } from '../../colorUtils';
 
 export function getMonochromaticColors(baseColor: HSL, count: number = 4): string[] {
   const baseColorChroma = chroma.hsl(baseColor.h, baseColor.s, baseColor.l);

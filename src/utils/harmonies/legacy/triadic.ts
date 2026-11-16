@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-import type { HSL } from '../colorUtils';
+import type { HSL } from '../../colorUtils';
 
 export function getTriadicColors(baseColor: HSL): string[] {
   // Triadic colors are evenly spaced around the color wheel (120 degrees apart)

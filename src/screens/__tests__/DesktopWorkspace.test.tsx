@@ -11,6 +11,7 @@ import {
   setChannel,
   touchWheel,
 } from '../../testing/renderWithProviders';
+import { harmonyColors } from '../../utils/color';
 import { DesktopWorkspace } from '../DesktopWorkspace';
 
 jest.mock('../../hooks/usePaletteActions', () => ({
@@ -18,7 +19,7 @@ jest.mock('../../hooks/usePaletteActions', () => ({
   exportPalette: jest.fn(() => Promise.resolve()),
 }));
 
-const ANALOGOUS_RED = ['#ff0000', '#ff8000', '#ff0080', '#ffff00', '#ff00ff'];
+const ANALOGOUS_RED = ['#ff0000', '#ff002d', '#ff2600', '#ff006d', '#ff4d00'];
 
 beforeEach(async () => {
   await AsyncStorage.clear();
@@ -73,21 +74,21 @@ describe('Desktop workspace', () => {
   it('copies a palette color in any format', async () => {
     await renderWithProviders(<DesktopWorkspace />);
 
-    await fireEvent.press(screen.getByTestId('swatch-#ff8000'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff8000');
+    await fireEvent.press(screen.getByTestId('swatch-#ff2600'));
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff2600');
 
-    await fireEvent.press(screen.getByTestId('swatch-more-#ff8000'), pressAt);
+    await fireEvent.press(screen.getByTestId('swatch-more-#ff2600'), pressAt);
     await fireEvent.press(screen.getByText('Copy as HSL'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(30deg 100% 50%)');
-    expect(screen.getByText('Copied hsl(30deg 100% 50%)')).toBeOnTheScreen();
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(9deg 100% 50%)');
+    expect(screen.getByText('Copied hsl(9deg 100% 50%)')).toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByTestId('swatch-more-#ff8000'), pressAt);
+    await fireEvent.press(screen.getByTestId('swatch-more-#ff2600'), pressAt);
     await fireEvent.press(screen.getByText('Copy as HSV'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsv(30, 100%, 100%)');
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsv(9, 100%, 100%)');
 
-    await fireEvent.press(screen.getByTestId('swatch-more-#ff8000'), pressAt);
+    await fireEvent.press(screen.getByTestId('swatch-more-#ff2600'), pressAt);
     await fireEvent.press(screen.getByText('Copy as RGB'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 128 0)');
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 38 0)');
   });
 
   it('copies the base color from the inspector fields', async () => {
@@ -104,6 +105,7 @@ const OCEANO: SavedPalette = {
   name: 'Oceano',
   harmony: 'complementary',
   base: '#0077b6',
+  colors: harmonyColors('complementary', '#0077b6'),
   createdAt: '2026-11-09T10:00:00.000Z',
 };
 
@@ -112,7 +114,7 @@ describe('Desktop workspace controls', () => {
     await renderWithProviders(<DesktopWorkspace />);
     await fireEvent.press(screen.getByTestId('harmony-triadic'));
     expect(screen.getByText('Palette · Triadic')).toBeOnTheScreen();
-    expect(screen.getByTestId('swatch-#00ff00')).toBeOnTheScreen();
+    expect(screen.getByTestId('swatch-#ffff00')).toBeOnTheScreen();
   });
 
   it('opens a saved palette from the sidebar', async () => {
@@ -120,18 +122,18 @@ describe('Desktop workspace controls', () => {
     await renderWithProviders(<DesktopWorkspace />);
     await fireEvent.press(screen.getByTestId('palette-Oceano'));
     expect(screen.getByText('Palette · Complementary')).toBeOnTheScreen();
-    expect(screen.getByTestId('swatch-#b63f00')).toBeOnTheScreen();
+    expect(screen.getByTestId('swatch-#b65000')).toBeOnTheScreen();
     expect(screen.getByText('Saved')).toBeOnTheScreen();
   });
 
   it('picks the base color on the wheel and its sliders', async () => {
     await renderWithProviders(<DesktopWorkspace />);
     await touchWheel(screen.getByTestId('color-wheel'), 0, 0);
-    expect(screen.getByTestId('swatch-#0040ff')).toBeOnTheScreen();
+    expect(screen.getByTestId('swatch-#00daff')).toBeOnTheScreen();
     await setChannel(screen.getByTestId('value-s'), '50');
     await setChannel(screen.getByTestId('value-v'), '50');
-    expect(screen.getByText('hsv(225, 50%, 50%)')).toBeOnTheScreen();
-    expect(screen.getAllByText('#405080').length).toBeGreaterThan(0);
+    expect(screen.getByText('hsv(189, 50%, 50%)')).toBeOnTheScreen();
+    expect(screen.getAllByText('#407680').length).toBeGreaterThan(0);
   });
 
   it('exports from the inspector', async () => {
@@ -142,8 +144,8 @@ describe('Desktop workspace controls', () => {
 
   it('copies a palette color as HEX from its menu', async () => {
     await renderWithProviders(<DesktopWorkspace />);
-    await fireEvent.press(screen.getByTestId('swatch-more-#ff8000'), pressAt);
+    await fireEvent.press(screen.getByTestId('swatch-more-#ff2600'), pressAt);
     await fireEvent.press(screen.getByText('Copy as HEX'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff8000');
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff2600');
   });
 });

@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-import type { HSL } from '../colorUtils';
+import type { HSL } from '../../colorUtils';
 
 export function getTetratriadic(baseColor: HSL): string[] {
   // Tetratriadic colors are evenly spaced around the color wheel (90 degrees apart)

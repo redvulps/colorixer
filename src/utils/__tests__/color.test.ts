@@ -1,4 +1,5 @@
 import {
+  HARMONIES,
   harmonyColors,
   hexToHsv,
   hslString,
@@ -11,29 +12,61 @@ import {
   rgbString,
 } from '../color';
 import type { ColorHarmonyType } from '../colorUtils';
+import { hueToRyb, rybToHue } from '../ryb';
 
 describe('harmonyColors', () => {
   it.each<[ColorHarmonyType, string[]]>([
-    ['analogous', ['#ff0000', '#ff8000', '#ff0080', '#ffff00', '#ff00ff']],
-    ['triadic', ['#ff0000', '#00ff00', '#0000ff']],
-    ['tetratriadic', ['#ff0000', '#80ff00', '#00ffff', '#7f00ff']],
-    ['complementary', ['#ff0000', '#00ffff']],
-    ['monochromatic', ['#ff0000', '#ff3721', '#ff6842', '#ff9264']],
+    ['analogous', ['#ff0000', '#ff002d', '#ff2600', '#ff006d', '#ff4d00']],
+    ['complementary', ['#ff0000', '#00ff4d', '#bf3030', '#39aa5b', '#804040']],
+    ['triadic', ['#ff0000', '#007bff', '#ffff00', '#aa3939', '#405e80']],
+    ['square', ['#ff0000', '#6600ff', '#00ff4d', '#ffbf00', '#aa3939']],
+    ['monochromatic', ['#ff0000', '#cc2929', '#993d3d', '#663d3d', '#332929']],
   ])('builds the %s palette of red', (harmony, expected) => {
     expect(harmonyColors(harmony, '#ff0000')).toEqual(expected);
   });
 
-  it('builds palettes from a darker base', () => {
-    expect(harmonyColors('tetratriadic', '#800000')).toEqual([
+  it('gives every harmony five colors, base first', () => {
+    for (const { key } of HARMONIES) {
+      const colors = harmonyColors(key, '#2f8fd8');
+      expect(colors).toHaveLength(5);
+      expect(colors[0]).toBe('#2f8fd8');
+    }
+  });
+
+  it('turns dark colors lighter instead of into black', () => {
+    expect(harmonyColors('square', '#800000')).toEqual([
       '#800000',
-      '#408000',
-      '#008080',
-      '#400080',
+      '#330080',
+      '#008027',
+      '#806000',
+      '#d54747',
     ]);
   });
 
   it('keeps greys grey', () => {
-    expect(harmonyColors('complementary', '#808080')).toEqual(['#808080', '#808080']);
+    for (const { key } of HARMONIES) {
+      for (const color of harmonyColors(key, '#808080')) {
+        const [r, g, b] = [1, 3, 5].map((i) => color.slice(i, i + 2));
+        expect(r).toBe(g);
+        expect(g).toBe(b);
+      }
+    }
+  });
+});
+
+describe('RYB wheel', () => {
+  it("puts the painter's primaries and complements in place", () => {
+    expect(rybToHue(0)).toBe(0);
+    expect(rybToHue(120)).toBeCloseTo(60, 5);
+    expect(rybToHue(300)).toBeCloseTo(300, 5);
+    // Red's complement is green, not cyan
+    expect(rybToHue(180)).toBeCloseTo(138.2, 1);
+  });
+
+  it('turns hues into angles and back', () => {
+    for (const hue of [0, 15, 59.5, 137, 200, 271, 359.9]) {
+      expect(rybToHue(hueToRyb(hue))).toBeCloseTo(hue, 6);
+    }
   });
 });
 

@@ -4,6 +4,7 @@ import { Image, PanResponder, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 
 import type { Hsv } from '@/src/utils/color';
+import { hueToRyb, rybToHue } from '@/src/utils/ryb';
 
 // Must match INSET in scripts/generate-color-wheel.js
 const INSET = 0.035;
@@ -23,8 +24,8 @@ interface ColorWheelProps {
 }
 
 /**
- * Hue/saturation wheel: hue is the angle (red to the right, clockwise),
- * saturation the distance from the center. Drag anywhere on it to pick.
+ * Hue/saturation wheel on the painter's RYB circle: the angle is the RYB angle (red to the right,
+ * clockwise), saturation the distance from the center. Drag anywhere on it to pick.
  */
 export function ColorWheel({
   size,
@@ -46,8 +47,8 @@ export function ColorWheel({
       const { radius: r, saturationRadius: sr, onChange: change } = latest.current;
       const dx = x - r;
       const dy = y - r;
-      const hue = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
-      change(hue, Math.min(Math.hypot(dx, dy) / sr, 1));
+      const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+      change(rybToHue(angle), Math.min(Math.hypot(dx, dy) / sr, 1));
     };
     return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -63,7 +64,7 @@ export function ColorWheel({
   }, []);
 
   const position = (hue: number, saturation: number) => {
-    const a = (hue * Math.PI) / 180;
+    const a = (hueToRyb(hue) * Math.PI) / 180;
     return {
       x: radius + Math.cos(a) * saturation * saturationRadius,
       y: radius + Math.sin(a) * saturation * saturationRadius,

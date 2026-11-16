@@ -11,6 +11,7 @@ import {
   setChannel,
   touchWheel,
 } from '../../testing/renderWithProviders';
+import { harmonyColors } from '../../utils/color';
 import { TabletWorkspace, tabletToastBottom } from '../TabletWorkspace';
 
 jest.mock('../../hooks/usePaletteActions', () => ({
@@ -18,13 +19,14 @@ jest.mock('../../hooks/usePaletteActions', () => ({
   exportPalette: jest.fn(() => Promise.resolve()),
 }));
 
-const ANALOGOUS_RED = ['#ff0000', '#ff8000', '#ff0080', '#ffff00', '#ff00ff'];
+const ANALOGOUS_RED = ['#ff0000', '#ff002d', '#ff2600', '#ff006d', '#ff4d00'];
 
 const OCEANO: SavedPalette = {
   id: 'p2',
   name: 'Oceano',
   harmony: 'complementary',
   base: '#0077b6',
+  colors: harmonyColors('complementary', '#0077b6'),
   createdAt: '2026-11-09T10:00:00.000Z',
 };
 
@@ -45,14 +47,14 @@ describe('Tablet workspace', () => {
 
   it('copies a color when it is tapped in the band', async () => {
     await renderWithProviders(<TabletWorkspace />);
-    await fireEvent.press(screen.getByTestId('swatch-#ff8000'));
-    expect(Clipboard.setStringAsync).toHaveBeenCalledWith('#ff8000');
+    await fireEvent.press(screen.getByTestId('swatch-#ff2600'));
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith('#ff2600');
   });
 
   it('switches the harmony from the controls column', async () => {
     await renderWithProviders(<TabletWorkspace />);
     await fireEvent.press(screen.getByText('Triadic'));
-    expect(screen.getByText('Triadic · 3 colors')).toBeOnTheScreen();
+    expect(screen.getByText('Triadic · 5 colors')).toBeOnTheScreen();
   });
 
   it('opens a saved palette from Palettes and goes back to Color', async () => {
@@ -61,7 +63,7 @@ describe('Tablet workspace', () => {
     await fireEvent.press(screen.getByTestId('view-palettes'));
     expect(screen.queryByTestId('generated-colors')).toBeNull();
     await fireEvent.press(screen.getByTestId('palette-Oceano'));
-    expect(screen.getByText('Oceano · Complementary · 2 colors')).toBeOnTheScreen();
+    expect(screen.getByText('Oceano · Complementary · 5 colors')).toBeOnTheScreen();
   });
 
   it('shows the palette in full screen from its button', async () => {
@@ -96,7 +98,7 @@ describe('Tablet workspace controls', () => {
   it('picks the base color on the wheel and its sliders', async () => {
     await renderWithProviders(<TabletWorkspace />);
     await touchWheel(screen.getByTestId('color-wheel'), 0, 0);
-    expect(within(screen.getByTestId('generated-colors')).getByText('#0040ff')).toBeOnTheScreen();
+    expect(within(screen.getByTestId('generated-colors')).getByText('#00daff')).toBeOnTheScreen();
     await setChannel(screen.getByTestId('value-h'), '120');
     await setChannel(screen.getByTestId('value-s'), '50');
     await setChannel(screen.getByTestId('value-v'), '50');
@@ -118,24 +120,24 @@ describe('Tablet workspace controls', () => {
 
   it('copies other formats from the long-press sheet, and closes it with Cancel', async () => {
     await renderWithProviders(<TabletWorkspace />);
-    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent(screen.getByTestId('swatch-#ff2600'), 'longPress');
     await fireEvent.press(screen.getByText('Copy as HSV'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsv(30, 100%, 100%)');
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsv(9, 100%, 100%)');
 
-    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent(screen.getByTestId('swatch-#ff2600'), 'longPress');
     await fireEvent.press(screen.getByText('Copy as HEX'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff8000');
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('#ff2600');
 
-    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent(screen.getByTestId('swatch-#ff2600'), 'longPress');
     await fireEvent.press(screen.getByText('Copy as HSL'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(30deg 100% 50%)');
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('hsl(9deg 100% 50%)');
 
-    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent(screen.getByTestId('swatch-#ff2600'), 'longPress');
     await fireEvent.press(screen.getByText('Copy as RGB'));
-    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 128 0)');
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 38 0)');
 
     jest.mocked(Clipboard.setStringAsync).mockClear();
-    await fireEvent(screen.getByTestId('swatch-#ff8000'), 'longPress');
+    await fireEvent(screen.getByTestId('swatch-#ff2600'), 'longPress');
     await fireEvent.press(within(screen.getByTestId('copy-sheet')).getByText('Cancel'));
     await waitFor(() => expect(screen.queryByText('Copy as HEX')).toBeNull());
     expect(Clipboard.setStringAsync).not.toHaveBeenCalled();
@@ -159,7 +161,11 @@ describe('Tablet workspace controls', () => {
       await fireEvent.press(screen.getByTestId('view-palettes'));
       await fireEvent.press(screen.getByTestId('palette-more-Oceano'));
       await fireEvent.press(screen.getByText('Export to Procreate'));
-      expect(exportPalette).toHaveBeenCalledWith('swatches', ['#0077b6', '#b63f00'], 'Oceano');
+      expect(exportPalette).toHaveBeenCalledWith(
+        'swatches',
+        ['#0077b6', '#b65000', '#1e5876', '#613d20', '#1b2d37'],
+        'Oceano',
+      );
     });
 
     it('deletes it from its sheet', async () => {

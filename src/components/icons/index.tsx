@@ -122,12 +122,18 @@ function point(deg: number, r = 11): [number, number] {
 
 const HARMONY_SHAPES: Record<
   ColorHarmonyType,
-  { dots: [number, number][]; base: number; shape?: 'polygon' | 'line' | 'radius' }
+  {
+    dots: [number, number][];
+    base: number;
+    shape?: 'polygon' | 'line' | 'radius';
+    /** Dots fade one after the other, for shades of one color */
+    fade?: boolean;
+  }
 > = {
   analogous: { dots: [-60, -30, 0, 30, 60].map((a) => point(a)), base: 2 },
-  triadic: { dots: [0, 120, 240].map((a) => point(a)), base: 0, shape: 'polygon' },
-  tetratriadic: { dots: [0, 90, 180, 270].map((a) => point(a)), base: 0, shape: 'polygon' },
   complementary: { dots: [0, 180].map((a) => point(a)), base: 0, shape: 'line' },
+  triadic: { dots: [0, 120, 240].map((a) => point(a)), base: 0, shape: 'polygon' },
+  square: { dots: [0, 90, 180, 270].map((a) => point(a)), base: 0, shape: 'polygon' },
   monochromatic: { dots: [2.5, 5.3, 8.1, 11].map((r) => point(0, r)), base: 3, shape: 'radius' },
 };
 
@@ -137,7 +143,7 @@ export function HarmonyIcon({
   size = 26,
   color = iconTone.secondary,
 }: IconProps & { harmony: ColorHarmonyType }) {
-  const { dots, base, shape } = HARMONY_SHAPES[harmony];
+  const { dots, base, shape, fade } = HARMONY_SHAPES[harmony];
   return (
     <Svg
       width={size}
@@ -154,7 +160,15 @@ export function HarmonyIcon({
       {shape === 'line' && <Line x1={dots[0][0]} y1={dots[0][1]} x2={dots[1][0]} y2={dots[1][1]} />}
       {shape === 'radius' && <Line x1={16} y1={16} x2={16} y2={5} />}
       {dots.map(([x, y], i) => (
-        <Circle key={i} cx={x} cy={y} r={i === base ? 3.2 : 2.3} fill={color} stroke="none" />
+        <Circle
+          key={i}
+          cx={x}
+          cy={y}
+          r={i === base ? 3.2 : fade ? 2.1 : 2.3}
+          fill={color}
+          fillOpacity={fade ? 1 - i * 0.18 : 1}
+          stroke="none"
+        />
       ))}
     </Svg>
   );

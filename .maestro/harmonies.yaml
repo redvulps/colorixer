@@ -8,31 +8,31 @@ tags:
 - assertVisible:
     id: 'harmony-selector'
 
-# Analogous (default): base color plus ±30° / ±60° hue steps
+# Analogous (default): the base and ±18° / ±36° on the RYB wheel
 - assertVisible: '#ff0000'
-- assertVisible: '#ff8000'
-- assertVisible: '#ff0080'
+- assertVisible: '#ff002d'
+- assertVisible: '#ff2600'
+
+# Complementary on the RYB wheel: red's partner is green, not cyan
+- tapOn:
+    id: 'harmony-complementary'
+- assertVisible: '#00ff4d'
+- assertVisible: '#bf3030'
+- assertNotVisible: '#ff2600'
 
 - tapOn:
     id: 'harmony-triadic'
-- assertVisible: '#00ff00'
-- assertVisible: '#0000ff'
-- assertNotVisible: '#ff8000'
+- assertVisible: '#007bff'
+- assertVisible: '#ffff00'
+- assertNotVisible: '#00ff4d'
 
 - tapOn:
-    id: 'harmony-complementary'
-- assertVisible: '#ff0000'
-- assertVisible: '#00ffff'
-- assertNotVisible: '#00ff00'
-
-- tapOn:
-    id: 'harmony-tetratriadic'
-- assertVisible: '#80ff00'
-- assertVisible: '#00ffff'
-- assertVisible: '#7f00ff'
+    id: 'harmony-square'
+- assertVisible: '#6600ff'
+- assertVisible: '#ffbf00'
 
 - tapOn:
     id: 'harmony-monochromatic'
-- assertVisible: '#ff0000'
-- assertVisible: '#ff3721'
-- assertNotVisible: '#80ff00'
+- assertVisible: '#cc2929'
+- assertVisible: '#993d3d'
+- assertNotVisible: '#6600ff'

@@ -8,9 +8,9 @@ export type Hsv = [h: number, s: number, v: number];
 
 export const HARMONIES: { key: ColorHarmonyType; label: string }[] = [
   { key: 'analogous', label: 'Analogous' },
-  { key: 'triadic', label: 'Triadic' },
-  { key: 'tetratriadic', label: 'Tetratriadic' },
   { key: 'complementary', label: 'Complementary' },
+  { key: 'triadic', label: 'Triadic' },
+  { key: 'square', label: 'Square' },
   { key: 'monochromatic', label: 'Monochromatic' },
 ];
 
@@ -53,10 +53,9 @@ export function hslToHex([h, s, l]: Hsl): string {
   return chroma.hsl(h, s, l).hex();
 }
 
-/** Colors of a harmony built from a base color; the base comes first */
+/** Five colors of a harmony built from a base color, on the RYB wheel; the base comes first */
 export function harmonyColors(harmony: ColorHarmonyType, base: string): string[] {
-  const [h, s, l] = chroma(base).hsl();
-  return getHarmonyColors(harmony, { h: Number.isNaN(h) ? 0 : h, s, l });
+  return getHarmonyColors(harmony, base);
 }
 
 /** e.g. rgb(255 128 0) */

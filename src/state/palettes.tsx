@@ -11,6 +11,7 @@ import React, {
 
 import { harmonyColors, hexToHsv, type Hsv, hsvToHex } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
+import { type LegacyHarmony, legacyHarmonyColors } from '@/src/utils/harmonies/legacy';
 
 export const STORAGE_KEY = 'colorixer:palettes:v1';
 export const SLIDER_MODE_KEY = 'colorixer:slider-mode:v1';
@@ -22,8 +23,10 @@ export interface SavedPalette {
   id: string;
   name: string;
   harmony: ColorHarmonyType;
-  /** Base color as hex; the other colors are derived from it */
+  /** Base color as hex */
   base: string;
+  /** Colors as saved, base first; the rules that made them may have changed since */
+  colors: string[];
   /** ISO date */
   createdAt: string;
 }
@@ -90,6 +93,22 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+/** A palette as stored by the first versions: no colors, and Square was called tetratriadic */
+type StoredPalette = Omit<SavedPalette, 'colors' | 'harmony'> & {
+  harmony: ColorHarmonyType | 'tetratriadic';
+  colors?: string[];
+};
+
+/** Brings a stored palette up to date, keeping the colors it was saved with */
+export function migratePalette(stored: StoredPalette): SavedPalette {
+  if (stored.colors) return stored as SavedPalette;
+  return {
+    ...stored,
+    harmony: stored.harmony === 'tetratriadic' ? 'square' : stored.harmony,
+    colors: legacyHarmonyColors(stored.harmony as LegacyHarmony, stored.base),
+  };
+}
+
 /** Next free "Palette N" name */
 function nextName(saved: SavedPalette[]): string {
   const used = saved
@@ -129,7 +148,12 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => dispatch({ type: 'hydrate', saved: raw ? JSON.parse(raw) : [] }))
+      .then((raw) =>
+        dispatch({
+          type: 'hydrate',
+          saved: raw ? (JSON.parse(raw) as StoredPalette[]).map(migratePalette) : [],
+        }),
+      )
       .catch((error) => {
         console.warn('Could not read saved palettes:', error);
         dispatch({ type: 'hydrate', saved: [] });
@@ -156,8 +180,10 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
   }, [state.saved, state.hydrated]);
 
   const base = hsvToHex(state.hsv);
-  const colors = useMemo(() => harmonyColors(state.harmony, base), [state.harmony, base]);
   const current = state.saved.find((p) => p.id === state.currentId) ?? null;
+  // An open saved palette shows the colors it was saved with
+  const computed = useMemo(() => harmonyColors(state.harmony, base), [state.harmony, base]);
+  const colors = current?.colors ?? computed;
 
   const setHsv = useCallback((hsv: Hsv) => dispatch({ type: 'setHsv', hsv }), []);
   const setHarmony = useCallback(
@@ -177,11 +203,12 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       name: nextName(state.saved),
       harmony: state.harmony,
       base,
+      colors,
       createdAt: new Date().toISOString(),
     };
     dispatch({ type: 'save', palette });
     return palette;
-  }, [state.saved, state.harmony, base]);
+  }, [state.saved, state.harmony, base, colors]);
   const load = useCallback(
     (id: string) => {
       dispatch({ type: 'load', id });
@@ -235,7 +262,7 @@ export function usePalette(): PaletteContextValue {
 
 /** Colors of a saved palette */
 export function paletteColors(palette: SavedPalette): string[] {
-  return harmonyColors(palette.harmony, palette.base);
+  return palette.colors;
 }
 
 /** e.g. Nov 12 */

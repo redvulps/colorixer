@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-import type { HSL } from '../colorUtils';
+import type { HSL } from '../../colorUtils';
 
 export function getComplementaryColors(baseColor: HSL): string[] {
   // Complementary color is opposite on the color wheel (180 degrees)

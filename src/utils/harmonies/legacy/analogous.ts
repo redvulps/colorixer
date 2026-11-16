@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-import type { HSL } from '../colorUtils';
+import type { HSL } from '../../colorUtils';
 
 export function getAnalogousColors(baseColor: HSL, count: number = 5): string[] {
   const colors: string[] = [];
