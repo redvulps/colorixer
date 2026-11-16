@@ -6,9 +6,8 @@ import { FileIcon, TrashIcon } from '@/src/components/icons';
 import { AppBar, BottomSheet, PaletteCard, SheetAction, useToast } from '@/src/components/ui';
 import { EXPORT_FORMATS, exportPalette } from '@/src/hooks/usePaletteActions';
 import { useTopInset } from '@/src/hooks/useTopInset';
-import { paletteColors, type SavedPalette, usePalette } from '@/src/state/palettes';
+import { paletteColors, paletteLabel, type SavedPalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
-import { harmonyLabel } from '@/src/utils/color';
 
 /** Palettes tab: the saved palettes, newest first */
 export function PalettesScreen() {
@@ -55,9 +54,7 @@ export function PalettesScreen() {
         onClose={() => setSelected(null)}
         title={selected?.name}
         subtitle={
-          selected
-            ? `${harmonyLabel(selected.harmony)} · ${selectedColors.length} colors`
-            : undefined
+          selected ? `${paletteLabel(selected)} · ${selectedColors.length} colors` : undefined
         }
         palette={selectedColors}
       >

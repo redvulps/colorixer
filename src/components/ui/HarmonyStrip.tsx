@@ -22,7 +22,8 @@ const FADE = 36;
 const MARGIN = 28;
 
 interface HarmonyStripProps {
-  value: ColorHarmonyType;
+  /** Selected harmony; none when the palette came from an image */
+  value: ColorHarmonyType | null;
   onChange: (harmony: ColorHarmonyType) => void;
 }
 
@@ -56,7 +57,7 @@ export function HarmonyStrip({ value, onChange }: HarmonyStripProps) {
 
   // Keep the selected harmony in view, with some of its neighbors
   useEffect(() => {
-    const frame = frames.current[value];
+    const frame = value ? frames.current[value] : undefined;
     if (!frame || !view.width) return;
     const left = frame.x - MARGIN;
     const right = frame.x + frame.width + MARGIN - view.width;

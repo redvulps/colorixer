@@ -9,8 +9,9 @@ import React, {
   useRef,
 } from 'react';
 
-import { harmonyColors, hexToHsv, type Hsv, hsvToHex } from '@/src/utils/color';
+import { harmonyColors, harmonyLabel, hexToHsv, type Hsv, hsvToHex } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
+import { type ImageMood, moodLabel } from '@/src/utils/extract';
 import { type LegacyHarmony, legacyHarmonyColors } from '@/src/utils/harmonies/legacy';
 
 export const STORAGE_KEY = 'colorixer:palettes:v1';
@@ -27,8 +28,18 @@ export interface SavedPalette {
   base: string;
   /** Colors as saved, base first; the rules that made them may have changed since */
   colors: string[];
+  /** Set when the colors came from an image, in this mood */
+  mood?: ImageMood;
   /** ISO date */
   createdAt: string;
+}
+
+/** Colors taken from an image, open in the editor until the color or harmony changes */
+export interface ImagePalette {
+  colors: string[];
+  mood: ImageMood;
+  /** File name of the image */
+  name: string;
 }
 
 interface State {
@@ -37,6 +48,8 @@ interface State {
   sliderMode: SliderMode;
   /** Saved palette open in the editor, until the color or harmony changes */
   currentId: string | null;
+  /** Palette taken from an image, until the color or harmony changes */
+  image: ImagePalette | null;
   saved: SavedPalette[];
   hydrated: boolean;
 }
@@ -45,6 +58,7 @@ type Action =
   | { type: 'setHsv'; hsv: Hsv }
   | { type: 'setHarmony'; harmony: ColorHarmonyType }
   | { type: 'setSliderMode'; mode: SliderMode }
+  | { type: 'useImage'; image: ImagePalette }
   | { type: 'save'; palette: SavedPalette }
   | { type: 'load'; id: string }
   | { type: 'remove'; id: string }
@@ -55,6 +69,7 @@ const initialState: State = {
   harmony: 'analogous',
   sliderMode: 'hsv',
   currentId: null,
+  image: null,
   saved: [],
   hydrated: false,
 };
@@ -62,11 +77,18 @@ const initialState: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'setHsv':
-      return { ...state, hsv: action.hsv, currentId: null };
+      return { ...state, hsv: action.hsv, currentId: null, image: null };
     case 'setHarmony':
-      return action.harmony === state.harmony
+      return action.harmony === state.harmony && !state.image
         ? state
-        : { ...state, harmony: action.harmony, currentId: null };
+        : { ...state, harmony: action.harmony, currentId: null, image: null };
+    case 'useImage':
+      return {
+        ...state,
+        hsv: hexToHsv(action.image.colors[0]),
+        image: action.image,
+        currentId: null,
+      };
     case 'setSliderMode':
       return { ...state, sliderMode: action.mode };
     case 'save':
@@ -79,6 +101,7 @@ function reducer(state: State, action: Action): State {
         hsv: hexToHsv(palette.base),
         harmony: palette.harmony,
         currentId: palette.id,
+        image: null,
       };
     }
     case 'remove':
@@ -125,6 +148,12 @@ function newId(): string {
 interface PaletteContextValue {
   hsv: Hsv;
   harmony: ColorHarmonyType;
+  /** Harmony the palette follows; none when its colors came from an image */
+  activeHarmony: ColorHarmonyType | null;
+  /** What made the palette: a harmony, or an image and its mood */
+  kind: string;
+  /** Palette taken from an image, while it is open */
+  image: ImagePalette | null;
   sliderMode: SliderMode;
   /** Base color as hex */
   base: string;
@@ -136,6 +165,7 @@ interface PaletteContextValue {
   setHsv: (hsv: Hsv) => void;
   setHarmony: (harmony: ColorHarmonyType) => void;
   setSliderMode: (mode: SliderMode) => void;
+  useImage: (image: ImagePalette) => void;
   save: () => SavedPalette;
   load: (id: string) => SavedPalette | null;
   remove: (id: string) => void;
@@ -183,7 +213,14 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
   const current = state.saved.find((p) => p.id === state.currentId) ?? null;
   // An open saved palette shows the colors it was saved with
   const computed = useMemo(() => harmonyColors(state.harmony, base), [state.harmony, base]);
-  const colors = current?.colors ?? computed;
+  const colors = current?.colors ?? state.image?.colors ?? computed;
+  const fromImage = current ? !!current.mood : !!state.image;
+  const activeHarmony = fromImage ? null : state.harmony;
+  const kind = current
+    ? paletteLabel(current)
+    : state.image
+      ? `Image · ${moodLabel(state.image.mood)}`
+      : harmonyLabel(state.harmony);
 
   const setHsv = useCallback((hsv: Hsv) => dispatch({ type: 'setHsv', hsv }), []);
   const setHarmony = useCallback(
@@ -197,6 +234,11 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       console.warn('Could not store the slider mode:', error),
     );
   }, []);
+  // Named like a hook by React's rules only; it is a plain callback
+  const applyImage = useCallback(
+    (image: ImagePalette) => dispatch({ type: 'useImage', image }),
+    [],
+  );
   const save = useCallback(() => {
     const palette: SavedPalette = {
       id: newId(),
@@ -204,11 +246,12 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       harmony: state.harmony,
       base,
       colors,
+      ...(state.image && { mood: state.image.mood }),
       createdAt: new Date().toISOString(),
     };
     dispatch({ type: 'save', palette });
     return palette;
-  }, [state.saved, state.harmony, base, colors]);
+  }, [state.saved, state.harmony, state.image, base, colors]);
   const load = useCallback(
     (id: string) => {
       dispatch({ type: 'load', id });
@@ -223,6 +266,9 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       hsv: state.hsv,
       harmony: state.harmony,
       sliderMode: state.sliderMode,
+      activeHarmony,
+      kind,
+      image: state.image,
       base,
       colors,
       current,
@@ -230,6 +276,7 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       setHsv,
       setHarmony,
       setSliderMode,
+      useImage: applyImage,
       save,
       load,
       remove,
@@ -239,12 +286,16 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
       state.harmony,
       state.sliderMode,
       state.saved,
+      state.image,
+      activeHarmony,
+      kind,
       base,
       colors,
       current,
       setHsv,
       setHarmony,
       setSliderMode,
+      applyImage,
       save,
       load,
       remove,
@@ -258,6 +309,11 @@ export function usePalette(): PaletteContextValue {
   const value = useContext(PaletteContext);
   if (!value) throw new Error('usePalette must be used inside <PaletteProvider>');
   return value;
+}
+
+/** What made a saved palette: its harmony, or the image mood */
+export function paletteLabel(palette: SavedPalette): string {
+  return palette.mood ? `Image · ${moodLabel(palette.mood)}` : harmonyLabel(palette.harmony);
 }
 
 /** Colors of a saved palette */

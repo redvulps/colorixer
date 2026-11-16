@@ -4,12 +4,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorSliders, SLIDERS_HEADER } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
-import { CheckIcon, ExportIcon, FileIcon, SaveIcon, TrashIcon } from '@/src/components/icons';
+import {
+  CheckIcon,
+  ExportIcon,
+  FileIcon,
+  ImageIcon,
+  SaveIcon,
+  TrashIcon,
+} from '@/src/components/icons';
 import {
   Button,
   CopyField,
   ExportOption,
   HarmonyRow,
+  ImagePaletteView,
   LogoMark,
   type MenuPoint,
   Overline,
@@ -28,12 +36,16 @@ import {
   useCopy,
 } from '@/src/hooks/usePaletteActions';
 import { useTopInset } from '@/src/hooks/useTopInset';
-import { paletteColors, type SavedPalette, usePalette } from '@/src/state/palettes';
+import {
+  type ImagePalette,
+  paletteColors,
+  type SavedPalette,
+  usePalette,
+} from '@/src/state/palettes';
 import { colors as tokens, radius, type } from '@/src/theme/tokens';
 import {
   HARMONIES,
   harmonyColors,
-  harmonyLabel,
   hslString,
   hsvString,
   inkOn,
@@ -54,14 +66,28 @@ const exportLabel = (format: ExportFormat) => (format === 'ase' ? 'Adobe ASE' : 
 
 /** Wide layout: harmonies and saved palettes | wheel and sliders | base color and export */
 export function DesktopWorkspace() {
-  const { hsv, harmony, base, colors, current, saved, setHsv, setHarmony, save, load, remove } =
-    usePalette();
+  const {
+    hsv,
+    activeHarmony,
+    kind,
+    base,
+    colors,
+    current,
+    saved,
+    setHsv,
+    setHarmony,
+    useImage: applyImage,
+    save,
+    load,
+    remove,
+  } = usePalette();
   const copy = useCopy();
   const toast = useToast();
   const { width, height } = useWindowDimensions();
   // Zero in a browser; on a tablet, the system bars the workspace has to stay clear of
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState<Menu | null>(null);
+  const [imageOpen, setImageOpen] = useState(false);
   const closeMenu = () => setMenu(null);
 
   const topInset = useTopInset();
@@ -105,6 +131,12 @@ export function DesktopWorkspace() {
     copy(text);
   };
 
+  const onUseImage = (palette: ImagePalette) => {
+    setImageOpen(false);
+    applyImage(palette);
+    toast(`Palette from ${palette.name}`);
+  };
+
   return (
     <View style={styles.root}>
       <View
@@ -124,6 +156,13 @@ export function DesktopWorkspace() {
           / Palettes / <Text style={styles.crumbName}>{current?.name ?? 'Untitled'}</Text>
         </Text>
         <View style={styles.spacer} />
+        <Button
+          testID="image-button"
+          variant="ghost"
+          icon={ImageIcon}
+          label="Image"
+          onPress={() => setImageOpen(true)}
+        />
         <Button
           testID="save-button"
           variant={current ? 'saved' : 'ghost'}
@@ -161,7 +200,7 @@ export function DesktopWorkspace() {
                 key={key}
                 harmony={key}
                 count={harmonyColors(key, base).length}
-                selected={key === harmony}
+                selected={key === activeHarmony}
                 onPress={() => setHarmony(key)}
               />
             ))}
@@ -214,7 +253,7 @@ export function DesktopWorkspace() {
           </View>
 
           <View testID="generated-colors" style={styles.paletteSection}>
-            <Overline style={styles.paletteLabel}>{`Palette · ${harmonyLabel(harmony)}`}</Overline>
+            <Overline style={styles.paletteLabel}>{`Palette · ${kind}`}</Overline>
             {colors.map((color, i) => (
               <PaletteValue
                 key={`${color}-${i}`}
@@ -323,6 +362,12 @@ export function DesktopWorkspace() {
           </>
         )}
       </PopoverMenu>
+      <ImagePaletteView
+        visible={imageOpen}
+        layout="dialog"
+        onClose={() => setImageOpen(false)}
+        onUse={onUseImage}
+      />
     </View>
   );
 }

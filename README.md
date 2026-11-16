@@ -6,6 +6,7 @@ Colorixer is a powerful color picker application that helps artists and designer
 
 - **Color wheel and HSV/HSL controls**: The wheel is the painter's RYB circle (red, yellow and blue primaries, after Gossett and Chen's pigment-mixing model), so complements are red and green, blue and orange, yellow and violet. Drag on it to pick hue and saturation, or set hue, saturation and value with sliders and numeric fields. The HSV/HSL switch above the sliders trades value for lightness, and the app remembers the choice
 - **Color Harmony Generation**: Analogous, complementary, split complementary, triadic, square, compound, shades and monochromatic palettes of five colors, drawn on the wheel. Saved palettes keep the colors they were saved with
+- **Palettes from images**: The image button next to Save takes five colors from a photo, in one of six moods (Natural, Vibrant, Light, Muted, Deep, Dark), and marks where each color comes from. The photo is read on the device; nothing is uploaded
 - **Saved palettes**: Save a palette, reopen it later, export or delete it from the Palettes tab
 - **Full-screen palette**: The full-screen button next to Save shows the palette over the whole screen; tap anywhere to go back
 - **Copy in any format**: Tap a swatch to copy its HEX value, long press for RGB, HSL or HSV
@@ -79,8 +80,9 @@ The flows are platform-agnostic. Android-only checks live in `.maestro/subflows/
 
 1. **Select a Base Color**: Drag on the color wheel, or use the H, S and V (or H, S and L) sliders and fields
 2. **Choose a Harmony Type**: Tap one of the harmony diagrams to generate related colors; on phones the row of diagrams scrolls sideways
-3. **Save**: Keep the palette in the Palettes tab (Palettes at the top on upright tablets, the sidebar on wide screens)
-4. **Export**: Share your palette with drawing applications in your preferred format
+3. **Or start from a photo**: Tap the image button, choose a photo and a mood, then Use palette
+4. **Save**: Keep the palette in the Palettes tab (Palettes at the top on upright tablets, the sidebar on wide screens)
+5. **Export**: Share your palette with drawing applications in your preferred format
 
 ## How the colors are made
 
@@ -113,11 +115,11 @@ The five-color structure and the starting sizes come from a black-box study of A
 
 Saved palettes keep the colors they were saved with. Palettes saved before the RYB wheel get their colors worked out once from the previous RGB rules (`src/utils/harmonies/legacy`), and an open saved palette shows its own colors until the color or the harmony changes.
 
-### Palettes from images (planned)
+### Palettes from images
 
-The extraction is being prototyped before it reaches the app. The plan follows published, open methods rather than any one app:
+The extraction (`src/utils/extract.ts`) follows published, open methods rather than any one app:
 
-1. **Shrink** the image to about 100 px on its longest side, on the device; nothing is uploaded.
+1. **Shrink** the image to 100 px on its longest side on the device with `expo-image-manipulator`, and read its pixels from the PNG it writes (`src/utils/png.ts`, inflated with `fflate`); nothing is uploaded.
 2. **Group** the pixels with Wu's color quantizer (Xiaolin Wu, Graphics Gems II, 1991) into 24 groups, then refine them with a weighted k-means in OKLab (Björn Ottosson, 2020), the way Material Color Utilities finds a wallpaper's colors. Each group's color is the average of its pixels, so it comes from the image.
 3. **Score** the groups for a mood. Moods are lightness × chroma targets in OKLCH, in the spirit of the profiles in Android's Palette library; a color in the mood's ranges ranks first, then by closeness to the targets, weighting lightness 0.52, chroma 0.24 and area 0.24.
 4. **Pick** five colors at least 0.1 apart in OKLab, so the palette stays varied; the distance relaxes when an image has too few distinct colors.

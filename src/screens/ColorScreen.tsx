@@ -3,10 +3,11 @@ import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-n
 
 import { ColorSliders } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
-import { ExpandIcon, ExportIcon, FileIcon } from '@/src/components/icons';
+import { ExpandIcon, ExportIcon, FileIcon, ImageIcon } from '@/src/components/icons';
 import {
   BottomSheet,
   HarmonyStrip,
+  ImagePaletteView,
   Overline,
   PaletteFullscreen,
   PaletteStrip,
@@ -24,9 +25,9 @@ import {
   useCopy,
 } from '@/src/hooks/usePaletteActions';
 import { useHeldTopInset } from '@/src/hooks/useTopInset';
-import { usePalette } from '@/src/state/palettes';
+import { type ImagePalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
-import { harmonyLabel, hslString, hsvString, rgbString } from '@/src/utils/color';
+import { hslString, hsvString, rgbString } from '@/src/utils/color';
 
 /** Largest wheel, for tablets and narrow browser windows */
 const MAX_WHEEL = 480;
@@ -36,13 +37,24 @@ const MAX_WHEEL = 480;
  * and the HSV or HSL sliders. The palette sticks to the top once the wheel scrolls away.
  */
 export function ColorScreen() {
-  const { hsv, harmony, colors, current, setHsv, setHarmony, save } = usePalette();
+  const {
+    hsv,
+    activeHarmony,
+    kind,
+    colors,
+    current,
+    setHsv,
+    setHarmony,
+    useImage: applyImage,
+    save,
+  } = usePalette();
   const toast = useToast();
   const copy = useCopy();
   const { width } = useWindowDimensions();
   const [exportOpen, setExportOpen] = useState(false);
   const [copyColor, setCopyColor] = useState<string | null>(null);
   const [fullOpen, setFullOpen] = useState(false);
+  const [imageOpen, setImageOpen] = useState(false);
   const [fullOrigin, setFullOrigin] = useState<Rect | null>(null);
   const { top: topInset, hold: holdTopInset } = useHeldTopInset(fullOpen);
   const stripRef = useRef<React.ComponentRef<typeof View>>(null);
@@ -64,6 +76,12 @@ export function ColorScreen() {
     stripRef.current?.measureInWindow((x, y, w, h) => setFullOrigin({ x, y, width: w, height: h }));
   };
 
+  const onUseImage = (palette: ImagePalette) => {
+    setImageOpen(false);
+    applyImage(palette);
+    toast(`Palette from ${palette.name}`);
+  };
+
   const copyAs = (text: string) => {
     setCopyColor(null);
     copy(text);
@@ -72,7 +90,7 @@ export function ColorScreen() {
   return (
     <View style={[styles.screen, { paddingTop: topInset }]}>
       <View style={styles.header}>
-        <HarmonyStrip value={harmony} onChange={setHarmony} />
+        <HarmonyStrip value={activeHarmony} onChange={setHarmony} />
       </View>
       <ScrollView contentContainerStyle={styles.content} stickyHeaderIndices={[1]}>
         <View style={styles.wheel}>
@@ -90,10 +108,16 @@ export function ColorScreen() {
           <View style={styles.paletteInner}>
             <View style={styles.paletteHeader}>
               <Overline style={styles.paletteName}>
-                {current ? `${current.name} · ${harmonyLabel(harmony)}` : harmonyLabel(harmony)}
+                {current ? `${current.name} · ${kind}` : kind}
               </Overline>
               <View style={styles.paletteActions}>
                 <PillButton testID="save-button" saved={!!current} onPress={onSave} />
+                <PillIconButton
+                  testID="image-button"
+                  icon={ImageIcon}
+                  accessibilityLabel="Take a palette from an image"
+                  onPress={() => setImageOpen(true)}
+                />
                 <PillIconButton
                   testID="fullscreen-button"
                   icon={ExpandIcon}
@@ -138,7 +162,7 @@ export function ColorScreen() {
         visible={fullOpen}
         origin={fullOrigin}
         colors={colors}
-        label={`${current ? `${current.name} · ` : ''}${harmonyLabel(harmony)} · ${colors.length} colors`}
+        label={`${current ? `${current.name} · ` : ''}${kind} · ${colors.length} colors`}
         onClose={() => setFullOpen(false)}
       />
 
@@ -147,7 +171,7 @@ export function ColorScreen() {
         visible={exportOpen}
         onClose={() => setExportOpen(false)}
         title={current?.name ?? 'Current palette'}
-        subtitle={`${harmonyLabel(harmony)} · ${colors.length} colors`}
+        subtitle={`${kind} · ${colors.length} colors`}
         palette={colors}
       >
         {EXPORT_FORMATS.map(({ format, app, ext }) => (
@@ -194,6 +218,12 @@ export function ColorScreen() {
         )}
         <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
       </BottomSheet>
+      <ImagePaletteView
+        visible={imageOpen}
+        layout="screen"
+        onClose={() => setImageOpen(false)}
+        onUse={onUseImage}
+      />
     </View>
   );
 }

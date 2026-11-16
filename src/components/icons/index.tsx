@@ -42,6 +42,21 @@ export const ExportIcon = (p: IconProps) => (
   </StrokeIcon>
 );
 
+export const ImageIcon = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <Path d="M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+    <Path d="M3 16l5-5 4 4 3-3 6 6" />
+    <Path d="M16 8.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
+  </StrokeIcon>
+);
+
+export const CloseIcon = (p: IconProps) => (
+  <StrokeIcon {...p}>
+    <Path d="M6 6l12 12" />
+    <Path d="M18 6L6 18" />
+  </StrokeIcon>
+);
+
 export const ExpandIcon = (p: IconProps) => (
   <StrokeIcon {...p}>
     <Path d="M15 3h6v6" />

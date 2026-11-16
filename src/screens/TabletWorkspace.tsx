@@ -10,6 +10,7 @@ import {
   ExpandIcon,
   ExportIcon,
   FileIcon,
+  ImageIcon,
   PalettesIcon,
   SaveIcon,
   TrashIcon,
@@ -20,6 +21,7 @@ import {
   CopyField,
   HarmonyRow,
   type IconComponent,
+  ImagePaletteView,
   LogoMark,
   type MenuPoint,
   Overline,
@@ -41,12 +43,17 @@ import {
   useCopy,
 } from '@/src/hooks/usePaletteActions';
 import { useHeldTopInset } from '@/src/hooks/useTopInset';
-import { paletteColors, type SavedPalette, usePalette } from '@/src/state/palettes';
+import {
+  type ImagePalette,
+  paletteColors,
+  paletteLabel,
+  type SavedPalette,
+  usePalette,
+} from '@/src/state/palettes';
 import { fonts, iconTone, radius, colors as tokens, type } from '@/src/theme/tokens';
 import {
   HARMONIES,
   harmonyColors,
-  harmonyLabel,
   hslString,
   hsvString,
   inkOn,
@@ -76,13 +83,27 @@ type TabletView = 'color' | 'palettes';
  * the controls a column on the right, and the palette runs edge to edge along the bottom.
  */
 export function TabletWorkspace() {
-  const { hsv, harmony, base, colors, current, saved, setHsv, setHarmony, save, load, remove } =
-    usePalette();
+  const {
+    hsv,
+    activeHarmony,
+    kind,
+    base,
+    colors,
+    current,
+    saved,
+    setHsv,
+    setHarmony,
+    useImage: applyImage,
+    save,
+    load,
+    remove,
+  } = usePalette();
   const copy = useCopy();
   const toast = useToast();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [view, setView] = useState<TabletView>('color');
+  const [imageOpen, setImageOpen] = useState(false);
   const [exportAt, setExportAt] = useState<MenuPoint | null>(null);
   const [selected, setSelected] = useState<SavedPalette | null>(null);
   const [copyColor, setCopyColor] = useState<string | null>(null);
@@ -129,6 +150,13 @@ export function TabletWorkspace() {
     copy(text);
   };
 
+  const onUseImage = (palette: ImagePalette) => {
+    setImageOpen(false);
+    setView('color');
+    applyImage(palette);
+    toast(`Palette from ${palette.name}`);
+  };
+
   return (
     <View style={styles.root}>
       <View
@@ -162,6 +190,13 @@ export function TabletWorkspace() {
           />
         </View>
         <View style={styles.spacer} />
+        <Button
+          testID="image-button"
+          variant="ghost"
+          icon={ImageIcon}
+          label="Image"
+          onPress={() => setImageOpen(true)}
+        />
         <Button
           testID="save-button"
           variant={current ? 'saved' : 'ghost'}
@@ -205,7 +240,7 @@ export function TabletWorkspace() {
                       key={key}
                       harmony={key}
                       count={harmonyColors(key, base).length}
-                      selected={key === harmony}
+                      selected={key === activeHarmony}
                       onPress={() => setHarmony(key)}
                     />
                   ))}
@@ -246,7 +281,7 @@ export function TabletWorkspace() {
               ]}
             >
               <Overline style={styles.paletteName}>
-                {`${current ? `${current.name} · ` : ''}${harmonyLabel(harmony)} · ${colors.length} colors`}
+                {`${current ? `${current.name} · ` : ''}${kind} · ${colors.length} colors`}
               </Overline>
               <PillIconButton
                 testID="fullscreen-button"
@@ -323,7 +358,7 @@ export function TabletWorkspace() {
         visible={fullOpen}
         origin={fullOrigin}
         colors={colors}
-        label={`${current ? `${current.name} · ` : ''}${harmonyLabel(harmony)} · ${colors.length} colors`}
+        label={`${current ? `${current.name} · ` : ''}${kind} · ${colors.length} colors`}
         onClose={() => setFullOpen(false)}
       />
 
@@ -333,9 +368,7 @@ export function TabletWorkspace() {
         onClose={() => setSelected(null)}
         title={selected?.name}
         subtitle={
-          selected
-            ? `${harmonyLabel(selected.harmony)} · ${selectedColors.length} colors`
-            : undefined
+          selected ? `${paletteLabel(selected)} · ${selectedColors.length} colors` : undefined
         }
         palette={selectedColors}
       >
@@ -397,6 +430,12 @@ export function TabletWorkspace() {
         )}
         <SheetAction label="Cancel" tone="cancel" onPress={() => setCopyColor(null)} />
       </BottomSheet>
+      <ImagePaletteView
+        visible={imageOpen}
+        layout="sheet"
+        onClose={() => setImageOpen(false)}
+        onUse={onUseImage}
+      />
     </View>
   );
 }

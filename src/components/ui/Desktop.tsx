@@ -5,7 +5,7 @@ import { type IconComponent, IconButton } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
 import { CopyIcon, FileIcon, HarmonyIcon, MoreIcon } from '@/src/components/icons';
-import { paletteColors, type SavedPalette } from '@/src/state/palettes';
+import { paletteColors, paletteLabel, type SavedPalette } from '@/src/state/palettes';
 import { colors, control, iconTone, radius, type } from '@/src/theme/tokens';
 import { harmonyLabel } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
@@ -126,7 +126,7 @@ export function SavedRow({
       <Pressable
         testID={`palette-${palette.name}`}
         accessibilityRole="button"
-        accessibilityLabel={`${palette.name}, ${harmonyLabel(palette.harmony)}`}
+        accessibilityLabel={`${palette.name}, ${paletteLabel(palette)}`}
         onPress={onPress}
         style={({ pressed }) => [styles.savedMain, pressed && !selected && styles.rowPressed]}
       >
@@ -146,7 +146,7 @@ export function SavedRow({
           >
             {palette.name}
           </Text>
-          <Text style={styles.savedHarmony}>{harmonyLabel(palette.harmony)}</Text>
+          <Text style={styles.savedHarmony}>{paletteLabel(palette)}</Text>
         </View>
       </Pressable>
       <IconButton

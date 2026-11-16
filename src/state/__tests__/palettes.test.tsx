@@ -90,6 +90,30 @@ describe('palette store', () => {
     expect(result.current.current).toBeNull();
   });
 
+  it('opens a palette from an image until the color or harmony changes', async () => {
+    const { result } = await renderStore();
+    const colors = ['#e63946', '#ffb703', '#2a9d8f', '#457b9d', '#1d3557'];
+    await act(async () => result.current.useImage({ colors, mood: 'vibrant', name: 'photo.jpg' }));
+    expect(result.current.colors).toEqual(colors);
+    expect(result.current.base).toBe('#e63946');
+    expect(result.current.kind).toBe('Image · Vibrant');
+    expect(result.current.activeHarmony).toBeNull();
+
+    let saved!: SavedPalette;
+    await act(async () => {
+      saved = result.current.save();
+    });
+    expect(saved).toMatchObject({ colors, mood: 'vibrant', base: '#e63946' });
+    expect(result.current.kind).toBe('Image · Vibrant');
+
+    // Picking the harmony already in place still leaves the image palette
+    await act(async () => result.current.setHarmony(result.current.harmony));
+    expect(result.current.activeHarmony).toBe('analogous');
+    expect(result.current.kind).toBe('Analogous');
+    expect(result.current.colors[0]).toBe('#e63946');
+    expect(result.current.colors).not.toEqual(colors);
+  });
+
   it('stores the slider mode and reads it on the next start', async () => {
     const first = await renderStore();
     expect(first.result.current.sliderMode).toBe('hsv');
