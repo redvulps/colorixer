@@ -1,0 +1,7 @@
+• Roda de cores dos pintores (RYB): complementares como vermelho e verde, azul e laranja
+• 8 harmonias com 5 cores cada, incluindo Complementar dividida, Composta e Tons
+• Crie paletas a partir de fotos da galeria ou da câmera, em 6 estilos
+• Sliders em HSV ou HSL
+• Copie cores em RGB, além de HEX, HSL e HSV
+• App em português e espanhol
+Suas paletas salvas continuam com as mesmas cores.

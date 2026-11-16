@@ -1,0 +1,7 @@
+• A painter's color wheel (RYB): complements like red and green, blue and orange
+• 8 harmonies with 5 colors each, including Split complementary, Compound and Shades
+• Make palettes from photos, from the gallery or the camera, in 6 moods
+• HSV or HSL sliders
+• Copy colors as RGB, besides HEX, HSL and HSV
+• Now in Portuguese and Spanish
+Your saved palettes keep their colors.
