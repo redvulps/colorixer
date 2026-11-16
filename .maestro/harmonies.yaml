@@ -31,8 +31,18 @@ tags:
 - assertVisible: '#6600ff'
 - assertVisible: '#ffbf00'
 
+# The strip scrolls to show the last harmonies
+- swipe:
+    from:
+      id: 'harmony-selector'
+    direction: LEFT
+- tapOn:
+    id: 'harmony-shades'
+- assertVisible: '#db0000'
+- assertVisible: '#610000'
+
 - tapOn:
     id: 'harmony-monochromatic'
 - assertVisible: '#cc2929'
 - assertVisible: '#993d3d'
-- assertNotVisible: '#6600ff'
+- assertNotVisible: '#610000'

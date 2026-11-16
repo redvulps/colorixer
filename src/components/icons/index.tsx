@@ -132,8 +132,12 @@ const HARMONY_SHAPES: Record<
 > = {
   analogous: { dots: [-60, -30, 0, 30, 60].map((a) => point(a)), base: 2 },
   complementary: { dots: [0, 180].map((a) => point(a)), base: 0, shape: 'line' },
+  // The spread is wider than the real one, so the two dots stay apart at icon size
+  splitComplementary: { dots: [0, 150, 210].map((a) => point(a)), base: 0, shape: 'polygon' },
   triadic: { dots: [0, 120, 240].map((a) => point(a)), base: 0, shape: 'polygon' },
   square: { dots: [0, 90, 180, 270].map((a) => point(a)), base: 0, shape: 'polygon' },
+  compound: { dots: [0, -30, -150, 180].map((a) => point(a)), base: 0, shape: 'polygon' },
+  shades: { dots: [6.5, 12, 16.5, 21, 25.5].map((x) => [x, 16]), base: 0, fade: true },
   monochromatic: { dots: [2.5, 5.3, 8.1, 11].map((r) => point(0, r)), base: 3, shape: 'radius' },
 };
 

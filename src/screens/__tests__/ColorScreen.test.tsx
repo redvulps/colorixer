@@ -35,6 +35,17 @@ describe('Color tab', () => {
     expect(screen.queryByText('#ff2600')).toBeNull();
   });
 
+  it('offers the split complementary, compound and shades harmonies', async () => {
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent.press(screen.getByTestId('harmony-splitComplementary'));
+    expect(screen.getByText('Split complementary')).toBeOnTheScreen();
+    expect(screen.getByText('#00ff84')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId('harmony-compound'));
+    expect(screen.getByText('#00ffbb')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId('harmony-shades'));
+    expect(screen.getByText('#610000')).toBeOnTheScreen();
+  });
+
   it('sets the hue from its field', async () => {
     await renderWithProviders(<ColorScreen />);
     const field = screen.getByTestId('value-h');

@@ -9,8 +9,11 @@ export type Hsv = [h: number, s: number, v: number];
 export const HARMONIES: { key: ColorHarmonyType; label: string }[] = [
   { key: 'analogous', label: 'Analogous' },
   { key: 'complementary', label: 'Complementary' },
+  { key: 'splitComplementary', label: 'Split complementary' },
   { key: 'triadic', label: 'Triadic' },
   { key: 'square', label: 'Square' },
+  { key: 'compound', label: 'Compound' },
+  { key: 'shades', label: 'Shades' },
   { key: 'monochromatic', label: 'Monochromatic' },
 ];
 

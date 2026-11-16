@@ -7,12 +7,15 @@ import { hueToRyb, rybToHue } from '../ryb';
 type Slot = [turn: number, depth: number | null];
 
 const ANALOGOUS_STEP = 18;
+const SPLIT_SPREAD = 18;
+const COMPOUND_TURN = 30;
 const LIGHT = 0.25;
 const MEDIUM = 1 / 3;
 const STRONG = 0.5;
 const MONOCHROMATIC_STEP = 0.2;
+const SHADES = [0.14, 0.3, 0.46, 0.62];
 
-const SLOTS: Record<Exclude<ColorHarmonyType, 'monochromatic'>, Slot[]> = {
+const SLOTS: Record<Exclude<ColorHarmonyType, 'shades' | 'monochromatic'>, Slot[]> = {
   analogous: [
     [0, null],
     [-ANALOGOUS_STEP, null],
@@ -27,6 +30,13 @@ const SLOTS: Record<Exclude<ColorHarmonyType, 'monochromatic'>, Slot[]> = {
     [180, MEDIUM],
     [0, STRONG],
   ],
+  splitComplementary: [
+    [0, null],
+    [180 + SPLIT_SPREAD, null],
+    [180 - SPLIT_SPREAD, null],
+    [0, STRONG],
+    [180 + SPLIT_SPREAD, STRONG],
+  ],
   triadic: [
     [0, null],
     [-120, null],
@@ -39,6 +49,13 @@ const SLOTS: Record<Exclude<ColorHarmonyType, 'monochromatic'>, Slot[]> = {
     [-90, null],
     [180, null],
     [90, null],
+    [0, MEDIUM],
+  ],
+  compound: [
+    [0, null],
+    [-COMPOUND_TURN, null],
+    [COMPOUND_TURN - 180, null],
+    [180, null],
     [0, MEDIUM],
   ],
 };
@@ -73,6 +90,12 @@ export function getHarmonyColors(harmony: ColorHarmonyType, base: string): strin
 
   return [0, 1, 2, 3, 4].map((k) => {
     if (k === 0) return chroma(base).hex();
+    if (harmony === 'shades') {
+      let v2 = v - SHADES[k - 1];
+      // Too dark to tell apart: start again from the light end
+      if (v2 <= 0.2) v2 += 0.8;
+      return chroma.hsv(h, s, Math.min(1, Math.max(0, v2))).hex();
+    }
     if (harmony === 'monochromatic') {
       const [s2, v2] = vary(MONOCHROMATIC_STEP * k);
       return chroma.hsv(h, s2, v2).hex();

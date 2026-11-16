@@ -18,8 +18,11 @@ describe('harmonyColors', () => {
   it.each<[ColorHarmonyType, string[]]>([
     ['analogous', ['#ff0000', '#ff002d', '#ff2600', '#ff006d', '#ff4d00']],
     ['complementary', ['#ff0000', '#00ff4d', '#bf3030', '#39aa5b', '#804040']],
+    ['splitComplementary', ['#ff0000', '#00ff84', '#42ff00', '#804040', '#408061']],
     ['triadic', ['#ff0000', '#007bff', '#ffff00', '#aa3939', '#405e80']],
     ['square', ['#ff0000', '#6600ff', '#00ff4d', '#ffbf00', '#aa3939']],
+    ['compound', ['#ff0000', '#ff0055', '#00ffbb', '#00ff4d', '#aa3939']],
+    ['shades', ['#ff0000', '#db0000', '#b30000', '#8a0000', '#610000']],
     ['monochromatic', ['#ff0000', '#cc2929', '#993d3d', '#663d3d', '#332929']],
   ])('builds the %s palette of red', (harmony, expected) => {
     expect(harmonyColors(harmony, '#ff0000')).toEqual(expected);
@@ -40,6 +43,13 @@ describe('harmonyColors', () => {
       '#008027',
       '#806000',
       '#d54747',
+    ]);
+    expect(harmonyColors('shades', '#800000')).toEqual([
+      '#800000',
+      '#5c0000',
+      '#340000',
+      '#d70000',
+      '#ae0000',
     ]);
   });
 
