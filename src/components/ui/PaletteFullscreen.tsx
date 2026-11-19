@@ -30,6 +30,8 @@ const ORIGIN_RADIUS = 14;
 /** Box of the vertical hex label: its line height by the width of seven mono characters */
 const LABEL_THICKNESS = 28;
 const LABEL_LENGTH = 112;
+/** Room under the hex of a row */
+const ROW_LABEL_BOTTOM = 20;
 
 /** Window rectangle, as measureInWindow reports it */
 export interface Rect {
@@ -46,19 +48,25 @@ interface PaletteFullscreenProps {
   colors: string[];
   /** Chip at the top, e.g. "Pôr do sol · Analogous · 5 colors" */
   label: string;
+  /**
+   * Columns side by side (a bar of swatches), or rows stacked top to bottom (a list of bands),
+   * so the view keeps the shape of what it grows out of
+   */
+  direction?: 'columns' | 'rows';
   onClose: () => void;
   testID?: string;
 }
 
 /**
- * The palette over the whole screen, one column per color with its hex. It grows out of the
- * palette bar, and a tap anywhere shrinks it back. With reduced motion it only fades.
+ * The palette over the whole screen, one column (or row) per color with its hex. It grows out of
+ * the palette bar, and a tap anywhere shrinks it back. With reduced motion it only fades.
  */
 export function PaletteFullscreen({
   visible,
   origin,
   colors: swatches,
   label,
+  direction = 'columns',
   onClose,
   testID,
 }: PaletteFullscreenProps) {
@@ -149,6 +157,7 @@ export function PaletteFullscreen({
     else setTimeout(tryOpen, ORIGIN_WAIT_MS);
   };
 
+  const rows = direction === 'rows';
   const W = size?.width ?? win.width;
   const H = size?.height ?? win.height;
   // Without an origin it rises from the bottom edge
@@ -187,23 +196,46 @@ export function PaletteFullscreen({
             accessibilityRole="button"
             accessibilityLabel={t('fullscreen.close', { label })}
             onPress={onClose}
-            style={styles.columns}
+            style={rows ? styles.rows : styles.columns}
           >
-            {swatches.map((color, i) => (
-              <View
-                key={`${color}-${i}`}
-                style={[
-                  styles.column,
-                  { backgroundColor: color, paddingBottom: insets.bottom + 28 },
-                ]}
-              >
-                <Animated.View style={[styles.labelBox, { opacity: labelOpacity }]}>
-                  <Text style={[styles.hex, { color: inkOn(color) }]} numberOfLines={1}>
+            {swatches.map((color, i) =>
+              rows ? (
+                <View
+                  key={`${color}-${i}`}
+                  style={[
+                    styles.row,
+                    {
+                      backgroundColor: color,
+                      paddingLeft: insets.left + 28,
+                      // The last row's label stays clear of the gesture bar
+                      paddingBottom:
+                        ROW_LABEL_BOTTOM + (i === swatches.length - 1 ? insets.bottom : 0),
+                    },
+                  ]}
+                >
+                  <Animated.Text
+                    style={[styles.rowHex, { color: inkOn(color), opacity: labelOpacity }]}
+                    numberOfLines={1}
+                  >
                     {color}
-                  </Text>
-                </Animated.View>
-              </View>
-            ))}
+                  </Animated.Text>
+                </View>
+              ) : (
+                <View
+                  key={`${color}-${i}`}
+                  style={[
+                    styles.column,
+                    { backgroundColor: color, paddingBottom: insets.bottom + 28 },
+                  ]}
+                >
+                  <Animated.View style={[styles.labelBox, { opacity: labelOpacity }]}>
+                    <Text style={[styles.hex, { color: inkOn(color) }]} numberOfLines={1}>
+                      {color}
+                    </Text>
+                  </Animated.View>
+                </View>
+              ),
+            )}
           </Pressable>
           <Animated.View
             pointerEvents="none"
@@ -242,6 +274,21 @@ const styles = StyleSheet.create({
     minWidth: 0,
     alignItems: 'center',
     justifyContent: 'flex-end',
+  },
+  rows: {
+    flex: 1,
+  },
+  // The hex sits low and to the left, clear of the chip over the first row
+  row: {
+    flex: 1,
+    minHeight: 0,
+    justifyContent: 'flex-end',
+  },
+  rowHex: {
+    fontFamily: fonts.monoSemibold,
+    fontSize: 22,
+    lineHeight: LABEL_THICKNESS,
+    letterSpacing: 0.9,
   },
   labelBox: {
     width: LABEL_THICKNESS,

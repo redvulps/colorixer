@@ -7,8 +7,8 @@ import { PaletteStrip } from './PaletteStrip';
 import { CopyIcon, FileIcon, HarmonyIcon, MoreIcon } from '@/src/components/icons';
 import { t } from '@/src/i18n';
 import { paletteColors, paletteLabel, type SavedPalette } from '@/src/state/palettes';
-import { colors, control, iconTone, radius, type } from '@/src/theme/tokens';
-import { harmonyLabel } from '@/src/utils/color';
+import { colors, control, fonts, iconTone, radius, type } from '@/src/theme/tokens';
+import { harmonyLabel, inkOn } from '@/src/utils/color';
 import type { ColorHarmonyType } from '@/src/utils/colorUtils';
 
 /** Section label: small caps, muted */
@@ -163,37 +163,48 @@ export function SavedRow({
   );
 }
 
-/** Swatch and hex of one palette color: copies HEX, the ⋯ button offers other formats */
-export function PaletteValue({
+/**
+ * One palette color as a band the width of its column, with its hex: a tap copies HEX, a long
+ * press or the ⋯ button offers the other formats. Stacked, the bands make the palette.
+ */
+export function PaletteBand({
   color,
+  insetRight = 0,
   onPress,
   onMore,
 }: {
   color: string;
+  /** System bar the band runs under on the right; the ⋯ button stays clear of it */
+  insetRight?: number;
   onPress: () => void;
   onMore: (e: GestureResponderEvent) => void;
 }) {
+  const ink = inkOn(color);
   return (
-    <View style={styles.value}>
+    <View style={[styles.band, { backgroundColor: color, paddingRight: 6 + insetRight }]}>
       <Pressable
         testID={`swatch-${color}`}
         accessibilityRole="button"
         accessibilityLabel={t('copy.color', { color })}
+        accessibilityHint={t('copy.hint')}
         onPress={onPress}
-        style={styles.valueMain}
+        onLongPress={onMore}
+        style={styles.bandMain}
       >
-        <View style={[styles.valueSwatch, { backgroundColor: color }]} />
-        <Text style={styles.valueHex}>{color}</Text>
+        <Text style={[styles.bandHex, { color: ink }]} numberOfLines={1}>
+          {color}
+        </Text>
       </Pressable>
-      <IconButton
+      <Pressable
         testID={`swatch-more-${color}`}
-        icon={MoreIcon}
-        tone="muted"
-        iconSize={16}
-        style={styles.valueMore}
+        accessibilityRole="button"
         accessibilityLabel={t('copy.otherFormat', { color })}
+        hitSlop={4}
         onPress={onMore}
-      />
+        style={({ pressed }) => [styles.bandMore, pressed && styles.bandMorePressed]}
+      >
+        <MoreIcon size={18} color={ink} />
+      </Pressable>
     </View>
   );
 }
@@ -314,30 +325,31 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     color: colors.textMuted,
   },
-  value: {
-    height: 28,
+  band: {
+    flexGrow: 1,
+    minHeight: control.md,
     flexDirection: 'row',
     alignItems: 'center',
   },
-  valueMain: {
+  bandMain: {
     flex: 1,
-    height: 28,
-    flexDirection: 'row',
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    paddingLeft: 18,
+  },
+  bandHex: {
+    fontFamily: fonts.monoSemibold,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  bandMore: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'center',
   },
-  valueMore: {
-    width: 28,
-    height: 28,
-    borderRadius: 7,
-  },
-  valueSwatch: {
-    width: 18,
-    height: 18,
-    borderRadius: 5,
-  },
-  valueHex: {
-    ...type.monoSmall,
-    color: colors.textSecondary,
+  bandMorePressed: {
+    backgroundColor: 'rgba(0, 0, 0, 0.14)',
   },
 });

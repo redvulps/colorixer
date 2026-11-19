@@ -113,7 +113,7 @@ describe('Desktop workspace controls', () => {
   it('switches the harmony from the sidebar', async () => {
     await renderWithProviders(<DesktopWorkspace />);
     await fireEvent.press(screen.getByTestId('harmony-triadic'));
-    expect(screen.getByText('Palette · Triadic')).toBeOnTheScreen();
+    expect(screen.getByText('Triadic · 5 colors')).toBeOnTheScreen();
     expect(screen.getByTestId('swatch-#ffff00')).toBeOnTheScreen();
   });
 
@@ -121,7 +121,7 @@ describe('Desktop workspace controls', () => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([OCEANO]));
     await renderWithProviders(<DesktopWorkspace />);
     await fireEvent.press(screen.getByTestId('palette-Oceano'));
-    expect(screen.getByText('Palette · Complementary')).toBeOnTheScreen();
+    expect(screen.getByText('Oceano · Complementary · 5 colors')).toBeOnTheScreen();
     expect(screen.getByTestId('swatch-#b65000')).toBeOnTheScreen();
     expect(screen.getByText('Saved')).toBeOnTheScreen();
   });
@@ -140,6 +140,19 @@ describe('Desktop workspace controls', () => {
     await renderWithProviders(<DesktopWorkspace />);
     await fireEvent.press(screen.getByText('Procreate'));
     expect(exportPalette).toHaveBeenCalledWith('swatches', ANALOGOUS_RED, 'Colorixer palette');
+  });
+
+  it('shows the palette in full screen from its button', async () => {
+    await renderWithProviders(<DesktopWorkspace />);
+    await fireEvent.press(screen.getByTestId('fullscreen-button'));
+    expect(await screen.findByTestId('palette-fullscreen')).toBeOnTheScreen();
+  });
+
+  it('offers the other formats on a long press of a color', async () => {
+    await renderWithProviders(<DesktopWorkspace />);
+    await fireEvent(screen.getByTestId('swatch-#ff2600'), 'longPress', pressAt);
+    await fireEvent.press(screen.getByText('Copy as RGB'));
+    expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('rgb(255 38 0)');
   });
 
   it('copies a palette color as HEX from its menu', async () => {

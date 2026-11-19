@@ -66,10 +66,10 @@ import {
 
 const TOP_BAR = 60;
 const CONTROLS = 316;
-const PREVIEW_HEADER = 52;
+export const PREVIEW_HEADER = 52;
 const BAND = 132;
 /** Least room kept under the band, so the gesture bar never sits on the colors */
-const MIN_BOTTOM_SAFE = 16;
+export const MIN_BOTTOM_SAFE = 16;
 const GRID_PADDING = 24;
 const GRID_GAP = 12;
 

@@ -6,6 +6,7 @@ import { ColorSliders, SLIDERS_HEADER } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
 import {
   CheckIcon,
+  ExpandIcon,
   ExportIcon,
   FileIcon,
   GearIcon,
@@ -23,9 +24,12 @@ import {
   LogoMark,
   type MenuPoint,
   Overline,
-  PaletteValue,
+  PaletteBand,
+  PaletteFullscreen,
+  PillIconButton,
   pointFromEvent,
   PopoverMenu,
+  type Rect,
   SavedRow,
   SheetAction,
   useToast,
@@ -37,9 +41,10 @@ import {
   unsavedName,
   useCopy,
 } from '@/src/hooks/usePaletteActions';
-import { useTopInset } from '@/src/hooks/useTopInset';
+import { useHeldTopInset } from '@/src/hooks/useTopInset';
 import { t } from '@/src/i18n';
 import { SettingsDialog } from '@/src/screens/SettingsScreen';
+import { MIN_BOTTOM_SAFE, PREVIEW_HEADER } from '@/src/screens/TabletWorkspace';
 import {
   type ImagePalette,
   paletteColors,
@@ -70,7 +75,10 @@ type Menu =
 
 const exportLabel = (format: ExportFormat) => (format === 'ase' ? 'Adobe ASE' : 'Procreate');
 
-/** Wide layout: harmonies and saved palettes | wheel and sliders | base color and export */
+/**
+ * Wide layout: harmonies and saved palettes | wheel and sliders | base color, export and the
+ * palette, whose colors run edge to edge down to the bottom of the inspector
+ */
 export function DesktopWorkspace() {
   const {
     hsv,
@@ -94,10 +102,13 @@ export function DesktopWorkspace() {
   const insets = useSafeAreaInsets();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [fullOpen, setFullOpen] = useState(false);
+  const [fullOrigin, setFullOrigin] = useState<Rect | null>(null);
   const imageFlow = useRef<ImagePaletteHandle>(null);
+  const bandsRef = useRef<React.ComponentRef<typeof View>>(null);
   const closeMenu = () => setMenu(null);
 
-  const topInset = useTopInset();
+  const { top: topInset, hold: holdTopInset } = useHeldTopInset(fullOpen);
   const topBarHeight = TOP_BAR + topInset;
   const canvasWidth = width - SIDEBAR - INSPECTOR - insets.left - insets.right;
   // Wheel, the sliders' header and three 34 px sliders with 12 px gaps, 18 px between them,
@@ -112,6 +123,7 @@ export function DesktopWorkspace() {
   );
   const sliderWidth = Math.min(470, canvasWidth - 48);
   const name = current?.name ?? unsavedName();
+  const paletteName = `${current ? `${current.name} · ` : ''}${kind} · ${t('common.colors', { count: colors.length })}`;
 
   const onSave = () => {
     const palette = save();
@@ -141,6 +153,14 @@ export function DesktopWorkspace() {
   const onUseImage = (palette: ImagePalette) => {
     applyImage(palette);
     toast(t('toast.fromImage', { name: palette.name }));
+  };
+
+  // The full-screen view grows out of the bands, so it needs their place on screen
+  const openFull = () => {
+    setFullOrigin(null);
+    holdTopInset();
+    setFullOpen(true);
+    bandsRef.current?.measureInWindow((x, y, w, h) => setFullOrigin({ x, y, width: w, height: h }));
   };
 
   return (
@@ -257,42 +277,57 @@ export function DesktopWorkspace() {
           style={[styles.inspector, { width: INSPECTOR + insets.right }]}
           contentContainerStyle={[
             styles.inspectorContent,
-            { paddingRight: 18 + insets.right, paddingBottom: 18 + insets.bottom },
+            { paddingBottom: Math.max(insets.bottom, MIN_BOTTOM_SAFE) },
           ]}
         >
-          <View style={styles.section}>
-            <Overline>{t('section.baseColor')}</Overline>
-            <View style={[styles.baseSwatch, { backgroundColor: base }]}>
-              <Text style={[styles.baseHex, { color: inkOn(base) }]}>{base}</Text>
+          <View style={[styles.inspectorTop, { paddingRight: 18 + insets.right }]}>
+            <View style={styles.section}>
+              <Overline>{t('section.baseColor')}</Overline>
+              <View style={[styles.baseSwatch, { backgroundColor: base }]}>
+                <Text style={[styles.baseHex, { color: inkOn(base) }]}>{base}</Text>
+              </View>
+              <CopyField label="HEX" value={base} onCopy={() => copy(base)} />
+              <CopyField label="RGB" value={rgbString(base)} onCopy={() => copy(rgbString(base))} />
+              <CopyField label="HSL" value={hslString(base)} onCopy={() => copy(hslString(base))} />
+              <CopyField label="HSV" value={hsvString(base)} onCopy={() => copy(hsvString(base))} />
             </View>
-            <CopyField label="HEX" value={base} onCopy={() => copy(base)} />
-            <CopyField label="RGB" value={rgbString(base)} onCopy={() => copy(rgbString(base))} />
-            <CopyField label="HSL" value={hslString(base)} onCopy={() => copy(hslString(base))} />
-            <CopyField label="HSV" value={hsvString(base)} onCopy={() => copy(hsvString(base))} />
+
+            <View style={styles.exportSection}>
+              <Overline>{t('common.export')}</Overline>
+              {EXPORT_FORMATS.map(({ format, ext }) => (
+                <ExportOption
+                  key={format}
+                  label={exportLabel(format)}
+                  ext={ext}
+                  onPress={() => onExport(format)}
+                />
+              ))}
+            </View>
           </View>
 
-          <View testID="generated-colors" style={styles.paletteSection}>
-            <Overline style={styles.paletteLabel}>{t('palette.header', { kind })}</Overline>
-            {colors.map((color, i) => (
-              <PaletteValue
-                key={`${color}-${i}`}
-                color={color}
-                onPress={() => copy(color)}
-                onMore={(e) => setMenu({ kind: 'color', at: pointFromEvent(e), color })}
+          {/* Like the band of an upright tablet, turned down the column: the colors take the
+              rest of the height and run from the inspector's edge to the window's */}
+          <View style={styles.paletteSection}>
+            <View style={[styles.paletteHeader, { paddingRight: 12 + insets.right }]}>
+              <Overline style={styles.paletteName}>{paletteName}</Overline>
+              <PillIconButton
+                testID="fullscreen-button"
+                icon={ExpandIcon}
+                accessibilityLabel={t('fullscreen.show')}
+                onPress={openFull}
               />
-            ))}
-          </View>
-
-          <View style={styles.exportSection}>
-            <Overline>{t('common.export')}</Overline>
-            {EXPORT_FORMATS.map(({ format, ext }) => (
-              <ExportOption
-                key={format}
-                label={exportLabel(format)}
-                ext={ext}
-                onPress={() => onExport(format)}
-              />
-            ))}
+            </View>
+            <View ref={bandsRef} collapsable={false} testID="generated-colors" style={styles.bands}>
+              {colors.map((color, i) => (
+                <PaletteBand
+                  key={`${color}-${i}`}
+                  color={color}
+                  insetRight={insets.right}
+                  onPress={() => copy(color)}
+                  onMore={(e) => setMenu({ kind: 'color', at: pointFromEvent(e), color })}
+                />
+              ))}
+            </View>
           </View>
         </ScrollView>
       </View>
@@ -381,6 +416,15 @@ export function DesktopWorkspace() {
           </>
         )}
       </PopoverMenu>
+      <PaletteFullscreen
+        testID="palette-fullscreen"
+        visible={fullOpen}
+        origin={fullOrigin}
+        colors={colors}
+        label={paletteName}
+        direction="rows"
+        onClose={() => setFullOpen(false)}
+      />
       <ImagePaletteView ref={imageFlow} layout="dialog" onUse={onUseImage} />
       <SettingsDialog visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </View>
@@ -469,7 +513,11 @@ const styles = StyleSheet.create({
     borderLeftColor: tokens.lineSubtle,
   },
   inspectorContent: {
-    padding: 18,
+    flexGrow: 1,
+  },
+  inspectorTop: {
+    paddingTop: 18,
+    paddingLeft: 18,
     gap: 22,
   },
   section: {
@@ -488,10 +536,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   paletteSection: {
-    gap: 2,
+    flexGrow: 1,
+    marginTop: 10,
   },
-  paletteLabel: {
-    paddingBottom: 4,
+  paletteHeader: {
+    height: PREVIEW_HEADER,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingLeft: 18,
+  },
+  paletteName: {
+    flexShrink: 1,
+  },
+  bands: {
+    flexGrow: 1,
   },
   exportSection: {
     gap: 8,
