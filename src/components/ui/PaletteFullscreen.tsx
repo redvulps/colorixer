@@ -207,14 +207,20 @@ export function PaletteFullscreen({
                     {
                       backgroundColor: color,
                       paddingLeft: insets.left + 28,
-                      // The last row's label stays clear of the gesture bar
-                      paddingBottom:
-                        ROW_LABEL_BOTTOM + (i === swatches.length - 1 ? insets.bottom : 0),
                     },
                   ]}
                 >
+                  {/* The last row's label stays clear of the gesture bar. A margin, not the
+                      row's padding: padding would make that row taller than the others. */}
                   <Animated.Text
-                    style={[styles.rowHex, { color: inkOn(color), opacity: labelOpacity }]}
+                    style={[
+                      styles.rowHex,
+                      {
+                        color: inkOn(color),
+                        opacity: labelOpacity,
+                        marginBottom: i === swatches.length - 1 ? insets.bottom : 0,
+                      },
+                    ]}
                     numberOfLines={1}
                   >
                     {color}
@@ -283,6 +289,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
     justifyContent: 'flex-end',
+    paddingBottom: ROW_LABEL_BOTTOM,
   },
   rowHex: {
     fontFamily: fonts.monoSemibold,
