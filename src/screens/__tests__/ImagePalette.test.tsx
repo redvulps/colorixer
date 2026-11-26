@@ -144,6 +144,23 @@ describe('Palette from an image', () => {
     warn.mockRestore();
   });
 
+  it('says so when the gallery cannot open', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest
+      .mocked(ImagePicker.launchImageLibraryAsync)
+      .mockRejectedValue(new Error('No activity found to handle the intent'));
+    await renderWithProviders(<ColorScreen />);
+    await fireEvent.press(screen.getByTestId('image-button'));
+    await fireEvent.press(screen.getByText('From gallery'));
+    await settle();
+    await waitFor(() =>
+      expect(screen.getByText('Could not open the gallery on this device.')).toBeOnTheScreen(),
+    );
+    expect(screen.getByTestId('image-source')).toBeOnTheScreen();
+    expect(screen.queryByTestId('image-palette')).toBeNull();
+    warn.mockRestore();
+  });
+
   it('opens nothing when the picker is cancelled', async () => {
     jest.mocked(ImagePicker.launchImageLibraryAsync).mockResolvedValue({
       canceled: true,
