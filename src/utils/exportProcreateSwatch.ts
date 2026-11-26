@@ -42,7 +42,7 @@ export async function exportProcreateSwatch(
       // Get HSV values from chroma-js: h(0-360), s(0-1), v(0-1)
       const [h, s, v] = chroma(hex).hsv();
       // Handle potential NaN hue for black/white/grey (chroma-js might return NaN)
-      const normalizedHue = isNaN(h) ? 0 : h / 360;
+      const normalizedHue = Number.isNaN(h) ? 0 : h / 360;
 
       return {
         alpha: 1, // Solid color

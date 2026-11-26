@@ -70,7 +70,7 @@ export function ChannelSlider({ channel, value, stops, onChange }: ChannelSlider
 
   const commitDraft = () => {
     if (draft === null) return;
-    const number = parseFloat(draft.replace(',', '.'));
+    const number = Number.parseFloat(draft.replace(',', '.'));
     if (!Number.isNaN(number)) {
       onChange(
         channel === 'h'
