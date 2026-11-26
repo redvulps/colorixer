@@ -1,10 +1,19 @@
 import React from 'react';
 import { type GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { type IconComponent, IconButton } from './Button';
+import { Button, type IconComponent, IconButton } from './Button';
 import { PaletteStrip } from './PaletteStrip';
 
-import { CopyIcon, FileIcon, HarmonyIcon, MoreIcon } from '@/src/components/icons';
+import {
+  CheckIcon,
+  CopyIcon,
+  ExportIcon,
+  FileIcon,
+  HarmonyIcon,
+  ImageIcon,
+  MoreIcon,
+  SaveIcon,
+} from '@/src/components/icons';
 import { t } from '@/src/i18n';
 import { paletteColors, paletteLabel, type SavedPalette } from '@/src/state/palettes';
 import { colors, control, fonts, iconTone, radius, type } from '@/src/theme/tokens';
@@ -14,6 +23,50 @@ import type { ColorHarmonyType } from '@/src/utils/colorUtils';
 /** Section label: small caps, muted */
 export function Overline({ children, style }: { children: string; style?: object }) {
   return <Text style={[styles.overline, style]}>{children}</Text>;
+}
+
+/** Image, Save and Export buttons at the right of the wide top bars */
+export function WorkspaceActions({
+  saved,
+  exportOpen,
+  onImage,
+  onSave,
+  onExport,
+}: {
+  saved: boolean;
+  exportOpen: boolean;
+  onImage: () => void;
+  onSave: () => void;
+  onExport: () => void;
+}) {
+  return (
+    <>
+      <Button
+        testID="image-button"
+        variant="ghost"
+        icon={ImageIcon}
+        label={t('common.image')}
+        onPress={onImage}
+      />
+      <Button
+        testID="save-button"
+        variant={saved ? 'saved' : 'ghost'}
+        icon={saved ? CheckIcon : SaveIcon}
+        label={saved ? t('common.saved') : t('common.save')}
+        disabled={saved}
+        onPress={onSave}
+      />
+      <Button
+        testID="share-button"
+        variant="primary"
+        icon={ExportIcon}
+        label={t('common.export')}
+        chevron
+        accessibilityState={{ expanded: exportOpen }}
+        onPress={onExport}
+      />
+    </>
+  );
 }
 
 /** Read-only value with a copy button (HEX, RGB, HSL, HSV) */

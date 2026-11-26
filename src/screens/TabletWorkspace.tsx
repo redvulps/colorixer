@@ -5,20 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ColorSliders } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
 import { CopySheet } from '@/src/components/CopySheet';
-import {
-  CheckIcon,
-  ColorIcon,
-  ExpandIcon,
-  ExportIcon,
-  FileIcon,
-  GearIcon,
-  ImageIcon,
-  PalettesIcon,
-  SaveIcon,
-} from '@/src/components/icons';
+import { ColorIcon, ExpandIcon, FileIcon, GearIcon, PalettesIcon } from '@/src/components/icons';
 import { PaletteSheet } from '@/src/components/PaletteSheet';
 import {
-  Button,
   CopyField,
   HarmonyRow,
   type IconComponent,
@@ -35,6 +24,7 @@ import {
   type Rect,
   SheetAction,
   useToast,
+  WorkspaceActions,
 } from '@/src/components/ui';
 import {
   EXPORT_FORMATS,
@@ -190,30 +180,13 @@ export function TabletWorkspace() {
           />
         </View>
         <View style={styles.spacer} />
-        <Button
-          testID="image-button"
-          variant="ghost"
-          icon={ImageIcon}
-          label={t('common.image')}
-          onPress={() => imageFlow.current?.start()}
-        />
-        <Button
-          testID="save-button"
-          variant={current ? 'saved' : 'ghost'}
-          icon={current ? CheckIcon : SaveIcon}
-          label={current ? t('common.saved') : t('common.save')}
-          disabled={!!current}
-          onPress={onSave}
-        />
-        <Button
-          testID="share-button"
-          variant="primary"
-          icon={ExportIcon}
-          label={t('common.export')}
-          chevron
-          accessibilityState={{ expanded: exportAt !== null }}
+        <WorkspaceActions
+          saved={!!current}
+          exportOpen={exportAt !== null}
+          onImage={() => imageFlow.current?.start()}
+          onSave={onSave}
           // Right-aligned under the button
-          onPress={() => setExportAt({ x: width - 28 - insets.right, y: topBarHeight - 14 })}
+          onExport={() => setExportAt({ x: width - 28 - insets.right, y: topBarHeight - 14 })}
         />
       </View>
 
