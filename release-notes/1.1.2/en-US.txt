@@ -1,0 +1,2 @@
+• The app now tells you when the photo gallery cannot be opened
+• Stability improvements
