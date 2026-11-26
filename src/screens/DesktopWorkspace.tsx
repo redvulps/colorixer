@@ -4,16 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorSliders, SLIDERS_HEADER } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
-import {
-  CheckIcon,
-  ExpandIcon,
-  ExportIcon,
-  FileIcon,
-  GearIcon,
-  ImageIcon,
-  SaveIcon,
-  TrashIcon,
-} from '@/src/components/icons';
+import { CopyActions } from '@/src/components/CopySheet';
+import { ExpandIcon, FileIcon, GearIcon, TrashIcon } from '@/src/components/icons';
 import {
   Button,
   CopyField,
@@ -33,6 +25,7 @@ import {
   SavedRow,
   SheetAction,
   useToast,
+  WorkspaceActions,
 } from '@/src/components/ui';
 import {
   EXPORT_FORMATS,
@@ -183,30 +176,13 @@ export function DesktopWorkspace() {
           <Text style={styles.crumbName}>{current?.name ?? t('palette.untitled')}</Text>
         </Text>
         <View style={styles.spacer} />
-        <Button
-          testID="image-button"
-          variant="ghost"
-          icon={ImageIcon}
-          label={t('common.image')}
-          onPress={() => imageFlow.current?.start()}
-        />
-        <Button
-          testID="save-button"
-          variant={current ? 'saved' : 'ghost'}
-          icon={current ? CheckIcon : SaveIcon}
-          label={current ? t('common.saved') : t('common.save')}
-          disabled={!!current}
-          onPress={onSave}
-        />
-        <Button
-          testID="share-button"
-          variant="primary"
-          icon={ExportIcon}
-          label={t('common.export')}
-          chevron
-          accessibilityState={{ expanded: menu?.kind === 'export' }}
+        <WorkspaceActions
+          saved={!!current}
+          exportOpen={menu?.kind === 'export'}
+          onImage={() => imageFlow.current?.start()}
+          onSave={onSave}
           // Right-aligned under the button, which has the gear and a gap to its right
-          onPress={() =>
+          onExport={() =>
             setMenu({
               kind: 'export',
               at: { x: width - 28 - GEAR_SPACE - insets.right, y: topBarHeight - 14 },
@@ -387,34 +363,7 @@ export function DesktopWorkspace() {
         width={320}
         onClose={closeMenu}
       >
-        {menu?.kind === 'color' && (
-          <>
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'HEX' })}
-              ext={menu.color}
-              onPress={() => onCopy(menu.color)}
-            />
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'RGB' })}
-              ext={rgbString(menu.color)}
-              onPress={() => onCopy(rgbString(menu.color))}
-            />
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'HSL' })}
-              ext={hslString(menu.color)}
-              onPress={() => onCopy(hslString(menu.color))}
-            />
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'HSV' })}
-              ext={hsvString(menu.color)}
-              onPress={() => onCopy(hsvString(menu.color))}
-            />
-          </>
-        )}
+        {menu?.kind === 'color' && <CopyActions compact color={menu.color} onCopy={onCopy} />}
       </PopoverMenu>
       <PaletteFullscreen
         testID="palette-fullscreen"
