@@ -47,7 +47,11 @@ export function decodePng(bytes: Uint8Array): Pixels {
   }
 
   const joined = new Uint8Array(idat.reduce((n, c) => n + c.length, 0));
-  idat.reduce((offset, chunk) => (joined.set(chunk, offset), offset + chunk.length), 0);
+  let offset = 0;
+  for (const chunk of idat) {
+    joined.set(chunk, offset);
+    offset += chunk.length;
+  }
   const raw = unzlibSync(joined);
 
   const stride = width * channels;
