@@ -134,7 +134,7 @@ export function TabletWorkspace() {
 
   const onExport = (format: ExportFormat) => {
     setExportAt(null);
-    exportPalette(format, colors, name);
+    void exportPalette(format, colors, name);
   };
 
   const open = (palette: SavedPalette) => {
@@ -399,7 +399,7 @@ export function TabletWorkspace() {
                 ext={ext}
                 onPress={() => {
                   setSelected(null);
-                  exportPalette(format, selectedColors, selected.name);
+                  void exportPalette(format, selectedColors, selected.name);
                 }}
               />
             ))}

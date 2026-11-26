@@ -183,7 +183,7 @@ export function ColorScreen() {
             ext={ext}
             onPress={() => {
               setExportOpen(false);
-              exportPalette(format, colors, name);
+              void exportPalette(format, colors, name);
             }}
           />
         ))}

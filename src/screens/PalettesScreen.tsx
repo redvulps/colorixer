@@ -69,7 +69,7 @@ export function PalettesScreen() {
                 ext={ext}
                 onPress={() => {
                   setSelected(null);
-                  exportPalette(format, selectedColors, selected.name);
+                  void exportPalette(format, selectedColors, selected.name);
                 }}
               />
             ))}

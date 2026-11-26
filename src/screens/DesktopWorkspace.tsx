@@ -133,9 +133,9 @@ export function DesktopWorkspace() {
   const onExport = (format: ExportFormat, palette?: SavedPalette) => {
     setMenu(null);
     if (palette) {
-      exportPalette(format, paletteColors(palette), palette.name);
+      void exportPalette(format, paletteColors(palette), palette.name);
     } else {
-      exportPalette(format, colors, name);
+      void exportPalette(format, colors, name);
     }
   };
 
