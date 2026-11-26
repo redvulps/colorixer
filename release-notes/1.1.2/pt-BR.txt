@@ -1,0 +1,2 @@
+• Agora avisamos quando não é possível abrir a galeria de fotos
+• Melhorias de estabilidade
