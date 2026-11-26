@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorSliders, SLIDERS_HEADER } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
+import { CopyActions } from '@/src/components/CopySheet';
 import {
   CheckIcon,
   ExpandIcon,
@@ -387,34 +388,7 @@ export function DesktopWorkspace() {
         width={320}
         onClose={closeMenu}
       >
-        {menu?.kind === 'color' && (
-          <>
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'HEX' })}
-              ext={menu.color}
-              onPress={() => onCopy(menu.color)}
-            />
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'RGB' })}
-              ext={rgbString(menu.color)}
-              onPress={() => onCopy(rgbString(menu.color))}
-            />
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'HSL' })}
-              ext={hslString(menu.color)}
-              onPress={() => onCopy(hslString(menu.color))}
-            />
-            <SheetAction
-              compact
-              label={t('copy.as', { format: 'HSV' })}
-              ext={hsvString(menu.color)}
-              onPress={() => onCopy(hsvString(menu.color))}
-            />
-          </>
-        )}
+        {menu?.kind === 'color' && <CopyActions compact color={menu.color} onCopy={onCopy} />}
       </PopoverMenu>
       <PaletteFullscreen
         testID="palette-fullscreen"

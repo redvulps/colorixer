@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ColorSliders } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
+import { CopySheet } from '@/src/components/CopySheet';
 import {
   CheckIcon,
   ColorIcon,
@@ -17,7 +18,6 @@ import {
 } from '@/src/components/icons';
 import { PaletteSheet } from '@/src/components/PaletteSheet';
 import {
-  BottomSheet,
   Button,
   CopyField,
   HarmonyRow,
@@ -140,11 +140,6 @@ export function TabletWorkspace() {
     holdTopInset();
     setFullOpen(true);
     bandRef.current?.measureInWindow((x, y, w, h) => setFullOrigin({ x, y, width: w, height: h }));
-  };
-
-  const copyAs = (text: string) => {
-    setCopyColor(null);
-    copy(text);
   };
 
   const onUseImage = (palette: ImagePalette) => {
@@ -371,39 +366,7 @@ export function TabletWorkspace() {
 
       <PaletteSheet palette={selected} onClose={() => setSelected(null)} />
 
-      <BottomSheet
-        testID="copy-sheet"
-        visible={copyColor !== null}
-        onClose={() => setCopyColor(null)}
-        title={copyColor ?? undefined}
-        subtitle={t('copy.title')}
-      >
-        {copyColor && (
-          <>
-            <SheetAction
-              label={t('copy.as', { format: 'HEX' })}
-              ext={copyColor}
-              onPress={() => copyAs(copyColor)}
-            />
-            <SheetAction
-              label={t('copy.as', { format: 'RGB' })}
-              ext={rgbString(copyColor)}
-              onPress={() => copyAs(rgbString(copyColor))}
-            />
-            <SheetAction
-              label={t('copy.as', { format: 'HSL' })}
-              ext={hslString(copyColor)}
-              onPress={() => copyAs(hslString(copyColor))}
-            />
-            <SheetAction
-              label={t('copy.as', { format: 'HSV' })}
-              ext={hsvString(copyColor)}
-              onPress={() => copyAs(hsvString(copyColor))}
-            />
-          </>
-        )}
-        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setCopyColor(null)} />
-      </BottomSheet>
+      <CopySheet color={copyColor} onClose={() => setCopyColor(null)} />
       <ImagePaletteView ref={imageFlow} layout="sheet" onUse={onUseImage} />
     </View>
   );

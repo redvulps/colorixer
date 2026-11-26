@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-n
 
 import { ColorSliders } from '@/src/components/ColorSliders';
 import { ColorWheel } from '@/src/components/ColorWheel';
+import { CopySheet } from '@/src/components/CopySheet';
 import { ExpandIcon, ExportIcon, FileIcon, ImageIcon } from '@/src/components/icons';
 import {
   BottomSheet,
@@ -29,7 +30,6 @@ import { useHeldTopInset } from '@/src/hooks/useTopInset';
 import { t } from '@/src/i18n';
 import { type ImagePalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
-import { hslString, hsvString, rgbString } from '@/src/utils/color';
 
 /** Largest wheel, for tablets and narrow browser windows */
 const MAX_WHEEL = 480;
@@ -81,11 +81,6 @@ export function ColorScreen() {
   const onUseImage = (palette: ImagePalette) => {
     applyImage(palette);
     toast(t('toast.fromImage', { name: palette.name }));
-  };
-
-  const copyAs = (text: string) => {
-    setCopyColor(null);
-    copy(text);
   };
 
   return (
@@ -194,39 +189,7 @@ export function ColorScreen() {
         />
       </BottomSheet>
 
-      <BottomSheet
-        testID="copy-sheet"
-        visible={copyColor !== null}
-        onClose={() => setCopyColor(null)}
-        title={copyColor ?? undefined}
-        subtitle={t('copy.title')}
-      >
-        {copyColor && (
-          <>
-            <SheetAction
-              label={t('copy.as', { format: 'HEX' })}
-              ext={copyColor}
-              onPress={() => copyAs(copyColor)}
-            />
-            <SheetAction
-              label={t('copy.as', { format: 'RGB' })}
-              ext={rgbString(copyColor)}
-              onPress={() => copyAs(rgbString(copyColor))}
-            />
-            <SheetAction
-              label={t('copy.as', { format: 'HSL' })}
-              ext={hslString(copyColor)}
-              onPress={() => copyAs(hslString(copyColor))}
-            />
-            <SheetAction
-              label={t('copy.as', { format: 'HSV' })}
-              ext={hsvString(copyColor)}
-              onPress={() => copyAs(hsvString(copyColor))}
-            />
-          </>
-        )}
-        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setCopyColor(null)} />
-      </BottomSheet>
+      <CopySheet color={copyColor} onClose={() => setCopyColor(null)} />
       <ImagePaletteView ref={imageFlow} layout="screen" onUse={onUseImage} />
     </View>
   );
