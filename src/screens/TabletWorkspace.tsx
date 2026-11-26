@@ -14,8 +14,8 @@ import {
   ImageIcon,
   PalettesIcon,
   SaveIcon,
-  TrashIcon,
 } from '@/src/components/icons';
+import { PaletteSheet } from '@/src/components/PaletteSheet';
 import {
   BottomSheet,
   Button,
@@ -47,13 +47,7 @@ import {
 import { useHeldTopInset } from '@/src/hooks/useTopInset';
 import { t } from '@/src/i18n';
 import { SettingsView } from '@/src/screens/SettingsScreen';
-import {
-  type ImagePalette,
-  paletteColors,
-  paletteLabel,
-  type SavedPalette,
-  usePalette,
-} from '@/src/state/palettes';
+import { type ImagePalette, type SavedPalette, usePalette } from '@/src/state/palettes';
 import { fonts, iconTone, radius, colors as tokens, type } from '@/src/theme/tokens';
 import {
   HARMONIES,
@@ -101,7 +95,6 @@ export function TabletWorkspace() {
     useImage: applyImage,
     save,
     load,
-    remove,
   } = usePalette();
   const copy = useCopy();
   const toast = useToast();
@@ -124,7 +117,6 @@ export function TabletWorkspace() {
   const stageHeight = height - topBarHeight - PREVIEW_HEADER - BAND - bottomSafe;
   const wheelSize = Math.max(200, Math.min(480, stageWidth - 48, stageHeight - 48));
   const cardWidth = (width - insets.left - insets.right - 2 * GRID_PADDING - GRID_GAP) / 2;
-  const selectedColors = selected ? paletteColors(selected) : [];
 
   const onSave = () => {
     const palette = save();
@@ -377,46 +369,7 @@ export function TabletWorkspace() {
         onClose={() => setFullOpen(false)}
       />
 
-      <BottomSheet
-        testID="palette-sheet"
-        visible={selected !== null}
-        onClose={() => setSelected(null)}
-        title={selected?.name}
-        subtitle={
-          selected
-            ? `${paletteLabel(selected)} · ${t('common.colors', { count: selectedColors.length })}`
-            : undefined
-        }
-        palette={selectedColors}
-      >
-        {selected && (
-          <>
-            {EXPORT_FORMATS.map(({ format, app, ext }) => (
-              <SheetAction
-                key={format}
-                icon={FileIcon}
-                label={t('export.to', { app })}
-                ext={ext}
-                onPress={() => {
-                  setSelected(null);
-                  void exportPalette(format, selectedColors, selected.name);
-                }}
-              />
-            ))}
-            <SheetAction
-              icon={TrashIcon}
-              tone="danger"
-              label={t('palette.delete')}
-              onPress={() => {
-                remove(selected.id);
-                setSelected(null);
-                toast(t('toast.deleted', { name: selected.name }));
-              }}
-            />
-          </>
-        )}
-        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setSelected(null)} />
-      </BottomSheet>
+      <PaletteSheet palette={selected} onClose={() => setSelected(null)} />
 
       <BottomSheet
         testID="copy-sheet"

@@ -2,22 +2,19 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { FileIcon, TrashIcon } from '@/src/components/icons';
-import { AppBar, BottomSheet, PaletteCard, SheetAction, useToast } from '@/src/components/ui';
-import { EXPORT_FORMATS, exportPalette } from '@/src/hooks/usePaletteActions';
+import { PaletteSheet } from '@/src/components/PaletteSheet';
+import { AppBar, PaletteCard } from '@/src/components/ui';
 import { useTopInset } from '@/src/hooks/useTopInset';
 import { t } from '@/src/i18n';
-import { paletteColors, paletteLabel, type SavedPalette, usePalette } from '@/src/state/palettes';
+import { type SavedPalette, usePalette } from '@/src/state/palettes';
 import { colors as tokens, type } from '@/src/theme/tokens';
 
 /** Palettes tab: the saved palettes, newest first */
 export function PalettesScreen() {
-  const { saved, current, load, remove } = usePalette();
+  const { saved, current, load } = usePalette();
   const router = useRouter();
-  const toast = useToast();
   const topInset = useTopInset();
   const [selected, setSelected] = useState<SavedPalette | null>(null);
-  const selectedColors = selected ? paletteColors(selected) : [];
 
   const open = (palette: SavedPalette) => {
     load(palette.id);
@@ -47,46 +44,7 @@ export function PalettesScreen() {
         }
       />
 
-      <BottomSheet
-        testID="palette-sheet"
-        visible={selected !== null}
-        onClose={() => setSelected(null)}
-        title={selected?.name}
-        subtitle={
-          selected
-            ? `${paletteLabel(selected)} · ${t('common.colors', { count: selectedColors.length })}`
-            : undefined
-        }
-        palette={selectedColors}
-      >
-        {selected && (
-          <>
-            {EXPORT_FORMATS.map(({ format, app, ext }) => (
-              <SheetAction
-                key={format}
-                icon={FileIcon}
-                label={t('export.to', { app })}
-                ext={ext}
-                onPress={() => {
-                  setSelected(null);
-                  void exportPalette(format, selectedColors, selected.name);
-                }}
-              />
-            ))}
-            <SheetAction
-              icon={TrashIcon}
-              tone="danger"
-              label={t('palette.delete')}
-              onPress={() => {
-                remove(selected.id);
-                setSelected(null);
-                toast(t('toast.deleted', { name: selected.name }));
-              }}
-            />
-          </>
-        )}
-        <SheetAction label={t('common.cancel')} tone="cancel" onPress={() => setSelected(null)} />
-      </BottomSheet>
+      <PaletteSheet palette={selected} onClose={() => setSelected(null)} />
     </View>
   );
 }
