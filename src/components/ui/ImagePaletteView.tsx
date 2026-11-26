@@ -113,7 +113,13 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
           return;
         }
       } else {
-        result = await ImagePicker.launchImageLibraryAsync(options);
+        try {
+          result = await ImagePicker.launchImageLibraryAsync(options);
+        } catch (e) {
+          console.warn('Could not open the gallery:', e);
+          fail(t('image.galleryFailed'));
+          return;
+        }
       }
       const asset = result.canceled ? null : result.assets[0];
       if (!asset) return;
@@ -140,7 +146,7 @@ export const ImagePaletteView = forwardRef<ImagePaletteHandle, ImagePaletteViewP
 
     const start = () => {
       setError(null);
-      if (Platform.OS === 'web') pickFrom('gallery');
+      if (Platform.OS === 'web') void pickFrom('gallery');
       else setAsking(true);
     };
     useImperativeHandle(ref, () => ({ start }));
