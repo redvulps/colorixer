@@ -125,36 +125,22 @@ describe('Palette from an image', () => {
     expect(screen.queryByTestId('image-palette')).toBeNull();
   });
 
-  it('says so when the device has no camera to open', async () => {
+  it.each([
+    ['camera', 'launchCameraAsync', 'From camera'],
+    ['gallery', 'launchImageLibraryAsync', 'From gallery'],
+  ] as const)('says so when the %s cannot open', async (source, launch, button) => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest
-      .mocked(ImagePicker.launchCameraAsync)
+      .mocked(ImagePicker[launch])
       .mockRejectedValue(
         new Error("Failed to resolve activity to handle the intent of type 'null'"),
       );
     await renderWithProviders(<ColorScreen />);
     await fireEvent.press(screen.getByTestId('image-button'));
-    await fireEvent.press(screen.getByText('From camera'));
+    await fireEvent.press(screen.getByText(button));
     await settle();
     await waitFor(() =>
-      expect(screen.getByText('Could not open the camera on this device.')).toBeOnTheScreen(),
-    );
-    expect(screen.getByTestId('image-source')).toBeOnTheScreen();
-    expect(screen.queryByTestId('image-palette')).toBeNull();
-    warn.mockRestore();
-  });
-
-  it('says so when the gallery cannot open', async () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest
-      .mocked(ImagePicker.launchImageLibraryAsync)
-      .mockRejectedValue(new Error('No activity found to handle the intent'));
-    await renderWithProviders(<ColorScreen />);
-    await fireEvent.press(screen.getByTestId('image-button'));
-    await fireEvent.press(screen.getByText('From gallery'));
-    await settle();
-    await waitFor(() =>
-      expect(screen.getByText('Could not open the gallery on this device.')).toBeOnTheScreen(),
+      expect(screen.getByText(`Could not open the ${source} on this device.`)).toBeOnTheScreen(),
     );
     expect(screen.getByTestId('image-source')).toBeOnTheScreen();
     expect(screen.queryByTestId('image-palette')).toBeNull();
